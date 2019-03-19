@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpIncludePathManager">
+    <include_path>
+      <path value="$PROJECT_DIR$/../wp-core" />
+      <path value="$PROJECT_DIR$/../wp-graphql" />
+      <path value="$PROJECT_DIR$/../advanced-custom-fields-pro" />
+      <path value="$PROJECT_DIR$/vendor/composer" />
+    </include_path>
+  </component>
+</project>

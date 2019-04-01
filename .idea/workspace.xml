@@ -2,12 +2,57 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="03d97aea-f1f7-4e58-908e-1ebfa8a5ed5a" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/src/ACFSettings.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ACFFieldGroupSettings.php" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ACFFieldSettings.php" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Config.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wp-graphql-acf.php" beforeDir="false" afterPath="$PROJECT_DIR$/wp-graphql-acf.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Actions.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Filters.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type.old/Field/FieldType.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type.old/FieldGroup/FieldGroupType.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type.old/LocationRule/LocationRuleType.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type.old/PostTypeObject/PostTypeObject.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type.old/Union/FieldUnionType.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Enum/ACF_LayoutEnum.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Interfaces/ACFField.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Accordion_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_ButtonGroup_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Checkbox_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_ColorPicker_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_ConditionalLogic.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_DatePicker_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_DateTimePicker_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Email_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_FieldChoice.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_FieldWrapper.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_File_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_FlexibleContent_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Gallery_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_GoogleMap_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Group_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Image_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Link_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Message_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Number_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Oembed_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_PageLink_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Password_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_PostObject_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_RadioButton_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Range_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Relationship_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Repeater_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Select_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Tab_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Taxonomy_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_TextArea_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Text_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_TimePicker_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_TrueFalse_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_Url_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_User_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Type/Object/ACF_WYSIWYG_Field.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/TypeRegistry.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Types.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pre-03152019/Utils.php" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -24,13 +69,13 @@
       <file leaf-file-name="Types.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/../wp-graphql/src/Types.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7191">
+            <state>
               <caret line="434" column="40" selection-start-line="434" selection-start-column="40" selection-end-line="434" selection-end-column="40" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="wp-graphql-acf.php" pinned="false" current-in-tab="true">
+      <file leaf-file-name="wp-graphql-acf.php" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wp-graphql-acf.php">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="63">
@@ -51,37 +96,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="acf-field-functions.php" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../advanced-custom-fields-pro/includes/acf-field-functions.php">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="14994">
-              <caret line="882" column="9" selection-start-line="882" selection-start-column="9" selection-end-line="882" selection-end-column="9" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Config.php" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Config.php" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Config.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="121">
-              <caret line="251" column="39" selection-start-line="251" selection-start-column="39" selection-end-line="251" selection-end-column="39" />
+            <state relative-caret-position="277">
+              <caret line="401" column="22" selection-start-line="401" selection-start-column="22" selection-end-line="401" selection-end-column="22" />
               <folding>
                 <element signature="e#33#63#0#PHP" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PostTypeObject.php" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/pre-03152019/Type.old/PostTypeObject/PostTypeObject.php">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file leaf-file-name="FieldGroupType.php" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/pre-03152019/Type.old/FieldGroup/FieldGroupType.php">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="15" column="20" selection-start-line="15" selection-start-column="20" selection-end-line="15" selection-end-column="20" />
             </state>
           </provider>
         </entry>
@@ -99,28 +121,17 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>acf_render_field_setting</find>
-      <find>graphql_field_name</find>
-      <find>print_r</find>
-      <find>num</find>
-      <find>checkbox</find>
-      <find>page_linkpage_link</find>
-      <find>Confi</find>
       <find>TermObjectUnion</find>
       <find>page_link</find>
       <find>veer</find>
       <find>image</find>
       <find>format_value</find>
       <find>var</find>
-      <find>taxonomy</find>
       <find>fromType</find>
-      <find>acf_field_type_to_graphql_type</find>
       <find>var_du</find>
       <find>gr</find>
       <find>should_field_group_show_in_graphql</find>
-      <find>var_dump</find>
       <find>add_field_group_fields</find>
-      <find>group</find>
       <find>root</find>
       <find>var_</find>
       <find>flex</find>
@@ -129,9 +140,21 @@
       <find>show_admin_notice</find>
       <find>post_object</find>
       <find>number</find>
+      <find>taxonomy</find>
+      <find>checkbox</find>
+      <find>acf_field_group</find>
+      <find>var_dump</find>
+      <find>Field Group</find>
+      <find>group</find>
+      <find>FieldGroup</find>
+      <find>type_name</find>
+      <find>acf_field_type_to_graphql_type</find>
+      <find>add_acf_fields_to_graphql_types</find>
+      <find>$type_name</find>
     </findStrings>
     <replaceStrings>
       <replace>wp-graphql-acf</replace>
+      <replace>$field_type_name</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$/src</dir>
@@ -178,8 +201,8 @@
         <option value="$PROJECT_DIR$/src/Freemius/Config.php" />
         <option value="$PROJECT_DIR$/src/ACFFieldSettings.php" />
         <option value="$PROJECT_DIR$/src/ACFSettings.php" />
-        <option value="$PROJECT_DIR$/src/Config.php" />
         <option value="$PROJECT_DIR$/wp-graphql-acf.php" />
+        <option value="$PROJECT_DIR$/src/Config.php" />
       </list>
     </option>
   </component>
@@ -206,8 +229,8 @@
       <path value="$PROJECT_DIR$/vendor/composer" />
     </include_path>
   </component>
-  <component name="ProjectFrameBounds" extendedState="1">
-    <option name="x" value="3560" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="1440" />
     <option name="y" value="23" />
     <option name="width" value="1440" />
     <option name="height" value="877" />
@@ -300,18 +323,18 @@
       <workItem from="1552838953955" duration="30136000" />
       <workItem from="1553286210398" duration="596000" />
       <workItem from="1553522089634" duration="4910000" />
-      <workItem from="1554131685490" duration="1013000" />
+      <workItem from="1554131685490" duration="8489000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="101612000" />
+    <option name="totallyTimeSpent" value="109088000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="3560" y="23" width="1440" height="877" extended-state="1" />
+    <frame x="1440" y="23" width="1920" height="1057" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4984472" visible="true" weight="0.19027181" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4984472" visible="true" weight="0.14164004" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
@@ -320,7 +343,7 @@
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info id="Structure" order="1" sideWeight="0.5015528" side_tool="true" weight="0.19169329" />
-      <window_info anchor="bottom" id="Terminal" order="7" visible="true" weight="0.32948717" />
+      <window_info anchor="bottom" id="Terminal" order="7" weight="0.26770833" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info id="Grunt " order="2" side_tool="true" />
@@ -595,7 +618,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/../wp-graphql/src/Types.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7191">
+        <state>
           <caret line="434" column="40" selection-start-line="434" selection-start-column="40" selection-end-line="434" selection-end-column="40" />
         </state>
       </provider>
@@ -632,15 +655,25 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Freemius/Config.php" />
+    <entry file="file://$PROJECT_DIR$/src/ACFFieldGroupSettings.php" />
+    <entry file="file://$PROJECT_DIR$/src/ACFFieldSettings.php" />
+    <entry file="file://$PROJECT_DIR$/wp-graphql-acf.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="63">
+          <caret line="34" column="47" selection-start-line="34" selection-start-column="43" selection-end-line="34" selection-end-column="47" />
+          <folding>
+            <element signature="e#6#399#0#PHP" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/../advanced-custom-fields-pro/includes/acf-field-functions.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="14994">
+        <state relative-caret-position="158">
           <caret line="882" column="9" selection-start-line="882" selection-start-column="9" selection-end-line="882" selection-end-column="9" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ACFFieldGroupSettings.php" />
-    <entry file="file://$PROJECT_DIR$/src/ACFFieldSettings.php" />
     <entry file="file://$PROJECT_DIR$/src/ACFSettings.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
@@ -650,20 +683,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Config.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="121">
-          <caret line="251" column="39" selection-start-line="251" selection-start-column="39" selection-end-line="251" selection-end-column="39" />
+        <state relative-caret-position="277">
+          <caret line="401" column="22" selection-start-line="401" selection-start-column="22" selection-end-line="401" selection-end-column="22" />
           <folding>
             <element signature="e#33#63#0#PHP" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wp-graphql-acf.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="63">
-          <caret line="34" column="47" selection-start-line="34" selection-start-column="43" selection-end-line="34" selection-end-column="47" />
-          <folding>
-            <element signature="e#6#399#0#PHP" expanded="true" />
           </folding>
         </state>
       </provider>

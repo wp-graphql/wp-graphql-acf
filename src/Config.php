@@ -9,13 +9,6 @@ use WPGraphQL\TypeRegistry;
 class Config {
 
 	/**
-	 * Config constructor.
-	 */
-	public function __construct() {
-
-	}
-
-	/**
 	 * Initialize WPGraphQL to ACF
 	 */
 	public function init() {
@@ -58,13 +51,16 @@ class Config {
 		}
 
 		/**
-		 * Determine conditions where the GraphQL Schema should NOT be shown in GraphQL
+		 * Determine conditions where the GraphQL Schema should NOT be shown in GraphQL for
+		 * root groups, not nested groups with parent.
 		 */
-		if (
-			( empty( $field_group['active'] ) || true !== $field_group['active'] ) ||
-			( empty( $field_group['location'] ) || ! is_array( $field_group['location'] ) )
-		) {
-			$show = false;
+		if ( ! isset( $field_group['parent'] ) ) {
+			if (
+				( empty( $field_group['active'] ) || true !== $field_group['active'] ) ||
+				( empty( $field_group['location'] ) || ! is_array( $field_group['location'] ) )
+			) {
+				$show = false;
+			}
 		}
 
 		/**
@@ -102,11 +98,12 @@ class Config {
 	 * Given the type of an ACF Field, return the GraphQL Type
 	 * it should resolve to in the GraphQL Schema
 	 *
-	 * @param string $acf_type The type the ACF
+	 * @param string $acf_type  The type the ACF
+	 * @param array  $acf_field The Field config for the ACF Field
 	 *
 	 * @return mixed string|null
 	 */
-	protected function acf_field_type_to_graphql_type( $acf_type, $acf_field, $from_type ) {
+	protected function acf_field_type_to_graphql_type( $acf_type, $acf_field ) {
 
 		/**
 		 * Map the ACF type to a GraphQL Type
@@ -121,7 +118,7 @@ class Config {
 			case 'text':
 			case 'link':
 			case 'message':
-			case 'page_link':
+			case 'oembed':
 			case 'password':
 			case 'time_picker':
 			case 'url':
@@ -147,15 +144,13 @@ class Config {
 			case 'true_false':
 				$graphql_type = 'Boolean';
 				break;
-			case 'user':
-				$graphql_type = 'User';
-				break;
 			// If a type can't be determined, set as null. No field
 			// will be added to the GraphQL Schema if there's no known
 			// GraphQL Type to resolve as
 			case 'gallery':
 				$graphql_type = [ 'list_of' => 'MediaItem' ];
 				break;
+			case 'page_link':
 			case 'post_object':
 				$graphql_type = 'PostObjectUnion';
 				break;
@@ -168,16 +163,122 @@ class Config {
 			case 'user':
 				$graphql_type = 'User';
 				break;
-			case 'oembed':
+			case 'group':
+
+				$type_name = self::camelCase( $acf_field['name'] ) . 'FieldGroup';
+				if ( TypeRegistry::get_type( $type_name ) ) {
+					$graphql_type = $type_name;
+					break;
+				}
+
+				register_graphql_object_type( $type_name, [
+					'description' => __( 'Field Group', 'wp-graphql-acf' ),
+					'fields'      => [
+						'fieldGroupName' => [
+							'type'    => 'String',
+							'resolve' => function( $source ) use ( $acf_field ) {
+								return ! empty( $acf_field['name'] ) ? $acf_field['name'] : null;
+							}
+						],
+					],
+				] );
+
+				$this->add_field_group_fields( $acf_field, $type_name );
+
+				$graphql_type = $type_name;
+				break;
+			case 'repeater':
+
+				$type_name = self::camelCase( $acf_field['name'] ) . 'Repeater';
+				if ( TypeRegistry::get_type( $type_name ) ) {
+					$graphql_type = $type_name;
+					break;
+				}
+
+				register_graphql_object_type( $type_name, [
+					'description' => __( 'Field Group', 'wp-graphql-acf' ),
+					'fields'      => [
+						'fieldGroupName' => [
+							'type'    => 'String',
+							'resolve' => function( $source ) use ( $acf_field ) {
+								return ! empty( $acf_field['name'] ) ? $acf_field['name'] : null;
+							}
+						],
+					],
+				] );
+
+				$this->add_field_group_fields( $acf_field, $type_name );
+
+				$graphql_type = [ 'list_of' => $type_name ];
+				break;
+			case 'google_map':
+
+				$type_name = 'ACFGoogleMap';
+				if ( $type = TypeRegistry::get_type( $type_name ) ) {
+					$graphql_type = $type_name;
+					break;
+				}
+
+				register_graphql_object_type( $type_name, [
+					'description' => __( 'Google Map field', 'wp-graphql-acf' ),
+					'fields'      => [
+						'streetAddress' => [
+							'type'        => 'String',
+							'description' => __( 'The street address associated with the map', 'wp-graphql-acf' ),
+							'resolve'     => function( $root ) {
+								return isset( $root['address'] ) ? $root['address'] : null;
+							},
+						],
+						'latitude'      => [
+							'type'        => 'Float',
+							'description' => __( 'The latitude associated with the map', 'wp-graphql-acf' ),
+							'resolve'     => function( $root ) {
+								return isset( $root['lat'] ) ? $root['lat'] : null;
+							},
+						],
+						'longitude'     => [
+							'type'        => 'Float',
+							'description' => __( 'The longitude associated with the map', 'wp-graphql-acf' ),
+							'resolve'     => function( $root ) {
+								return isset( $root['lng'] ) ? $root['lng'] : null;
+							},
+						],
+					],
+				] );
+				$graphql_type = $type_name;
+				break;
+			case 'flexible_content':
+
+				var_dump( $acf_field );
+
+				$type_name = self::camelCase( $acf_field['name'] ) . 'FlexField';
+				if ( TypeRegistry::get_type( $type_name ) ) {
+					$graphql_type = $type_name;
+					break;
+				}
+
+				register_graphql_object_type( $type_name, [
+					'description' => __( 'Field Group', 'wp-graphql-acf' ),
+					'fields'      => [
+						'fieldGroupName' => [
+							'type'    => 'String',
+							'resolve' => function( $source ) use ( $acf_field ) {
+								return ! empty( $acf_field['name'] ) ? $acf_field['name'] : null;
+							}
+						],
+					],
+				] );
+
+				$this->add_field_group_fields( $acf_field, $type_name );
+
+				$graphql_type = [ 'list_of' => $type_name ];
+				break;
 			case 'output':
 			case 'radio':
 			case 'range':
 			case 'select':
 			case 'separator':
 			case 'tab':
-			case 'flexible_content':
-			case 'google_map':
-			case 'group':
 			default:
 				$graphql_type = null;
 				break;
@@ -236,171 +337,153 @@ class Config {
 			 * Loop over the field groups for this post type
 			 */
 			foreach ( $field_groups as $field_group ) {
+				$this->add_field_group_fields( $field_group, $post_type_object->graphql_single_name );
+			}
 
+		}
+
+	}
+
+	protected function add_field_group_fields( $field_group, $add_to_type ) {
+
+		/**
+		 * Determine if the field group should be exposed
+		 * to graphql
+		 */
+		if ( ! $this->should_field_group_show_in_graphql( $field_group ) ) {
+			return;
+		}
+
+		/**
+		 * Get the fields in the group.
+		 */
+		$acf_fields = ! empty( $field_group['sub_fields'] ) ? $field_group['sub_fields'] : acf_get_fields( $field_group['ID'] );
+
+		/**
+		 * If there are no fields, bail
+		 */
+		if ( empty( $acf_fields ) || ! is_array( $acf_fields ) ) {
+			return;
+		}
+
+		/**
+		 * Loop over the fields and register them to the Schema
+		 */
+		foreach ( $acf_fields as $acf_field ) {
+
+			/**
+			 * Setup data for register_graphql_field
+			 */
+			$name            = ! empty( $acf_field['name'] ) ? self::camelCase( $acf_field['name'] ) : null;
+			$type            = ! empty( $acf_field['type'] ) ? $this->acf_field_type_to_graphql_type( $acf_field['type'], $acf_field ) : null;
+			$show_in_graphql = isset( $acf_field['show_in_graphql'] ) && true !== (bool) $acf_field['show_in_graphql'] ? false : true;
+			$description     = isset( $acf_field['instructions'] ) ? $acf_field['instructions'] : __( 'ACF Field added to the Schema by WPGraphQL ACF' );
+
+			/**
+			 * If the field is missing a name or a type,
+			 * we can't add it to the Schema.
+			 */
+			if (
+				empty( $name ) ||
+				empty( $type ) ||
+				true !== $show_in_graphql
+			) {
 				/**
-				 * Determine if the field group should be exposed
-				 * to graphql
+				 * Uncomment line below to determine what fields are not going to be output
+				 * in the Schema.
 				 */
-				if ( ! $this->should_field_group_show_in_graphql( $field_group ) ) {
-					return;
-				}
+				// var_dump( $acf_field );
+				continue;
+			}
 
-				/**
-				 * Get the fields in the group.
-				 */
-				$acf_fields = acf_get_fields( $field_group['ID'] );
+			/**
+			 * Register the GraphQL Field to the Schema
+			 */
+			register_graphql_field(
+				$add_to_type,
+				$name,
+				[
+					'type'            => $type,
+					'description'     => $description,
+					'acf_field'       => $acf_field,
+					'acf_field_group' => $field_group,
+					'resolve'         => function( $root, $args, $context, $info ) use ( $acf_field ) {
 
-				/**
-				 * If there are no fields, bail
-				 */
-				if ( empty( $acf_fields ) || ! is_array( $acf_fields ) ) {
-					return;
-				}
+						$value = null;
+						if ( is_array( $root ) ) {
+							if ( isset( $root[ $acf_field['key'] ] ) ) {
+								$value = $root[ $acf_field['key'] ];
+							}
+						} else {
+							$field_value = get_field( $acf_field['key'], $root->ID, false );
+							$value       = ! empty( $field_value ) ? $field_value : null;
+						}
 
-//				print_r( $acf_fields );
-
-				/**
-				 * Loop over the fields and register them to the Schema
-				 */
-				foreach ( $acf_fields as $acf_field ) {
-
-					/**
-					 * Setup data for register_graphql_field
-					 */
-					$name = ! empty( $acf_field['name'] ) ? self::camelCase( $acf_field['name'] ) : null;
-
-//					if ( isset( $acf_field['graphql_field_name'] ) && ! empty( $acf_field['graphql_field_name'] ) ) {
-//						$name = $acf_field['graphql_field_name'];
-//					}
-
-//					if ( $acf_field['type'] === 'gallery' ) {
-//
-//						register_graphql_connection([
-//							'fromType' => $post_type_object->graphql_single_name,
-//							'toType' => 'MediaItem',
-//							'queryClass'       => 'WP_Query',
-//							'connectionFields' => [
-//								'postTypeInfo' => [
-//									'type'        => 'PostType',
-//									'description' => __( 'Information about the type of content being queried', 'wp-graphql' ),
-//									'resolve'     => function ( $source, array $args, $context, $info ) {
-//										$post_type = $source->post_type;
-//										$post_type_object = get_post_type_object( $post_type );
-//										return DataSource::resolve_post_type( $post_type_object->name );
-//									},
-//								],
-//							],
-//							'resolveNode'      => function( $id, $args, $context, $info ) {
-//								return DataSource::resolve_post_object( $id, $context );
-//							},
-//							'fromFieldName'    => self::camelCase( $acf_field['name'] ),
-//							'connectionArgs'   => [],
-//							'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
-//								$value = get_field( $acf_field['name'], $root->ID );
-//								var_dump( $value );
-//							}
-//						]);
-//
-//						continue;
-//					}
-
-					$type            = ! empty( $acf_field['type'] ) ? $this->acf_field_type_to_graphql_type( $acf_field['type'], $acf_field, $post_type_object->graphql_single_name ) : null;
-					$show_in_graphql = isset( $acf_field['show_in_graphql'] ) && true !== (bool) $acf_field['show_in_graphql'] ? false : true;
-					$description     = isset( $acf_field['instructions'] ) ? $acf_field['instructions'] : __( 'ACF Field added to the Schema by WPGraphQL ACF' );
-
-					/**
-					 * If the field is missing a name or a type,
-					 * we can't add it to the Schema.
-					 */
-					if (
-						empty( $name ) ||
-						empty( $type ) ||
-						true !== $show_in_graphql
-					) {
-						continue;
-					}
-
-					/**
-					 * Register the GraphQL Field to the Schema
-					 */
-					register_graphql_field(
-						$post_type_object->graphql_single_name,
-						$name,
-						[
-							'type'            => $type,
-							'description'     => $description,
-							'post_type'       => $post_type_object->name,
-							'acf_field'       => $acf_field,
-							'acf_field_group' => $field_group,
-							'resolve'         => function ( $post, $args, $context, $info ) use ( $acf_field ) {
-								$value = get_field( $acf_field['name'], $post->ID );
-//								if ( empty( $value ) ) {
-//									return null;
-//								}
-
-								switch ( $acf_field['type'] ) {
-									case 'user':
-										var_dump( $value );
-									case 'taxonomy':
-										$terms = [];
-										if ( ! empty( $value ) && is_array( $value ) ) {
-											foreach ( $value as $term ) {
-												$terms[] = DataSource::resolve_term_object( (int) $term, $acf_field['taxonomy'] );
-											}
-										}
-										return $terms;
-									case 'relationship':
-										$relationship = [];
-										if ( ! empty( $value ) && is_array( $value ) ) {
-											foreach ( $value as $post ) {
-												$relationship[] = DataSource::resolve_post_object( $post->ID, $context );
-											}
-										}
-
-										return $relationship;
-									case 'post_object':
-										if ( $value instanceof \WP_Post ) {
-											$return = new Post( $value );
-										} else {
-											$return = DataSource::resolve_post_object( (int) $value, $context );
-										}
-										break;
-									case  'link':
-										return isset( $value['url'] ) ? $value['url'] : null;
-									case 'image':
-									case 'file':
-										$return = DataSource::resolve_post_object( (int) $value['ID'], $context );
-										break;
-									case 'checkbox':
-										if ( is_array( $value ) ) {
-											$return = $value;
-										} else {
-											$return = [];
-										}
-										break;
-									case 'gallery':
-										$gallery = [];
-										if ( ! empty( $value ) && is_array( $value ) ) {
-											foreach ( $value as $image ) {
-												$gallery[] = DataSource::resolve_post_object( $image['ID'], $context );
-											}
-										}
-
-										return $gallery;
-										break;
-									default:
-										$return = $value;
+						switch ( $acf_field['type'] ) {
+							case 'date_picker':
+							case 'time_picker':
+							case 'date_time_picker':
+								return isset( $root->ID ) ? get_field( $acf_field['key'], $root->ID, true ) : null;
+							case 'user':
+								return DataSource::resolve_user( (int) $value, $context );
+							case 'taxonomy':
+								$terms = [];
+								if ( ! empty( $value ) && is_array( $value ) ) {
+									foreach ( $value as $term ) {
+										$terms[] = DataSource::resolve_term_object( (int) $term, $context );
+									}
+								}
+								return $terms;
+							case 'relationship':
+								$relationship = [];
+								if ( ! empty( $value ) && is_array( $value ) ) {
+									foreach ( $value as $post_id ) {
+										$relationship[] = DataSource::resolve_post_object( (int) $post_id, $context );
+									}
 								}
 
-								return $return;
+								return isset( $value ) ? $relationship : null;
+							case 'page_link':
+							case 'post_object':
+								if ( $value instanceof \WP_Post ) {
+									$return = new Post( $value );
+								} else {
+									$return = DataSource::resolve_post_object( (int) $value, $context );
+								}
+								break;
+							case  'link':
+								return isset( $value['url'] ) ? $value['url'] : null;
+							case 'image':
+							case 'file':
+								$return = DataSource::resolve_post_object( (int) $value, $context );
+								break;
+							case 'checkbox':
+								if ( is_array( $value ) ) {
+									$return = $value;
+								} else {
+									$return = null;
+								}
+								break;
+							case 'gallery':
+								$gallery = [];
+								if ( ! empty( $value ) && is_array( $value ) ) {
+									foreach ( $value as $image ) {
+										$gallery[] = DataSource::resolve_post_object( (int) $image, $context );
+									}
+								}
 
-							}
-						]
-					);
+								return isset( $value ) ? $gallery : null;
+								break;
+							default:
+								$return = $value;
+						}
 
-				}
+						return $return;
 
-			}
+
+					}
+				]
+			);
 
 		}
 

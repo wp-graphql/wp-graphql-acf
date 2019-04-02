@@ -1,0 +1,12 @@
+{
+  "phpcs.standard": "./phpcs.ruleset.xml",
+  "phpcs.ignorePatterns": ["vendor"],
+  "phpcs.executablePath": "./vendor/bin/phpcs",
+  "phpcbf.onsave": true,
+  "phpcbf.executablePath": "./vendor/bin/phpcbf",
+  // "phpcbf.standard": "./phpcs.ruleset.xml",
+  "phpcbf.configSearch": true,
+  "editor.formatOnSaveTimeout": 5000,
+  "phpcbf.debug": true,
+  "editor.formatOnSave": true
+}

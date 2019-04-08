@@ -6,3 +6,7 @@ node_modules/
 *.tar.gz
 *.zip
 .idea
+vendor/wp-coding-standards
+vendor/squizlabs
+vendor/bin
+vendor/dealerdirect

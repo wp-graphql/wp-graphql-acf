@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit43d505e613353a4948867689bb69bf5b
+class ComposerStaticInit78b1922b8102c4b4d425a5476ce4478e
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -21,25 +21,16 @@ class ComposerStaticInit43d505e613353a4948867689bb69bf5b
     );
 
     public static $classMap = array (
+        'WPGraphQL\\ACF\\ACFSettings' => __DIR__ . '/../..' . '/src/ACFSettings.php',
         'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/Config.php',
-        'WPGraphQL\\Extensions\\ACF\\Actions' => __DIR__ . '/../..' . '/src/pre-03152019/Actions.php',
-        'WPGraphQL\\Extensions\\ACF\\Filters' => __DIR__ . '/../..' . '/src/pre-03152019/Filters.php',
-        'WPGraphQL\\Extensions\\ACF\\TypeRegistry' => __DIR__ . '/../..' . '/src/pre-03152019/TypeRegistry.php',
-        'WPGraphQL\\Extensions\\ACF\\Type\\FieldGroup\\FieldGroupType' => __DIR__ . '/../..' . '/src/pre-03152019/Type.old/FieldGroup/FieldGroupType.php',
-        'WPGraphQL\\Extensions\\ACF\\Type\\Field\\FieldType' => __DIR__ . '/../..' . '/src/pre-03152019/Type.old/Field/FieldType.php',
-        'WPGraphQL\\Extensions\\ACF\\Type\\LocationRule\\LocationRuleType' => __DIR__ . '/../..' . '/src/pre-03152019/Type.old/LocationRule/LocationRuleType.php',
-        'WPGraphQL\\Extensions\\ACF\\Type\\PostTypeObject\\PostTypeObject' => __DIR__ . '/../..' . '/src/pre-03152019/Type.old/PostTypeObject/PostTypeObject.php',
-        'WPGraphQL\\Extensions\\ACF\\Type\\Union\\FieldUnionType' => __DIR__ . '/../..' . '/src/pre-03152019/Type.old/Union/FieldUnionType.php',
-        'WPGraphQL\\Extensions\\ACF\\Types' => __DIR__ . '/../..' . '/src/pre-03152019/Types.php',
-        'WPGraphQL\\Extensions\\ACF\\Utils' => __DIR__ . '/../..' . '/src/pre-03152019/Utils.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit43d505e613353a4948867689bb69bf5b::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit43d505e613353a4948867689bb69bf5b::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit43d505e613353a4948867689bb69bf5b::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit78b1922b8102c4b4d425a5476ce4478e::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit78b1922b8102c4b4d425a5476ce4478e::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit78b1922b8102c4b4d425a5476ce4478e::$classMap;
 
         }, null, ClassLoader::class);
     }

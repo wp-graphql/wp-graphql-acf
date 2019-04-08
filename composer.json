@@ -9,8 +9,6 @@
       "email": "me@tonimain.com"
     }
   ],
-  "require-dev": {
-  },
   "config": {
     "optimize-autoloader": true
   },
@@ -21,5 +19,10 @@
     "classmap": [
       "src/"
     ]
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "3.*",
+    "wp-coding-standards/wpcs": "^2.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0"
   }
 }

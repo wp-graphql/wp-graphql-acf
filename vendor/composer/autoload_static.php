@@ -11,10 +11,6 @@ class ComposerStaticInit78b1922b8102c4b4d425a5476ce4478e
         array (
             'WPGraphQL\\ACF\\' => 14,
         ),
-        'D' => 
-        array (
-            'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 55,
-        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -22,17 +18,11 @@ class ComposerStaticInit78b1922b8102c4b4d425a5476ce4478e
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
-        'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/dealerdirect/phpcodesniffer-composer-installer/src',
-        ),
     );
 
     public static $classMap = array (
-        'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin' => __DIR__ . '/..' . '/dealerdirect/phpcodesniffer-composer-installer/src/Plugin.php',
-        'WPGraphQL\\ACF\\ACF' => __DIR__ . '/../..' . '/src/class-acf.php',
-        'WPGraphQL\\ACF\\ACFSettings' => __DIR__ . '/../..' . '/src/class-acfsettings.php',
-        'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/class-config.php',
+        'WPGraphQL\\ACF\\ACFSettings' => __DIR__ . '/../..' . '/src/ACFSettings.php',
+        'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/Config.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

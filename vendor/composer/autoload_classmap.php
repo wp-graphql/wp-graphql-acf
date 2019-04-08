@@ -6,8 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin' => $vendorDir . '/dealerdirect/phpcodesniffer-composer-installer/src/Plugin.php',
-    'WPGraphQL\\ACF\\ACF' => $baseDir . '/src/class-acf.php',
-    'WPGraphQL\\ACF\\ACFSettings' => $baseDir . '/src/class-acfsettings.php',
-    'WPGraphQL\\ACF\\Config' => $baseDir . '/src/class-config.php',
+    'WPGraphQL\\ACF\\ACFSettings' => $baseDir . '/src/ACFSettings.php',
+    'WPGraphQL\\ACF\\Config' => $baseDir . '/src/Config.php',
 );

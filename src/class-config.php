@@ -91,11 +91,12 @@ class Config {
 	 *
 	 * @todo: This may be a good utility to add to WPGraphQL Core? May even have something already?
 	 *
-	 * @param string $str Unknown.
+	 * @param string $str      Unknown.
 	 * @param array  $no_strip Unknown.
+	 *
 	 * @return mixed|null|string|string[]
 	 */
-	public static function camel_case( string $str, array $no_strip = [] ) {
+	public static function camel_case( $str, array $no_strip = [] ) {
 		// non-alpha and non-numeric characters become spaces.
 		$str = preg_replace( '/[^a-z0-9' . implode( '', $no_strip ) . ']+/i', ' ', $str );
 		$str = trim( $str );
@@ -157,7 +158,22 @@ class Config {
 			 * Loop over the field groups for this post type
 			 */
 			foreach ( $field_groups as $field_group ) {
-				$this->add_field_group_fields( $field_group, $post_type_object->graphql_single_name );
+
+				$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+
+				$field_group['type'] = 'group';
+				$field_group['name'] = $field_name;
+				$config              = [
+					'name'            => $field_name,
+					'description'     => $field_group['description'],
+					'acf_field'       => $field_group,
+					'acf_field_group' => null,
+					'resolve'         => function( $root ) use ( $field_group ) {
+						return isset( $root ) ? $root : null;
+					}
+				];
+
+				$this->register_graphql_field( $post_type_object->graphql_single_name, $field_name, $config );
 			}
 		}
 
@@ -168,6 +184,7 @@ class Config {
 	 *
 	 * @param [type] $root Undocumented.
 	 * @param [type] $acf_field Undocumented.
+	 *
 	 * @return mixed
 	 */
 	protected function get_acf_field_value( $root, $acf_field ) {
@@ -192,6 +209,7 @@ class Config {
 	 * @param [type] $type_name Undocumented.
 	 * @param [type] $field_name Undocumented.
 	 * @param [type] $config Undocumented.
+	 *
 	 * @return mixed
 	 */
 	protected function register_graphql_field( $type_name, $field_name, $config ) {
@@ -205,8 +223,9 @@ class Config {
 
 		$field_config = [
 			'type'    => null,
-			'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
+			'resolve' => isset( $config['resolve'] ) && is_callable( $config['resolve'] ) ? $config['resolve'] : function( $root, $args, $context, $info ) use ( $acf_field ) {
 				$value = $this->get_acf_field_value( $root, $acf_field );
+
 				return ! empty( $value ) ? $value : null;
 			},
 		];
@@ -250,6 +269,7 @@ class Config {
 								$relationship[] = DataSource::resolve_post_object( (int) $post_id, $context );
 							}
 						}
+
 						return isset( $value ) ? $relationship : null;
 					},
 				];
@@ -274,6 +294,7 @@ class Config {
 					'type'    => 'String',
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
+
 						return isset( $value['url'] ) ? $value['url'] : null;
 					},
 				];
@@ -284,6 +305,7 @@ class Config {
 					'type'    => 'MediaItem',
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
+
 						return DataSource::resolve_post_object( (int) $value, $context );
 					},
 				];
@@ -293,6 +315,7 @@ class Config {
 					'type'    => [ 'list_of' => 'String' ],
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
+
 						return is_array( $value ) ? $value : null;
 					},
 				];
@@ -318,6 +341,7 @@ class Config {
 					'type'    => 'User',
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
+
 						return DataSource::resolve_user( (int) $value, $context );
 					},
 				];
@@ -344,7 +368,7 @@ class Config {
 				$field_config = null;
 				break;
 			case 'group':
-				$field_type_name = ucfirst( self::camel_case( $acf_field['name'] ) . 'FieldGroup' );
+				$field_type_name = ucfirst( self::camel_case( $acf_field['name'] ) . '_ACF_FieldGroup' );
 				if ( TypeRegistry::get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
 					break;
@@ -371,8 +395,8 @@ class Config {
 				break;
 
 			case 'google_map':
-				$field_type_name = 'ACFGoogleMap';
-				if ( TypeRegistry::get_type( $field_type_name ) == $type ) {
+				$field_type_name = 'ACF_GoogleMap';
+				if ( TypeRegistry::get_type( $field_type_name ) == $field_type_name ) {
 					$field_config['type'] = $field_type_name;
 					break;
 				}
@@ -409,7 +433,7 @@ class Config {
 				$field_config['type'] = $field_type_name;
 				break;
 			case 'repeater':
-				$field_type_name = self::camel_case( $acf_field['name'] ) . 'Repeater';
+				$field_type_name = self::camel_case( $acf_field['name'] ) . '_ACF_Repeater';
 				if ( TypeRegistry::get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
 					break;
@@ -471,6 +495,7 @@ class Config {
 		}
 
 		$config = array_merge( $config, $field_config );
+
 		return register_graphql_field( $type_name, $field_name, $config );
 	}
 
@@ -583,6 +608,7 @@ class Config {
 	 *
 	 * @param [type] $field_group Undocumented.
 	 * @param [type] $post_type Undocumented.
+	 *
 	 * @return void
 	 */
 	protected function add_acf_fields_to_post_object_type( $field_group, $post_type ) {

@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'WPGraphQL\\ACF\\ACFSettings' => $baseDir . '/src/ACFSettings.php', 
-    'WPGraphQL\\ACF\\Config' => $baseDir . '/src/Config.php', 
+    'WPGraphQL\\ACF\\ACF' => $baseDir . '/src/class-acf.php', 
+    'WPGraphQL\\ACF\\ACF_Settings' => $baseDir . '/src/class-acfsettings.php', 
+    'WPGraphQL\\ACF\\Config' => $baseDir . '/src/class-config.php', 
 );

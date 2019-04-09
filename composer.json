@@ -3,12 +3,7 @@
   "description": "Advanced Custom Fields bindings for wp-graphql",
   "type": "wordpress-plugin",
   "license": "GPLv3",
-  "authors": [
-    {
-      "name": "Toni Main",
-      "email": "me@tonimain.com"
-    }
-  ],
+  "authors": [],
   "config": {
     "optimize-autoloader": true
   },

@@ -8,11 +8,11 @@
 namespace WPGraphQL\ACF;
 
 /**
- * Class ACFSettings
+ * Class ACF_Settings
  *
  * @package WPGraphQL\ACF
  */
-class ACFSettings {
+class ACF_Settings {
 
 	/**
 	 * Initialize ACF Settings for the plugin
@@ -23,7 +23,10 @@ class ACFSettings {
 		 * Creates a field group setting to allow a field group to be
 		 * shown in the GraphQL Schema.
 		 */
-		add_action( 'acf/render_field_group_settings', [ $this, 'add_field_group_settings' ], 10, 1 );
+		add_action( 'acf/render_field_group_settings', [
+			$this,
+			'add_field_group_settings'
+		], 10, 1 );
 
 		/**
 		 * Add settings to individual fields to allow each field granular control
@@ -69,11 +72,6 @@ class ACFSettings {
 	public function add_field_group_settings( $field_group ) {
 
 		/**
-		 * Default value for show in GraphQL. If not set, default is false.
-		 */
-		$value = isset( $field_group['show_in_graphql'] ) ? (bool) $field_group['show_in_graphql'] : false;
-
-		/**
 		 * Render a field in the Field Group settings to allow for a Field Group to be shown in GraphQL.
 		 */
 		acf_render_field_wrap(
@@ -83,8 +81,24 @@ class ACFSettings {
 				'type'         => 'true_false',
 				'name'         => 'show_in_graphql',
 				'prefix'       => 'acf_field_group',
-				'value'        => $value,
+				'value'        => isset( $field_group['show_in_graphql'] ) ? (bool) $field_group['show_in_graphql'] : false,
 				'ui'           => 1,
+			]
+		);
+
+
+		/**
+		 * Render a field in the Field Group settings to allow for a Field Group to be shown in GraphQL.
+		 */
+		acf_render_field_wrap(
+			[
+				'label'        => __( 'GraphQL Field Name', 'acf' ),
+				'instructions' => __( 'The name of the field group in the GraphQL Schema.', 'wp-graphql-acf' ),
+				'type'         => 'text',
+				'prefix'       => 'acf_field_group',
+				'name'         => 'graphql_field_name',
+				'placeholder'  => isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] ),
+				'value'        => isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null,
 			]
 		);
 

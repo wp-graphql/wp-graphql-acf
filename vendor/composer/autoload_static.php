@@ -21,8 +21,9 @@ class ComposerStaticInit78b1922b8102c4b4d425a5476ce4478e
     );
 
     public static $classMap = array (
-        'WPGraphQL\\ACF\\ACFSettings' => __DIR__ . '/../..' . '/src/ACFSettings.php',
-        'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/Config.php',
+        'WPGraphQL\\ACF\\ACF' => __DIR__ . '/../..' . '/src/class-acf.php',
+        'WPGraphQL\\ACF\\ACF_Settings' => __DIR__ . '/../..' . '/src/class-acfsettings.php',
+        'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/class-config.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

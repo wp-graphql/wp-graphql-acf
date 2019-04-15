@@ -10,3 +10,4 @@ vendor/wp-coding-standards
 vendor/squizlabs
 vendor/bin
 vendor/dealerdirect
+.env

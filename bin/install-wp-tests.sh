@@ -12,8 +12,10 @@ DB_HOST=${4-localhost}
 WP_VERSION=${5-latest}
 SKIP_DB_CREATE=${6-false}
 
-WP_TESTS_DIR=${WP_TESTS_DIR-/tmp/wordpress-tests-lib}
-WP_CORE_DIR=${WP_CORE_DIR-/tmp/wordpress/}
+PLUGIN_DIR=$(pwd)
+WP_TESTS_DIR=${WP_TESTS_DIR-/tmp/wp-graphql-acf/wordpress-tests-lib}
+WP_CORE_DIR=${WP_CORE_DIR-/tmp/wp-graphql-acf/wordpress/}
+DB_SERVE_NAME=${DB_SERVE_NAME-wpgraphql_acf_serve}
 
 download() {
     if [ `which curl` ]; then
@@ -122,6 +124,47 @@ install_db() {
 	mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
 }
 
+configure_wordpress() {
+
+    cd $WP_CORE_DIR
+    wp config create --dbname="$DB_SERVE_NAME" --dbuser=root --dbpass="$DB_PASS" --dbhost="$DB_HOST" --skip-check --force=true
+    wp core install --url=wpgraphql.test --title="WPGraphQL Tests" --admin_user=admin --admin_password=password --admin_email=admin@wpgraphql.test
+    wp rewrite structure '/%year%/%monthnum%/%postname%/'
+}
+
+install_wpgraphql() {
+	echo "Cloning WPGraphQL"
+	git clone https://github.com/wp-graphql/wp-graphql.git $WP_CORE_DIR/wp-content/plugins/wp-graphql
+}
+
+install_acf_pro() {
+	echo "Cloning ACF PRO"
+	git clone git@github.com:AdvancedCustomFields/acf-pro.git $WP_CORE_DIR/wp-content/plugins/advanced-custom-fields-pro
+}
+
+activate_plugins() {
+
+    # Add this repo as a plugin to the repo
+    ln -s $PLUGIN_DIR $WP_CORE_DIR/wp-content/plugins/wp-graphql-acf
+
+    cd $WP_CORE_DIR
+
+    # activate the plugin
+    wp plugin activate wp-graphql
+    wp plugin activate wp-graphql-acf
+    wp plugin activate advanced-custom-fields-pro
+
+    # Flush the permalinks
+    wp rewrite flush
+
+    # Export the db for codeception to use
+    wp db export $PLUGIN_DIR/tests/_data/dump.sql
+}
+
 install_wp
 install_test_suite
 install_db
+configure_wordpress
+install_wpgraphql
+install_acf_pro
+activate_plugins

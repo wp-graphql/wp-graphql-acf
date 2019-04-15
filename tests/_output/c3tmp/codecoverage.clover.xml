@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1516402905">
+  <project timestamp="1516402905">
+    <package name="WPGraphQL\JWT_Authentication">
+      <file name="/Users/jasonbahl/Sites/wordpress/wp-graphql-jwt-authentication/src/Auth.php">
+        <class name="WPGraphQL\JWT_Authentication\Auth" namespace="WPGraphQL\JWT_Authentication">
+          <metrics complexity="74" methods="19" coveredmethods="11" conditionals="0" coveredconditionals="0" statements="111" coveredstatements="85" elements="130" coveredelements="96"/>
+        </class>
+        <line num="23" type="method" name="get_secret_key" visibility="public" complexity="3" crap="3" count="5"/>
+        <line num="26" type="stmt" count="5"/>
+        <line num="27" type="stmt" count="5"/>
+        <line num="41" type="method" name="login_and_get_token" visibility="public" complexity="4" crap="4.13" count="4"/>
+        <line num="46" type="stmt" count="4"/>
+        <line num="47" type="stmt" count="0"/>
+        <line num="53" type="stmt" count="4"/>
+        <line num="58" type="stmt" count="4"/>
+        <line num="59" type="stmt" count="0"/>
+        <line num="65" type="stmt" count="4"/>
+        <line num="71" type="stmt" count="4"/>
+        <line num="72" type="stmt" count="4"/>
+        <line num="73" type="stmt" count="4"/>
+        <line num="79" type="stmt" count="4"/>
+        <line num="87" type="method" name="get_token_issued" visibility="public" complexity="2" crap="2" count="4"/>
+        <line num="88" type="stmt" count="4"/>
+        <line num="89" type="stmt" count="4"/>
+        <line num="92" type="stmt" count="4"/>
+        <line num="100" type="method" name="get_token_expiration" visibility="public" complexity="3" crap="3" count="4"/>
+        <line num="102" type="stmt" count="4"/>
+        <line num="107" type="stmt" count="4"/>
+        <line num="114" type="stmt" count="4"/>
+        <line num="118" type="stmt" count="4"/>
+        <line num="127" type="method" name="get_signed_token" visibility="protected" complexity="5" crap="5.01" count="4"/>
+        <line num="132" type="stmt" count="4"/>
+        <line num="133" type="stmt" count="0"/>
+        <line num="142" type="stmt" count="4"/>
+        <line num="149" type="stmt" count="4"/>
+        <line num="150" type="stmt" count="4"/>
+        <line num="151" type="stmt" count="4"/>
+        <line num="152" type="stmt" count="4"/>
+        <line num="155" type="stmt" count="4"/>
+        <line num="166" type="stmt" count="4"/>
+        <line num="171" type="stmt" count="4"/>
+        <line num="172" type="stmt" count="4"/>
+        <line num="182" type="stmt" count="4"/>
+        <line num="187" type="stmt" count="4"/>
+        <line num="198" type="method" name="get_user_jwt_secret" visibility="public" complexity="7" crap="7.39" count="4"/>
+        <line num="203" type="stmt" count="4"/>
+        <line num="204" type="stmt" count="0"/>
+        <line num="213" type="stmt" count="4"/>
+        <line num="218" type="stmt" count="4"/>
+        <line num="219" type="stmt" count="4"/>
+        <line num="220" type="stmt" count="0"/>
+        <line num="226" type="stmt" count="4"/>
+        <line num="231" type="stmt" count="4"/>
+        <line num="232" type="stmt" count="4"/>
+        <line num="241" type="stmt" count="4"/>
+        <line num="251" type="method" name="issue_new_user_secret" visibility="public" complexity="3" crap="3" count="4"/>
+        <line num="256" type="stmt" count="4"/>
+        <line num="261" type="stmt" count="4"/>
+        <line num="266" type="stmt" count="4"/>
+        <line num="267" type="stmt" count="4"/>
+        <line num="271" type="stmt" count="4"/>
+        <line num="281" type="method" name="is_jwt_secret_revoked" visibility="public" complexity="3" crap="3" count="4"/>
+        <line num="282" type="stmt" count="4"/>
+        <line num="284" type="stmt" count="4"/>
+        <line num="294" type="method" name="get_token" visibility="public" complexity="1" crap="1" count="3"/>
+        <line num="295" type="stmt" count="3"/>
+        <line num="305" type="method" name="anonymousFunction:305#1277" complexity="3" crap="3" count="4"/>
+        <line num="306" type="stmt" count="4"/>
+        <line num="307" type="stmt" count="4"/>
+        <line num="314" type="stmt" count="1"/>
+        <line num="315" type="stmt" count="1"/>
+        <line num="318" type="stmt" count="4"/>
+        <line num="319" type="stmt" count="4"/>
+        <line num="321" type="stmt" count="4"/>
+        <line num="324" type="method" name="is_refresh_token" visibility="public" complexity="2" crap="6" count="0"/>
+        <line num="325" type="stmt" count="0"/>
+        <line num="336" type="method" name="authenticate_user" visibility="protected" complexity="4" crap="5.02" count="4"/>
+        <line num="341" type="stmt" count="4"/>
+        <line num="346" type="stmt" count="4"/>
+        <line num="347" type="stmt" count="0"/>
+        <line num="348" type="stmt" count="0"/>
+        <line num="351" type="stmt" count="4"/>
+        <line num="363" type="method" name="filter_determine_current_user" visibility="public" complexity="4" crap="4" count="6"/>
+        <line num="370" type="stmt" count="6"/>
+        <line num="375" type="stmt" count="6"/>
+        <line num="380" type="stmt" count="6"/>
+        <line num="390" type="stmt" count="2"/>
+        <line num="397" type="stmt" count="2"/>
+        <line num="408" type="method" name="revoke_user_secret" visibility="public" complexity="4" crap="20" count="0"/>
+        <line num="416" type="stmt" count="0"/>
+        <line num="422" type="stmt" count="0"/>
+        <line num="424" type="stmt" count="0"/>
+        <line num="425" type="stmt" count="0"/>
+        <line num="432" type="stmt" count="0"/>
+        <line num="434" type="stmt" count="0"/>
+        <line num="438" type="stmt" count="0"/>
+        <line num="452" type="method" name="unrevoke_user_secret" visibility="public" complexity="3" crap="12" count="0"/>
+        <line num="460" type="stmt" count="0"/>
+        <line num="465" type="stmt" count="0"/>
+        <line num="471" type="stmt" count="0"/>
+        <line num="472" type="stmt" count="0"/>
+        <line num="474" type="stmt" count="0"/>
+        <line num="478" type="stmt" count="0"/>
+        <line num="485" type="method" name="anonymousFunction:485#2020" complexity="1" crap="1" count="1"/>
+        <line num="486" type="stmt" count="1"/>
+        <line num="487" type="stmt" count="1"/>
+        <line num="488" type="stmt" count="1"/>
+        <line num="499" type="method" name="validate_token" visibility="public" complexity="11" crap="12.24" count="6"/>
+        <line num="501" type="stmt" count="6"/>
+        <line num="509" type="stmt" count="6"/>
+        <line num="514" type="stmt" count="6"/>
+        <line num="521" type="stmt" count="6"/>
+        <line num="522" type="stmt" count="6"/>
+        <line num="528" type="stmt" count="2"/>
+        <line num="536" type="stmt" count="4"/>
+        <line num="537" type="stmt" count="0"/>
+        <line num="548" type="stmt" count="4"/>
+        <line num="550" type="stmt" count="4"/>
+        <line num="551" type="stmt" count="4"/>
+        <line num="556" type="stmt" count="3"/>
+        <line num="557" type="stmt" count="0"/>
+        <line num="563" type="stmt" count="3"/>
+        <line num="564" type="stmt" count="0"/>
+        <line num="570" type="stmt" count="3"/>
+        <line num="572" type="stmt" count="0"/>
+        <line num="573" type="stmt" count="0"/>
+        <line num="580" type="stmt" count="1"/>
+        <line num="581" type="stmt" count="1"/>
+        <line num="582" type="stmt" count="1"/>
+        <line num="585" type="stmt" count="3"/>
+        <line num="587" type="stmt" count="3"/>
+        <line num="596" type="method" name="get_auth_header" visibility="public" complexity="5" crap="5" count="6"/>
+        <line num="602" type="stmt" count="6"/>
+        <line num="607" type="stmt" count="6"/>
+        <line num="612" type="stmt" count="6"/>
+        <line num="619" type="stmt" count="6"/>
+        <line num="623" type="method" name="get_refresh_header" visibility="public" complexity="2" crap="2" count="6"/>
+        <line num="628" type="stmt" count="6"/>
+        <line num="630" type="stmt" count="6"/>
+        <metrics loc="633" ncloc="315" classes="1" methods="19" coveredmethods="11" conditionals="0" coveredconditionals="0" statements="113" coveredstatements="87" elements="132" coveredelements="98"/>
+      </file>
+      <file name="/Users/jasonbahl/Sites/wordpress/wp-graphql-jwt-authentication/src/Login.php">
+        <class name="WPGraphQL\JWT_Authentication\Login" namespace="WPGraphQL\JWT_Authentication">
+          <metrics complexity="5" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="18" coveredstatements="18" elements="21" coveredelements="21"/>
+        </class>
+        <line num="19" type="method" name="root_mutation_fields" visibility="public" complexity="1" crap="1" count="6"/>
+        <line num="20" type="stmt" count="6"/>
+        <line num="22" type="stmt" count="6"/>
+        <line num="25" type="method" name="mutation" visibility="protected" complexity="3" crap="3" count="6"/>
+        <line num="27" type="stmt" count="6"/>
+        <line num="29" type="stmt" count="6"/>
+        <line num="30" type="stmt" count="6"/>
+        <line num="32" type="stmt" count="6"/>
+        <line num="35" type="stmt" count="6"/>
+        <line num="36" type="stmt" count="6"/>
+        <line num="39" type="stmt" count="6"/>
+        <line num="40" type="stmt" count="6"/>
+        <line num="45" type="stmt" count="6"/>
+        <line num="46" type="stmt" count="6"/>
+        <line num="49" type="stmt" count="6"/>
+        <line num="50" type="stmt" count="6"/>
+        <line num="53" type="stmt" count="6"/>
+        <line num="54" type="stmt" count="6"/>
+        <line num="57" type="method" name="anonymousFunction:57#354" complexity="1" crap="1" count="6"/>
+        <line num="62" type="stmt" count="4"/>
+        <line num="64" type="stmt" count="6"/>
+        <line num="69" type="stmt" count="6"/>
+        <metrics loc="73" ncloc="62" classes="1" methods="3" coveredmethods="3" conditionals="0" coveredconditionals="0" statements="19" coveredstatements="19" elements="22" coveredelements="22"/>
+      </file>
+      <file name="/Users/jasonbahl/Sites/wordpress/wp-graphql-jwt-authentication/src/ManageTokens.php">
+        <class name="WPGraphQL\JWT_Authentication\ManageTokens" namespace="WPGraphQL\JWT_Authentication">
+          <metrics complexity="50" methods="12" coveredmethods="6" conditionals="0" coveredconditionals="0" statements="77" coveredstatements="63" elements="89" coveredelements="69"/>
+        </class>
+        <line num="12" type="method" name="init" visibility="public" complexity="1" crap="1" count="6"/>
+        <line num="17" type="stmt" count="6"/>
+        <line num="18" type="stmt" count="6"/>
+        <line num="25" type="stmt" count="6"/>
+        <line num="26" type="stmt" count="6"/>
+        <line num="30" type="stmt" count="6"/>
+        <line num="31" type="stmt" count="6"/>
+        <line num="33" type="stmt" count="6"/>
+        <line num="38" type="stmt" count="6"/>
+        <line num="39" type="stmt" count="6"/>
+        <line num="41" type="stmt" count="6"/>
+        <line num="46" type="stmt" count="6"/>
+        <line num="47" type="stmt" count="6"/>
+        <line num="51" type="stmt" count="6"/>
+        <line num="52" type="stmt" count="6"/>
+        <line num="55" type="stmt" count="6"/>
+        <line num="64" type="method" name="add_user_fields" visibility="public" complexity="11" crap="11" count="6"/>
+        <line num="66" type="stmt" count="6"/>
+        <line num="67" type="stmt" count="6"/>
+        <line num="68" type="stmt" count="6"/>
+        <line num="69" type="method" name="anonymousFunction:69#230" complexity="4" crap="4.13" count="6"/>
+        <line num="74" type="stmt" count="1"/>
+        <line num="79" type="stmt" count="1"/>
+        <line num="80" type="stmt" count="0"/>
+        <line num="83" type="stmt" count="1"/>
+        <line num="84" type="stmt" count="6"/>
+        <line num="87" type="stmt" count="6"/>
+        <line num="88" type="stmt" count="6"/>
+        <line num="89" type="stmt" count="6"/>
+        <line num="90" type="method" name="anonymousFunction:90#371" complexity="4" crap="4.13" count="6"/>
+        <line num="95" type="stmt" count="1"/>
+        <line num="100" type="stmt" count="1"/>
+        <line num="101" type="stmt" count="0"/>
+        <line num="104" type="stmt" count="1"/>
+        <line num="105" type="stmt" count="6"/>
+        <line num="108" type="stmt" count="6"/>
+        <line num="109" type="stmt" count="6"/>
+        <line num="110" type="stmt" count="6"/>
+        <line num="111" type="method" name="anonymousFunction:111#512" complexity="3" crap="3.07" count="6"/>
+        <line num="116" type="stmt" count="1"/>
+        <line num="121" type="stmt" count="1"/>
+        <line num="122" type="stmt" count="0"/>
+        <line num="128" type="stmt" count="1"/>
+        <line num="129" type="stmt" count="6"/>
+        <line num="132" type="stmt" count="6"/>
+        <line num="133" type="stmt" count="6"/>
+        <line num="134" type="stmt" count="6"/>
+        <line num="135" type="method" name="anonymousFunction:135#647" complexity="2" crap="2" count="6"/>
+        <line num="136" type="stmt" count="1"/>
+        <line num="137" type="stmt" count="1"/>
+        <line num="138" type="stmt" count="6"/>
+        <line num="141" type="stmt" count="6"/>
+        <line num="142" type="stmt" count="6"/>
+        <line num="143" type="stmt" count="6"/>
+        <line num="144" type="method" name="anonymousFunction:144#741" complexity="2" crap="2" count="6"/>
+        <line num="145" type="stmt" count="1"/>
+        <line num="146" type="stmt" count="1"/>
+        <line num="147" type="stmt" count="6"/>
+        <line num="152" type="stmt" count="6"/>
+        <line num="162" type="method" name="add_user_mutation_input_fields" visibility="public" complexity="1" crap="1" count="6"/>
+        <line num="164" type="stmt" count="6"/>
+        <line num="165" type="stmt" count="6"/>
+        <line num="166" type="stmt" count="6"/>
+        <line num="169" type="stmt" count="6"/>
+        <line num="170" type="stmt" count="6"/>
+        <line num="171" type="stmt" count="6"/>
+        <line num="174" type="stmt" count="6"/>
+        <line num="182" type="method" name="update_jwt_fields_during_mutation" visibility="public" complexity="6" crap="42" count="0"/>
+        <line num="188" type="stmt" count="0"/>
+        <line num="189" type="stmt" count="0"/>
+        <line num="190" type="stmt" count="0"/>
+        <line num="191" type="stmt" count="0"/>
+        <line num="192" type="stmt" count="0"/>
+        <line num="199" type="stmt" count="0"/>
+        <line num="200" type="stmt" count="0"/>
+        <line num="201" type="stmt" count="0"/>
+        <line num="205" type="stmt" count="0"/>
+        <line num="215" type="method" name="prevent_token_from_returning_if_revoked" visibility="public" complexity="2" crap="2.06" count="4"/>
+        <line num="220" type="stmt" count="4"/>
+        <line num="225" type="stmt" count="4"/>
+        <line num="226" type="stmt" count="0"/>
+        <line num="229" type="stmt" count="4"/>
+        <line num="234" type="method" name="use_custom_user_expiration" visibility="public" complexity="5" crap="5.07" count="4"/>
+        <line num="236" type="stmt" count="4"/>
+        <line num="241" type="stmt" count="4"/>
+        <line num="242" type="stmt" count="2"/>
+        <line num="248" type="stmt" count="4"/>
+        <line num="249" type="stmt" count="4"/>
+        <line num="250" type="stmt" count="0"/>
+        <line num="253" type="stmt" count="4"/>
+        <line num="257" type="method" name="add_tokens_to_graphql_response_headers" visibility="public" complexity="9" crap="9" count="6"/>
+        <line num="262" type="stmt" count="6"/>
+        <line num="267" type="stmt" count="6"/>
+        <line num="272" type="stmt" count="1"/>
+        <line num="277" type="stmt" count="1"/>
+        <line num="278" type="stmt" count="1"/>
+        <line num="283" type="stmt" count="6"/>
+        <line num="285" type="stmt" count="6"/>
+        <line num="287" type="stmt" count="1"/>
+        <line num="289" type="stmt" count="1"/>
+        <line num="290" type="stmt" count="1"/>
+        <line num="295" type="stmt" count="6"/>
+        <metrics loc="298" ncloc="205" classes="1" methods="12" coveredmethods="6" conditionals="0" coveredconditionals="0" statements="90" coveredstatements="76" elements="102" coveredelements="82"/>
+      </file>
+      <file name="/Users/jasonbahl/Sites/wordpress/wp-graphql-jwt-authentication/src/RefreshToken.php">
+        <class name="WPGraphQL\JWT_Authentication\RefreshToken" namespace="WPGraphQL\JWT_Authentication">
+          <metrics complexity="13" methods="3" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="18" coveredstatements="17" elements="21" coveredelements="19"/>
+        </class>
+        <line num="20" type="method" name="root_mutation_fields" visibility="public" complexity="1" crap="1" count="6"/>
+        <line num="21" type="stmt" count="6"/>
+        <line num="23" type="stmt" count="6"/>
+        <line num="26" type="method" name="mutation" visibility="public" complexity="7" crap="7" count="6"/>
+        <line num="28" type="stmt" count="6"/>
+        <line num="30" type="stmt" count="6"/>
+        <line num="31" type="stmt" count="6"/>
+        <line num="33" type="stmt" count="6"/>
+        <line num="36" type="stmt" count="6"/>
+        <line num="37" type="stmt" count="6"/>
+        <line num="42" type="stmt" count="6"/>
+        <line num="43" type="stmt" count="6"/>
+        <line num="46" type="method" name="anonymousFunction:46#251" complexity="5" crap="5.05" count="6"/>
+        <line num="48" type="stmt" count="2"/>
+        <line num="50" type="stmt" count="2"/>
+        <line num="51" type="stmt" count="2"/>
+        <line num="52" type="stmt" count="0"/>
+        <line num="55" type="stmt" count="2"/>
+        <line num="56" type="stmt" count="2"/>
+        <line num="59" type="stmt" count="2"/>
+        <line num="62" type="stmt" count="6"/>
+        <line num="67" type="stmt" count="6"/>
+        <metrics loc="71" ncloc="63" classes="1" methods="3" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="19" coveredstatements="18" elements="22" coveredelements="20"/>
+      </file>
+      <file name="/Users/jasonbahl/Sites/wordpress/wp-graphql-jwt-authentication/wp-graphql-jwt-authentication.php">
+        <class name="WPGraphQL\JWT_Authentication\JWT_Authentication" namespace="WPGraphQL\JWT_Authentication" fullPackage="JWT">
+          <metrics complexity="15" methods="6" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="36" coveredstatements="32" elements="42" coveredelements="36"/>
+        </class>
+        <line num="31" type="stmt" count="6"/>
+        <line num="51" type="method" name="instance" visibility="public" complexity="3" crap="3" count="6"/>
+        <line num="53" type="stmt" count="6"/>
+        <line num="54" type="stmt" count="6"/>
+        <line num="55" type="stmt" count="6"/>
+        <line num="56" type="stmt" count="6"/>
+        <line num="59" type="stmt" count="6"/>
+        <line num="66" type="stmt" count="6"/>
+        <line num="71" type="stmt" count="6"/>
+        <line num="83" type="method" name="__clone" visibility="public" complexity="1" crap="2" count="0"/>
+        <line num="86" type="stmt" count="0"/>
+        <line num="88" type="stmt" count="0"/>
+        <line num="97" type="method" name="__wakeup" visibility="public" complexity="1" crap="2" count="0"/>
+        <line num="100" type="stmt" count="0"/>
+        <line num="102" type="stmt" count="0"/>
+        <line num="111" type="method" name="setup_constants" visibility="private" complexity="6" crap="6" count="6"/>
+        <line num="114" type="stmt" count="6"/>
+        <line num="115" type="stmt" count="6"/>
+        <line num="119" type="stmt" count="6"/>
+        <line num="120" type="stmt" count="6"/>
+        <line num="124" type="stmt" count="6"/>
+        <line num="125" type="stmt" count="6"/>
+        <line num="129" type="stmt" count="6"/>
+        <line num="130" type="stmt" count="6"/>
+        <line num="134" type="stmt" count="6"/>
+        <line num="135" type="stmt" count="6"/>
+        <line num="138" type="stmt" count="6"/>
+        <line num="148" type="method" name="includes" visibility="private" complexity="3" crap="3" count="6"/>
+        <line num="151" type="stmt" count="6"/>
+        <line num="152" type="stmt" count="6"/>
+        <line num="154" type="stmt" count="6"/>
+        <line num="159" type="method" name="init" visibility="private" complexity="1" crap="1" count="6"/>
+        <line num="165" type="stmt" count="6"/>
+        <line num="170" type="stmt" count="6"/>
+        <line num="171" type="stmt" count="6"/>
+        <line num="173" type="stmt" count="6"/>
+        <line num="175" type="stmt" count="6"/>
+        <line num="176" type="stmt" count="6"/>
+        <line num="178" type="stmt" count="6"/>
+        <line num="183" type="stmt" count="6"/>
+        <line num="184" type="stmt" count="6"/>
+        <line num="186" type="stmt" count="6"/>
+        <line num="188" type="stmt" count="6"/>
+        <line num="195" type="stmt" count="6"/>
+        <line num="198" type="stmt" count="6"/>
+        <metrics loc="197" ncloc="97" classes="1" methods="6" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="38" coveredstatements="34" elements="44" coveredelements="38"/>
+      </file>
+    </package>
+    <metrics files="5" loc="1272" ncloc="742" classes="5" methods="43" coveredmethods="26" conditionals="0" coveredconditionals="0" statements="279" coveredstatements="234" elements="322" coveredelements="260"/>
+  </project>
+</coverage>

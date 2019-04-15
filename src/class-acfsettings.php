@@ -59,6 +59,19 @@ class ACF_Settings {
 			true
 		);
 
+		acf_render_field_setting(
+			$field,
+			[
+				'label'         => __( 'GraphQL Field Name', 'wp-graphql-acf' ),
+				'instructions'  => __( 'The name of the field in the GraphQL Schema. Default is camelCase of the field name.', 'wp-graphql-acf' ),
+				'name'          => 'graphql_field_name',
+				'type'          => 'text',
+				'placeholder'  => isset( $field['graphql_field_name'] ) ? $field['graphql_field_name'] : Config::camel_case( $field['title'] ),
+				'value'        => isset( $field['graphql_field_name'] ) ? $field['graphql_field_name'] : null,
+			],
+			true
+		);
+
 	}
 
 	/**

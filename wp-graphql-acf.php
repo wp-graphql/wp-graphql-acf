@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name:     WPGraphQL ACF
- * Plugin URI:      https://github.com/tonimain/wp-graphql-acf
+ * Plugin Name:     WPGraphQL for Advanced Custom Fields
+ * Plugin URI:      https://wpgraphql.com/acf
  * Description:     Adds Advanced Custom Fields to the WPGraphQL Schema
  * Author:          WPGraphQL, Jason Bahl
  * Author URI:      https://www.wpgraphql.com
@@ -38,22 +38,23 @@ if ( ! function_exists( 'wga_fs' ) ) {
 
 			try {
 				$wga_fs = fs_dynamic_init(
-					array(
-						'id'               => '3289',
-						'slug'             => 'wp-graphql-acf',
-						'premium_slug'     => 'wp-graphql-acf',
-						'type'             => 'plugin',
-						'public_key'       => 'pk_66dc1cb99818841a8fa76276565cd',
-						'is_premium'       => true,
-						'is_premium_only'  => true,
-						'has_addons'       => false,
-						'has_paid_plans'   => true,
-						'is_org_compliant' => false,
-						'menu'             => array(
-							'first-path' => 'plugins.php',
-							'support'    => false,
-						),
-					)
+					[
+						'id'                  => '3289',
+						'slug'                => 'wp-graphql-acf',
+						'premium_slug'        => 'wp-graphql-acf',
+						'type'                => 'plugin',
+						'public_key'          => 'pk_66dc1cb99818841a8fa76276565cd',
+						'is_premium'          => true,
+						'is_premium_only'     => true,
+						'has_addons'          => false,
+						'has_paid_plans'      => true,
+						'is_org_compliant'    => false,
+						'has_affiliation'     => 'selected',
+						'menu'                => [
+							'first-path'     => 'plugins.php',
+							'support'        => false,
+						],
+					]
 				);
 			} catch ( \Freemius_Exception $e ) {
 				return new \WP_Error( $e->getMessage() );
@@ -80,11 +81,7 @@ function init() {
 	/**
 	 * If either ACF or WPGraphQL are not active, show the admin notice
 	 */
-	if ( ! class_exists( 'acf' ) || ! class_exists( 'WPGraphQL' ) ) {
-		add_action( 'admin_init', __NAMESPACE__ . '\show_admin_notice' );
-
-		return null;
-	}
+	add_action( 'admin_init', __NAMESPACE__ . '\show_admin_notice' );
 
 	/**
 	 * Return the instance of WPGraphQL\ACF
@@ -101,9 +98,13 @@ add_action( 'init', '\WPGraphQL\ACF\init' );
  * @return bool
  */
 function show_admin_notice() {
-	if ( ! class_exists( 'acf' ) || ! class_exists( 'WPGraphQL' ) ) {
+
+	$wp_graphql_required_min_version = '0.3.2';
+
+	if ( ! class_exists( 'acf' ) || ! class_exists( 'WPGraphQL' ) || ( defined( 'WPGRAPHQL_VERSION' ) && version_compare( WPGRAPHQL_VERSION, $wp_graphql_required_min_version, 'lt' ) ) ) {
+
 		/**
-		 * For users with lower priveleges, don't show the notice
+		 * For users with lower capabilities, don't show the notice
 		 */
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return false;
@@ -111,10 +112,10 @@ function show_admin_notice() {
 
 		add_action(
 			'admin_notices',
-			function() {
+			function() use ( $wp_graphql_required_min_version ) {
 				?>
 			<div class="error notice">
-				<p><?php _e( 'Both WPGraphQL (v0.2.3+) and Advanced Custom Fields (v5.7+) must be active for "wp-graphql-acf" to work', 'wp-graphiql-acf' ); ?></p>
+				<p><?php _e( sprintf('Both WPGraphQL (v%s+) and Advanced Custom Fields (v5.7+) must be active for "wp-graphql-acf" to work', $wp_graphql_required_min_version ), 'wp-graphiql-acf' ); ?></p>
 			</div>
 				<?php
 			}

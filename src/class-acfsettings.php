@@ -23,10 +23,7 @@ class ACF_Settings {
 		 * Creates a field group setting to allow a field group to be
 		 * shown in the GraphQL Schema.
 		 */
-		add_action( 'acf/render_field_group_settings', [
-			$this,
-			'add_field_group_settings'
-		], 10, 1 );
+		add_action( 'acf/render_field_group_settings', [ $this, 'add_field_group_settings' ], 10, 1 );
 
 		/**
 		 * Add settings to individual fields to allow each field granular control
@@ -43,6 +40,15 @@ class ACF_Settings {
 	 */
 	public function add_field_settings( $field ) {
 
+		$supported_fields = Config::get_supported_fields();
+
+		/**
+		 * If there are no supported fields, or the field is not supported, don't add a setting field.
+		 */
+		if ( empty( $supported_fields ) || ! is_array( $supported_fields ) || ! in_array( $field['type'], $supported_fields, true ) ) {
+			return;
+		}
+
 		/**
 		 * Render the "show_in_graphql" setting for the field.
 		 */
@@ -55,19 +61,6 @@ class ACF_Settings {
 				'type'          => 'true_false',
 				'ui'            => 1,
 				'default_value' => 1,
-			],
-			true
-		);
-
-		acf_render_field_setting(
-			$field,
-			[
-				'label'         => __( 'GraphQL Field Name', 'wp-graphql-acf' ),
-				'instructions'  => __( 'The name of the field in the GraphQL Schema. Default is camelCase of the field name.', 'wp-graphql-acf' ),
-				'name'          => 'graphql_field_name',
-				'type'          => 'text',
-				'placeholder'  => isset( $field['graphql_field_name'] ) ? $field['graphql_field_name'] : Config::camel_case( $field['title'] ),
-				'value'        => isset( $field['graphql_field_name'] ) ? $field['graphql_field_name'] : null,
 			],
 			true
 		);
@@ -99,7 +92,6 @@ class ACF_Settings {
 			]
 		);
 
-
 		/**
 		 * Render a field in the Field Group settings to allow for a Field Group to be shown in GraphQL.
 		 */
@@ -110,8 +102,9 @@ class ACF_Settings {
 				'type'         => 'text',
 				'prefix'       => 'acf_field_group',
 				'name'         => 'graphql_field_name',
-				'placeholder'  => isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] ),
-				'value'        => isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null,
+				'required'     => true,
+				'placeholder'  => ! empty( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null,
+				'value'        => ! empty( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null,
 			]
 		);
 

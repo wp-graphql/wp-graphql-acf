@@ -4,6 +4,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 	public $admin;
 	public $post;
+	public $test_cpt;
 	public $page;
 
 	/**
@@ -14,6 +15,13 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 		parent::setUp();
 
+		register_post_type( 'test', [
+			'show_in_graphql' => true,
+			'hierarchical' => true,
+			'graphql_single_name' => 'Test',
+			'graphql_plural_name' => 'Tests'
+		] );
+
 		$this->admin = $this->factory()->user->create( [
 			'role' => 'administrator',
 			'user_login' => 'testuser',
@@ -23,6 +31,13 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->post = $this->factory()->post->create([
 			'post_type' => 'post',
 			'post_title' => 'ACF Test',
+			'post_status' => 'publish',
+			'post_author' => $this->admin
+		]);
+
+		$this->test_cpt = $this->factory()->post->create([
+			'post_type' => 'test',
+			'post_title' => 'ACF Test CPT',
 			'post_status' => 'publish',
 			'post_author' => $this->admin
 		]);
@@ -858,6 +873,40 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 	}
 
+	public function testQueryFieldOnCustomPostType() {
+
+		$id = $this->test_cpt;
+		$expected_text_1 = 'test value';
+
+		update_field( 'text_field', $expected_text_1, $id );
+
+		$query = '
+		query GET_CUSTOM_POST_TYPE_WITH_ACF_FIELD( $testId: Int! ) {
+		  testBy( testId: $testId ) {
+		    __typename
+		    id
+		    title
+		    postFields {
+		      textField
+		    }
+		  }  
+		}';
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'testId' => $id,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+		$this->assertEquals( $expected_text_1, $actual['data']['testBy']['postFields']['textField'] );
+
+
+	}
+
 	/**
 	 * Test querying a Relationship field
 	 */
@@ -920,6 +969,17 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 	}
 
 	protected function register_fields() {
+
+		add_action( 'init', function() {
+			register_post_type( 'test', [
+				'show_in_graphql' => true,
+				'hierarchical' => true,
+				'graphql_single_name' => 'Test',
+				'graphql_plural_name' => 'Tests'
+			] );
+		});
+
+
 
 		acf_add_local_field_group(array(
 			'key' => 'group_5c8c7abfe98f7',
@@ -1825,6 +1885,18 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 						'param' => 'post_type',
 						'operator' => '==',
 						'value' => 'post',
+					),
+					array(
+						'param' => 'post_status',
+						'operator' => '==',
+						'value' => 'publish',
+					),
+				),
+				array(
+					array(
+						'param' => 'post_type',
+						'operator' => '==',
+						'value' => 'test',
 					),
 					array(
 						'param' => 'post_status',

@@ -5,7 +5,7 @@ node_modules/
 *.sql
 *.tar.gz
 *.zip
-.idea
+.idea*
 vendor/wp-coding-standards
 vendor/squizlabs
 vendor/bin

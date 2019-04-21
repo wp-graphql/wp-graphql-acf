@@ -138,10 +138,10 @@ class Config {
 			);
 
 			/**
-			 * If there are no field groups for this post type, bail early
+			 * If there are no field groups for this post type, move on to the next one.
 			 */
 			if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
-				return;
+				continue;
 			}
 
 			/**

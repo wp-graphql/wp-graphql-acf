@@ -6,7 +6,7 @@ WPGraphQL for Advanced Custom Fields automatically exposes your ACF fields to th
 
 ## Licensing
 
-This plugin is a licensed plugin. To purchase the plugin, visit: https://wpgraphql.com/acf
+This is a licensed plugin. To purchase a license for the plugin and receive a copy of the plugin, visit: https://wpgraphql.com/acf
 
 ## Support
 

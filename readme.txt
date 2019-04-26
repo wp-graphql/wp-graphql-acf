@@ -17,11 +17,19 @@ allowing for interacting with ACF field data using GraphQL Queries.
 
 == Changelog ==
 
+= 0.1.2 =
+* Fixes bug with Nested Fields not properly showing in the Schema. By defualt, fields are not supposed
+to be exposed in the Schema if they are not set to "show_in_graphql", however there was a flaw in
+logic causing nested fields of Flex Field layouts to not properly be exposed to the Schema. This
+fixes that issue, so nested fields of Flex Field layouts can properly be queried and seen in the
+Schema.
+
 = 0.1.1 =
 * Fixes bug with Field groups not properly being exposed to the Schema for custom post types.
 
 = 0.1.0 =
 * Initial public release.
+
 
 == Upgrade Notice ==
 

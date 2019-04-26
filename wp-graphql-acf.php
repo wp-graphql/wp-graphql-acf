@@ -124,4 +124,3 @@ function show_admin_notice() {
 		return false;
 	}
 }
-

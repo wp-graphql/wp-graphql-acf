@@ -527,6 +527,7 @@ class Config {
 					]
 				);
 
+
 				$this->add_field_group_fields( $acf_field, $field_type_name );
 
 				$field_config['type'] = $field_type_name;
@@ -572,6 +573,7 @@ class Config {
 				break;
 			case 'repeater':
 				$field_type_name = $type_name . '_' . self::camel_case( $acf_field['name'] );
+
 				if ( TypeRegistry::get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
 					break;
@@ -702,6 +704,12 @@ class Config {
 	protected function add_field_group_fields( $field_group, $type_name ) {
 
 		/**
+		 * If the field group has the show_in_graphql setting configured, respect it's setting
+		 * otherwise default to true (for nested fields)
+		 */
+		$field_group['show_in_graphql'] = isset( $field_group['show_in_graphql'] ) ? (boolean) $field_group['show_in_graphql'] : true;
+
+		/**
 		 * Determine if the field group should be exposed
 		 * to graphql
 		 */
@@ -713,6 +721,7 @@ class Config {
 		 * Get the fields in the group.
 		 */
 		$acf_fields = ! empty( $field_group['sub_fields'] ) ? $field_group['sub_fields'] : acf_get_fields( $field_group );
+
 
 		/**
 		 * If there are no fields, bail
@@ -741,6 +750,7 @@ class Config {
 				empty( $name ) ||
 				true !== $show_in_graphql
 			) {
+
 				/**
 				 * Uncomment line below to determine what fields are not going to be output
 				 * in the Schema.

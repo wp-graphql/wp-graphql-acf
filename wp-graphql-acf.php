@@ -7,7 +7,7 @@
  * Author URI:      https://www.wpgraphql.com
  * Text Domain:     wp-graphql-acf
  * Domain Path:     /languages
- * Version:         0.1.2
+ * Version:         0.1.3
  *
  * @package         WPGraphQL_ACF
  */
@@ -120,7 +120,8 @@ function show_admin_notice() {
 				<?php
 			}
 		);
-
-		return false;
+		return true;
 	}
+	return false;
 }
+

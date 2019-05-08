@@ -8,7 +8,11 @@
 namespace WPGraphQL\ACF;
 
 use WPGraphQL\Data\DataSource;
+use WPGraphQL\Model\Comment;
+use WPGraphQL\Model\Menu;
+use WPGraphQL\Model\MenuItem;
 use WPGraphQL\Model\Post;
+use WPGraphQL\Model\Term;
 use WPGraphQL\TypeRegistry;
 use WPGraphQL\Types;
 
@@ -27,8 +31,8 @@ class Config {
 		$this->add_acf_fields_to_post_object_types();
 		$this->add_acf_fields_to_term_objects();
 		$this->add_acf_fields_to_comments();
+		$this->add_acf_fields_to_menus();
 		$this->add_acf_fields_to_menu_items();
-		$this->add_acf_fields_to_media_items();
 	}
 
 	/**
@@ -114,7 +118,7 @@ class Config {
 		/**
 		 * Get a list of post types that have been registered to show in graphql
 		 */
-		$graphql_post_types = \WPGraphQL::$allowed_post_types;
+		$graphql_post_types = \WPGraphQL::get_allowed_post_types();
 
 		/**
 		 * If there are no post types exposed to GraphQL, bail
@@ -183,13 +187,42 @@ class Config {
 	 * @return mixed
 	 */
 	protected function get_acf_field_value( $root, $acf_field ) {
+
+
 		$value = null;
 		if ( is_array( $root ) ) {
 			if ( isset( $root[ $acf_field['key'] ] ) ) {
 				$value = $root[ $acf_field['key'] ];
 			}
 		} else {
-			$field_value = get_field( $acf_field['key'], $root->ID, false );
+
+			switch (true) {
+				case $root instanceof Term:
+					$id = acf_get_term_post_id( $root->taxonomyName, $root->term_id );
+					break;
+				case $root instanceof Post:
+					$id = absint( $root->ID );
+					break;
+				case $root instanceof MenuItem:
+					$id = absint( $root->menuItemId );
+					break;
+				case $root instanceof Menu:
+					$id = acf_get_term_post_id( 'nav_menu', $root->menuId  );
+					break;
+				case $root instanceof Comment:
+					$id = 'comment_' . absint( $root->comment_ID );
+					break;
+				default:
+					$id = null;
+					break;
+			}
+
+			if ( empty( $id ) ) {
+				return null;
+			}
+
+			$field_value = get_field( $acf_field['key'], $id, false );
+
 			$value       = ! empty( $field_value ) ? $field_value : null;
 		}
 
@@ -223,7 +256,7 @@ class Config {
 			'gallery',
 			'select',
 			'checkbox',
-			'radio_button',
+			'radio',
 			'button_group',
 			'true_false',
 			'link',
@@ -287,13 +320,21 @@ class Config {
 			case 'oembed':
 			case 'password':
 			case 'url':
-			case 'wysiwyg':
 				// Even though Selects and Radios in ACF can _technically_ be an integer
 				// we're chosing to always cast as a string because with
 				// GraphQL we can't return different types
 			case 'select':
 			case 'radio':
 				$field_config['type'] = 'String';
+				break;
+			case 'wysiwyg':
+				$field_config = [
+					'type' => 'String',
+					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
+						$value = get_field( $acf_field['key'], $root->ID, true );
+						return $value;
+					}
+				];
 				break;
 			case 'range':
 				$field_config['type'] = 'Integer';
@@ -722,7 +763,6 @@ class Config {
 		 */
 		$acf_fields = ! empty( $field_group['sub_fields'] ) ? $field_group['sub_fields'] : acf_get_fields( $field_group );
 
-
 		/**
 		 * If there are no fields, bail
 		 */
@@ -772,38 +812,254 @@ class Config {
 	}
 
 	/**
-	 * Undocumented function
+	 * Add field groups to Taxonomies
 	 *
 	 * @return void
 	 */
 	protected function add_acf_fields_to_term_objects() {
-		// @todo: Coming soon
+
+		/**
+		 * Get a list of taxonomies that have been registered to show in graphql
+		 */
+		$graphql_taxonomies = \WPGraphQL::get_allowed_taxonomies();
+
+		/**
+		 * If there are no taxonomies exposed to GraphQL, bail
+		 */
+		if ( empty( $graphql_taxonomies ) || ! is_array( $graphql_taxonomies ) ) {
+			return;
+		}
+
+		/**
+		 * Loop over the taxonomies exposed to GraphQL
+		 */
+		foreach ( $graphql_taxonomies as $taxonomy ) {
+
+			/**
+			 * Get the field groups associated with the taxonomy
+			 */
+			$field_groups = acf_get_field_groups(
+				[
+					'taxonomy' => $taxonomy,
+				]
+			);
+
+			/**
+			 * If there are no field groups for this taxonomy, move on to the next one.
+			 */
+			if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
+				continue;
+			}
+
+			/**
+			 * Get the Taxonomy object
+			 */
+			$tax_object = get_taxonomy( $taxonomy );
+
+			/**
+			 * Loop over the field groups for this post type
+			 */
+			foreach ( $field_groups as $field_group ) {
+
+				$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+
+				$field_group['type'] = 'group';
+				$field_group['name'] = $field_name;
+				$config              = [
+					'name'            => $field_name,
+					'description'     => $field_group['description'],
+					'acf_field'       => $field_group,
+					'acf_field_group' => null,
+					'resolve'         => function( $root ) use ( $field_group ) {
+						return isset( $root ) ? $root : null;
+					}
+				];
+
+				$this->register_graphql_field( $tax_object->graphql_single_name, $field_name, $config );
+			}
+		}
 	}
 
 	/**
-	 * Undocumented function
+	 * Add ACF Fields to comments
 	 *
 	 * @return void
 	 */
 	protected function add_acf_fields_to_comments() {
-		// @todo: Coming soon
+
+		$comment_field_groups = [];
+
+		/**
+		 * Get the field groups associated with the taxonomy
+		 */
+		$field_groups = acf_get_field_groups();
+
+		foreach( $field_groups as $field_group ) {
+			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
+				foreach ( $field_group['location'] as $locations ) {
+					if ( ! empty( $locations ) && is_array( $locations ) ) {
+						foreach ( $locations as $location ) {
+							if ( 'comment' === $location['param'] && '!=' === $location['operator'] ) {
+								continue;
+							}
+							if ( 'comment' === $location['param'] && '==' === $location['operator'] ) {
+								$comment_field_groups[] = $field_group;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ( empty( $comment_field_groups ) ) {
+			return;
+		}
+
+		/**
+		 * Loop over the field groups for this post type
+		 */
+		foreach ( $comment_field_groups as $field_group ) {
+
+			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+
+			$field_group['type'] = 'group';
+			$field_group['name'] = $field_name;
+			$config              = [
+				'name'            => $field_name,
+				'description'     => $field_group['description'],
+				'acf_field'       => $field_group,
+				'acf_field_group' => null,
+				'resolve'         => function( $root ) use ( $field_group ) {
+					return isset( $root ) ? $root : null;
+				}
+			];
+
+			$this->register_graphql_field( 'Comment', $field_name, $config );
+
+		}
+
 	}
 
 	/**
-	 * Undocumented function
+	 * Add Fields to Menus in the GraphQL Schema
+	 *
+	 * @return void
+	 */
+	protected function add_acf_fields_to_menus() {
+
+		$menu_field_groups = [];
+
+		/**
+		 * Get the field groups associated with the taxonomy
+		 */
+		$field_groups = acf_get_field_groups();
+
+		foreach( $field_groups as $field_group ) {
+			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
+				foreach ( $field_group['location'] as $locations ) {
+					if ( ! empty( $locations ) && is_array( $locations ) ) {
+						foreach ( $locations as $location ) {
+							if ( 'nav_menu' === $location['param'] && '!=' === $location['operator'] ) {
+								continue;
+							}
+							if ( 'nav_menu' === $location['param'] && '==' === $location['operator'] ) {
+								$menu_field_groups[] = $field_group;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ( empty( $menu_field_groups ) ) {
+			return;
+		}
+
+		/**
+		 * Loop over the field groups for this post type
+		 */
+		foreach ( $menu_field_groups as $field_group ) {
+
+			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+
+			$field_group['type'] = 'group';
+			$field_group['name'] = $field_name;
+			$config              = [
+				'name'            => $field_name,
+				'description'     => $field_group['description'],
+				'acf_field'       => $field_group,
+				'acf_field_group' => null,
+				'resolve'         => function( $root ) use ( $field_group ) {
+					return isset( $root ) ? $root : null;
+				}
+			];
+
+			$this->register_graphql_field( 'Menu', $field_name, $config );
+
+		}
+
+	}
+
+	/**
+	 * Add ACF Field Groups to Menu Items
 	 *
 	 * @return void
 	 */
 	protected function add_acf_fields_to_menu_items() {
-		// @todo: Coming soon
+
+		$menu_item_field_groups = [];
+
+		/**
+		 * Get the field groups associated with the taxonomy
+		 */
+		$field_groups = acf_get_field_groups();
+		foreach( $field_groups as $field_group ) {
+			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
+				foreach ( $field_group['location'] as $locations ) {
+					if ( ! empty( $locations ) && is_array( $locations ) ) {
+						foreach ( $locations as $location ) {
+							if ( 'nav_menu_item' === $location['param'] && '!=' === $location['operator'] ) {
+								continue;
+							}
+							if ( 'nav_menu_item' === $location['param'] && '==' === $location['operator'] ) {
+								$menu_item_field_groups[] = $field_group;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ( empty( $menu_item_field_groups ) ) {
+			return;
+		}
+
+		/**
+		 * Loop over the field groups for this post type
+		 */
+		foreach ( $menu_item_field_groups as $field_group ) {
+
+			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+
+			$field_group['type'] = 'group';
+			$field_group['name'] = $field_name;
+			$config              = [
+				'name'            => $field_name,
+				'description'     => $field_group['description'],
+				'acf_field'       => $field_group,
+				'acf_field_group' => null,
+				'resolve'         => function( $root ) use ( $field_group ) {
+					return isset( $root ) ? $root : null;
+				}
+			];
+
+			$this->register_graphql_field( 'MenuItem', $field_name, $config );
+
+		}
 	}
 
-	/**
-	 * Undocumented function
-	 *
-	 * @return void
-	 */
-	protected function add_acf_fields_to_media_items() {
+	protected function add_acf_fields_to_options_pages() {
 		// @todo: Coming soon
 	}
 

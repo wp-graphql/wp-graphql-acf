@@ -379,8 +379,8 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 	 */
 	public function testQueryWysiwygField() {
 
-		$expected = 'some text';
-		update_field( 'wysiwyg_field', $expected, $this->post );
+		$text = 'some text';
+		update_field( 'wysiwyg_field', $text, $this->post );
 
 		$query = '
 		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
@@ -400,7 +400,10 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			],
 		]);
 
+		$expected = get_field( 'wysiwyg_field', $this->post, true );
+
 		codecept_debug( $actual );
+		codecept_debug( $expected );
 
 		$this->assertSame( $expected, $actual['data']['postBy']['postFields']['wysiwygField'] );
 

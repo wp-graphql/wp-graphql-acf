@@ -1,6 +1,6 @@
 <?php
 /**
- * Undocumented class.
+ * ACF
  *
  * @package wp-graphql-acf
  */

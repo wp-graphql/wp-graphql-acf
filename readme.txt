@@ -17,6 +17,15 @@ allowing for interacting with ACF field data using GraphQL Queries.
 
 == Changelog ==
 
+= 0.1.4 =
+* Fixes bug with WYSIWYG fields nested in Flex Fields and Repeater Fields not properly resolving
+* Adds support for assigning ACF Field Groups to attachments (MediaItems)
+
+= 0.1.3 =
+
+* Adds support for the following locations: Menus, Menu Items, Taxonomies, Comments
+* Fixed a bug where the "show_in_graphql" button wasn't showing on Radio Buttons
+
 = 0.1.2 =
 * Fixes bug with Nested Fields not properly showing in the Schema. By defualt, fields are not supposed
 to be exposed in the Schema if they are not set to "show_in_graphql", however there was a flaw in

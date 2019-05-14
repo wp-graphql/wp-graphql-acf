@@ -61,6 +61,7 @@ class ACF_Settings {
 				'type'          => 'true_false',
 				'ui'            => 1,
 				'default_value' => 1,
+				'value'        => isset( $field['show_in_graphql'] ) ? (bool) $field['show_in_graphql'] : true,
 			],
 			true
 		);

@@ -33,6 +33,7 @@ class Config {
 		$this->add_acf_fields_to_comments();
 		$this->add_acf_fields_to_menus();
 		$this->add_acf_fields_to_menu_items();
+		$this->add_acf_fields_to_media_items();
 	}
 
 	/**
@@ -221,7 +222,12 @@ class Config {
 				return null;
 			}
 
-			$field_value = get_field( $acf_field['key'], $id, false );
+			$format = false;
+			if ( 'wysiwyg' === $acf_field['type'] ) {
+				$format = true;
+			}
+
+			$field_value = get_field( $acf_field['key'], $id, $format );
 
 			$value       = ! empty( $field_value ) ? $field_value : null;
 		}
@@ -319,6 +325,7 @@ class Config {
 			case 'message':
 			case 'oembed':
 			case 'password':
+			case 'wysiwyg':
 			case 'url':
 				// Even though Selects and Radios in ACF can _technically_ be an integer
 				// we're chosing to always cast as a string because with
@@ -326,15 +333,6 @@ class Config {
 			case 'select':
 			case 'radio':
 				$field_config['type'] = 'String';
-				break;
-			case 'wysiwyg':
-				$field_config = [
-					'type' => 'String',
-					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
-						$value = get_field( $acf_field['key'], $root->ID, true );
-						return $value;
-					}
-				];
 				break;
 			case 'range':
 				$field_config['type'] = 'Integer';
@@ -779,7 +777,7 @@ class Config {
 			 * Setup data for register_graphql_field
 			 */
 			$name            = ! empty( $acf_field['name'] ) ? self::camel_case( $acf_field['name'] ) : null;
-			$show_in_graphql = isset( $acf_field['show_in_graphql'] ) && true !== (bool) $acf_field['show_in_graphql'] ? false : true;
+			$show_in_graphql = isset( $acf_field['show_in_graphql'] ) ? (bool) $acf_field['show_in_graphql'] : true;
 			$description     = isset( $acf_field['instructions'] ) ? $acf_field['instructions'] : __( 'ACF Field added to the Schema by WPGraphQL ACF' );
 
 			/**
@@ -865,9 +863,10 @@ class Config {
 
 				$field_group['type'] = 'group';
 				$field_group['name'] = $field_name;
+				$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 				$config              = [
 					'name'            => $field_name,
-					'description'     => $field_group['description'],
+					'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to the "%2$s" taxonomy', 'wp-graphql-acf' ), $field_group['title'], $tax_object->name ),
 					'acf_field'       => $field_group,
 					'acf_field_group' => null,
 					'resolve'         => function( $root ) use ( $field_group ) {
@@ -924,9 +923,10 @@ class Config {
 
 			$field_group['type'] = 'group';
 			$field_group['name'] = $field_name;
+			$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
 				'name'            => $field_name,
-				'description'     => $field_group['description'],
+				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Comments', 'wp-graphql-acf' ), $field_group['title'] ),
 				'acf_field'       => $field_group,
 				'acf_field_group' => null,
 				'resolve'         => function( $root ) use ( $field_group ) {
@@ -985,9 +985,10 @@ class Config {
 
 			$field_group['type'] = 'group';
 			$field_group['name'] = $field_name;
+			$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
 				'name'            => $field_name,
-				'description'     => $field_group['description'],
+				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Menus', 'wp-graphql-acf' ), $field_group['title'] ),
 				'acf_field'       => $field_group,
 				'acf_field_group' => null,
 				'resolve'         => function( $root ) use ( $field_group ) {
@@ -1044,9 +1045,10 @@ class Config {
 
 			$field_group['type'] = 'group';
 			$field_group['name'] = $field_name;
+			$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
 				'name'            => $field_name,
-				'description'     => $field_group['description'],
+				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Menu Items', 'wp-graphql-acf' ), $field_group['title'] ),
 				'acf_field'       => $field_group,
 				'acf_field_group' => null,
 				'resolve'         => function( $root ) use ( $field_group ) {
@@ -1055,6 +1057,66 @@ class Config {
 			];
 
 			$this->register_graphql_field( 'MenuItem', $field_name, $config );
+
+		}
+	}
+
+	/**
+	 * Add ACF Field Groups to Media Items (attachments)
+	 *
+	 * @return void
+	 */
+	protected function add_acf_fields_to_media_items() {
+
+		$media_item_field_groups = [];
+
+		/**
+		 * Get the field groups associated with the taxonomy
+		 */
+		$field_groups = acf_get_field_groups();
+
+		foreach( $field_groups as $field_group ) {
+			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
+				foreach ( $field_group['location'] as $locations ) {
+					if ( ! empty( $locations ) && is_array( $locations ) ) {
+						foreach ( $locations as $location ) {
+							if ( 'attachment' === $location['param'] && '!=' === $location['operator'] ) {
+								continue;
+							}
+							if ( 'attachment' === $location['param'] && '==' === $location['operator'] ) {
+								$media_item_field_groups[] = $field_group;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if ( empty( $media_item_field_groups ) ) {
+			return;
+		}
+
+		/**
+		 * Loop over the field groups for this post type
+		 */
+		foreach ( $media_item_field_groups as $field_group ) {
+
+			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+
+			$field_group['type'] = 'group';
+			$field_group['name'] = $field_name;
+			$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
+			$config              = [
+				'name'            => $field_name,
+				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to attachments', 'wp-graphql-acf' ), $field_group['title'] ),
+				'acf_field'       => $field_group,
+				'acf_field_group' => null,
+				'resolve'         => function( $root ) use ( $field_group ) {
+					return isset( $root ) ? $root : null;
+				}
+			];
+
+			$this->register_graphql_field( 'MediaItem', $field_name, $config );
 
 		}
 	}

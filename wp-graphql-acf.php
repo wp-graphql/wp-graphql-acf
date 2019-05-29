@@ -7,7 +7,7 @@
  * Author URI:      https://www.wpgraphql.com
  * Text Domain:     wp-graphql-acf
  * Domain Path:     /languages
- * Version:         0.1.4
+ * Version:         0.1.5
  *
  * @package         WPGraphQL_ACF
  */

@@ -64,7 +64,7 @@ class Config {
 		 */
 		if ( ! isset( $field_group['parent'] ) ) {
 			if (
-				( empty( $field_group['active'] ) || true !== $field_group['active'] ) ||
+				( isset( $field_group['active'] ) && true != $field_group['active'] ) ||
 				( empty( $field_group['location'] ) || ! is_array( $field_group['location'] ) )
 			) {
 				$show = false;
@@ -631,7 +631,8 @@ class Config {
 							],
 						],
 						'resolve'     => function( $source ) use ( $acf_field ) {
-							return $this->get_acf_field_value( $source, $acf_field );
+							$repeater = $this->get_acf_field_value( $source, $acf_field );
+							return ! empty( $repeater ) ? $repeater : [];
 						},
 					]
 				);
@@ -717,7 +718,7 @@ class Config {
 					$field_config['resolve'] = function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 
-						return $value;
+						return ! empty( $value ) ? $value : [];
 					};
 				}
 				break;
@@ -786,7 +787,7 @@ class Config {
 			 */
 			if (
 				empty( $name ) ||
-				true !== $show_in_graphql
+				true != $show_in_graphql
 			) {
 
 				/**

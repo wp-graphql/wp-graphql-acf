@@ -64,7 +64,7 @@ class Config {
 		 */
 		if ( ! isset( $field_group['parent'] ) ) {
 			if (
-				( isset( $field_group['active'] ) && false === $field_group['active'] ) ||
+				( isset( $field_group['active'] ) && true != $field_group['active'] ) ||
 				( empty( $field_group['location'] ) || ! is_array( $field_group['location'] ) )
 			) {
 				$show = false;

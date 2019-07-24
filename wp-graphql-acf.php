@@ -7,7 +7,7 @@
  * Author URI:      https://www.wpgraphql.com
  * Text Domain:     wp-graphql-acf
  * Domain Path:     /languages
- * Version:         0.1.7
+ * Version:         0.2.0
  *
  * @package         WPGraphQL_ACF
  */
@@ -19,58 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once( __DIR__ . '/vendor/autoload.php' );
-
-/**
- * Configure Freemius SDK
- */
-if ( ! function_exists( 'wga_fs' ) ) {
-	/**
-	 * Create a helper function for easy SDK access.
-	 *
-	 * @return mixed|WP_Error|freemius
-	 */
-	function wga_fs() {
-		global $wga_fs;
-
-		if ( ! isset( $wga_fs ) ) {
-
-			require_once dirname( __FILE__ ) . '/freemius/start.php';
-
-			try {
-				$wga_fs = fs_dynamic_init(
-					[
-						'id'                  => '3289',
-						'slug'                => 'wp-graphql-acf',
-						'premium_slug'        => 'wp-graphql-acf',
-						'type'                => 'plugin',
-						'public_key'          => 'pk_66dc1cb99818841a8fa76276565cd',
-						'is_premium'          => true,
-						'is_premium_only'     => true,
-						'has_addons'          => false,
-						'has_paid_plans'      => true,
-						'is_org_compliant'    => false,
-						'has_affiliation'     => 'selected',
-						'menu'                => [
-							'first-path'     => 'plugins.php',
-							'support'        => false,
-						],
-					]
-				);
-			} catch ( \Freemius_Exception $e ) {
-				return new \WP_Error( $e->getMessage() );
-			}
-		}
-
-		return $wga_fs;
-	}
-
-	// Init Freemius.
-	wga_fs();
-	// Signal that SDK was initiated.
-	do_action( 'wga_fs_loaded' );
-}
-
-
 
 /**
  * Initialize the plugin

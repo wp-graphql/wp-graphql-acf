@@ -874,6 +874,10 @@ class Config {
 			 */
 			$tax_object = get_taxonomy( $taxonomy );
 
+			if ( empty( $tax_object ) || ! isset( $tax_object->graphql_single_name ) ) {
+				return;
+			}
+
 			/**
 			 * Loop over the field groups for this post type
 			 */
@@ -1270,7 +1274,7 @@ class Config {
 			$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
 				'name'            => $field_name,
-				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to the "%2$s" taxonomy', 'wp-graphql-acf' ), $field_group['title'], $tax_object->name ),
+				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to Users edit or register form', 'wp-graphql-acf' ), $field_group['title'] ),
 				'acf_field'       => $field_group,
 				'acf_field_group' => null,
 				'resolve'         => function( $root ) use ( $field_group ) {

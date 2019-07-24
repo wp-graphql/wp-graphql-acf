@@ -2,7 +2,8 @@
   "name": "wp-graphql/wp-graphql-acf",
   "description": "Advanced Custom Fields bindings for wp-graphql",
   "type": "wordpress-plugin",
-  "license": "GPLv3",
+  "license": "GPL-3.0+",
+  "version": "0.2.0",
   "authors": [
     {
       "name": "jasonbahl",

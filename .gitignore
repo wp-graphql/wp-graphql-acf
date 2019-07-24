@@ -7,3 +7,4 @@ node_modules/
 *.zip
 .idea*
 .env
+c3.php

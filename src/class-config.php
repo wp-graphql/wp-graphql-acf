@@ -1154,6 +1154,17 @@ class Config {
 		 */
 		$field_groups = acf_get_field_groups();
 
+		$allowed_post_types = get_post_types([
+			'show_ui' => true,
+			'show_in_graphql' => true
+		]);
+
+		/**
+		 * Remove the `attachment` post_type, as it's treated special and we don't
+		 * want to add field groups in the same way we do for other post types
+		 */
+		unset( $allowed_post_types['attachment'] );
+
 		foreach( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
 				foreach ( $field_group['location'] as $locations ) {
@@ -1171,7 +1182,7 @@ class Config {
 							/**
 							 * If the param (the post_type) is in the array of allowed_post_types
 							 */
-							if ( 'post' === $location['param'] && '==' === $location['operator'] ) {
+							if ( in_array( $location['param'], $allowed_post_types, true ) && '==' === $location['operator'] ) {
 								$post_field_groups[] = [
 									'field_group' => $field_group,
 									'post_id' => $location['value']
@@ -1189,17 +1200,6 @@ class Config {
 		if ( empty( $post_field_groups ) ) {
 			return;
 		}
-
-		$allowed_post_types = get_post_types([
-			'show_ui' => true,
-			'show_in_graphql' => true
-		]);
-
-		/**
-		 * Remove the `attachment` post_type, as it's treated special and we don't
-		 * want to add field groups in the same way we do for other post types
-		 */
-		unset( $allowed_post_types['attachment'] );
 
 		/**
 		 * Loop over the field groups assigned to a specific post

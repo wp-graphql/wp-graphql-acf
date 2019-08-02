@@ -71,7 +71,7 @@ function show_admin_notice() {
 		function() {
 			?>
 		<div class="error notice">
-			<p><?php _e( sprintf('Both WPGraphQL (v%s+) and Advanced Custom Fields (v5.7+) must be active for "wp-graphql-acf" to work', WPGRAPHQL_REQUIRED_MIN_VERSION ), 'wp-graphiql-acf' ); ?></p>
+			<p><?php esc_html_e( sprintf('Both WPGraphQL (v%s+) and Advanced Custom Fields (v5.7+) must be active for "wp-graphql-acf" to work', WPGRAPHQL_REQUIRED_MIN_VERSION ), 'wp-graphiql-acf' ); ?></p>
 		</div>
 			<?php
 		}

@@ -876,6 +876,77 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 	}
 
+	/**
+	 * Test query the select field with multiple values selected
+	 * @throws Exception
+	 */
+	public function testQueryMultipleSelectField() {
+
+		$expected_value = [ 'one', 'two' ];
+		update_field( 'select_field_multiple', $expected_value, $this->post );
+
+		$query = '
+		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+		  postBy( postId: $postId ) {
+		    id
+		    title
+		    postFields {
+		      selectFieldMultiple
+		    }
+		  }  
+		}';
+
+
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertSame( $expected_value, $actual['data']['postBy']['postFields']['selectFieldMultiple'] );
+
+
+	}
+
+	/**
+	 * Test query the select field with no values set
+	 * @throws Exception
+	 */
+	public function testQueryMultipleSelectFieldWithNoValueSet() {
+
+		delete_field( 'select_field_multiple', $this->post );
+
+		$query = '
+		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+		  postBy( postId: $postId ) {
+		    id
+		    title
+		    postFields {
+		      selectFieldMultiple
+		    }
+		  }  
+		}';
+
+
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertSame( [], $actual['data']['postBy']['postFields']['selectFieldMultiple'] );
+
+
+	}
+
 	public function testQueryFieldOnCustomPostType() {
 
 		$id = $this->test_cpt;
@@ -1266,6 +1337,34 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 					),
 					'allow_null' => 0,
 					'multiple' => 0,
+					'ui' => 0,
+					'return_format' => 'value',
+					'ajax' => 0,
+					'placeholder' => '',
+				),
+				array(
+					'key' => 'field_selectFieldMultiple',
+					'label' => 'Select Field_Multiple',
+					'name' => 'select_field_multiple',
+					'type' => 'select',
+					'instructions' => '',
+					'required' => 0,
+					'conditional_logic' => 0,
+					'wrapper' => array(
+						'width' => '',
+						'class' => '',
+						'id' => '',
+					),
+					'show_in_graphql' => 1,
+					'graphql_field_name' => 'selectMultiple',
+					'choices' => array(
+						'one' => 'One',
+						'two' => 'Two',
+					),
+					'default_value' => array(
+					),
+					'allow_null' => 0,
+					'multiple' => 1,
 					'ui' => 0,
 					'return_format' => 'value',
 					'ajax' => 0,

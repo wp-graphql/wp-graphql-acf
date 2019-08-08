@@ -340,9 +340,30 @@ class Config {
 			case 'wysiwyg':
 			case 'url':
 				// Even though Selects and Radios in ACF can _technically_ be an integer
-				// we're chosing to always cast as a string because with
+				// we're choosing to always cast as a string because with
 				// GraphQL we can't return different types
+				$field_config['type'] = 'String';
+				break;
 			case 'select':
+
+				/**
+				 * If the select field is configured to not allow multiple values
+				 * the field will return a string, but if it is configured to allow
+				 * multiple values it will return a list of strings, and an empty array
+				 * if no values are set.
+				 *
+				 * @see: https://github.com/wp-graphql/wp-graphql-acf/issues/25
+				 */
+				if ( 0 === $acf_field['multiple'] ) {
+					$field_config['type'] = 'String';
+				} else {
+					$field_config['type'] = [ 'list_of' => 'String' ];
+					$field_config['resolve'] = function( $root ) use ( $acf_field ) {
+						$value = $this->get_acf_field_value( $root, $acf_field );
+						return ! empty( $value ) && is_array( $value ) ? $value : [];
+					};
+				}
+				break;
 			case 'radio':
 				$field_config['type'] = 'String';
 				break;
@@ -1154,6 +1175,17 @@ class Config {
 		 */
 		$field_groups = acf_get_field_groups();
 
+		$allowed_post_types = get_post_types([
+			'show_ui' => true,
+			'show_in_graphql' => true
+		]);
+
+		/**
+		 * Remove the `attachment` post_type, as it's treated special and we don't
+		 * want to add field groups in the same way we do for other post types
+		 */
+		unset( $allowed_post_types['attachment'] );
+
 		foreach( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
 				foreach ( $field_group['location'] as $locations ) {
@@ -1171,8 +1203,9 @@ class Config {
 							/**
 							 * If the param (the post_type) is in the array of allowed_post_types
 							 */
-							if ( 'post' === $location['param'] && '==' === $location['operator'] ) {
+							if ( in_array( $location['param'], $allowed_post_types, true ) && '==' === $location['operator'] ) {
 								$post_field_groups[] = [
+									'type' => $location['param'],
 									'field_group' => $field_group,
 									'post_id' => $location['value']
 								];
@@ -1183,23 +1216,13 @@ class Config {
 			}
 		}
 
+
 		/**
 		 * If no field groups are assigned to a specific post, we don't need to modify the Schema
 		 */
 		if ( empty( $post_field_groups ) ) {
 			return;
 		}
-
-		$allowed_post_types = get_post_types([
-			'show_ui' => true,
-			'show_in_graphql' => true
-		]);
-
-		/**
-		 * Remove the `attachment` post_type, as it's treated special and we don't
-		 * want to add field groups in the same way we do for other post types
-		 */
-		unset( $allowed_post_types['attachment'] );
 
 		/**
 		 * Loop over the field groups assigned to a specific post

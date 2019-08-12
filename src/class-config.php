@@ -1236,12 +1236,16 @@ class Config {
 
 			$post_object = get_post( (int) $group['post_id'] );
 
-			if ( ! $post_object instanceof \WP_Post ) {
+			$allowed_post_types = get_post_types([ 'show_in_graphql' => true ]);
+			if ( ! $post_object instanceof \WP_Post || ! in_array( $post_object->post_type, $allowed_post_types, true ) ) {
 				continue;
 			}
 
 			$field_group = $group['field_group'];
-			$post_type = get_post_type_object( $post_object->post_type );
+			$post_type_object = get_post_type_object( $post_object->post_type );
+
+
+
 			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
 
 			$field_group['type'] = 'group';
@@ -1249,7 +1253,7 @@ class Config {
 			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
 				'name'            => $field_name,
-				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to an individual post of the post_type: "%2$s". The group will be present in the Schema for the "%3$s" Type, but will only resolve if the entity has content saved.', 'wp-graphql-acf' ), $field_group['title'], $post_type->name, $post_type->graphql_plural_name ),
+				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to an individual post of the post_type: "%2$s". The group will be present in the Schema for the "%3$s" Type, but will only resolve if the entity has content saved.', 'wp-graphql-acf' ), $field_group['title'], $post_type_object->name, $post_type_object->graphql_plural_name ),
 				'acf_field'       => $field_group,
 				'acf_field_group' => null,
 				'resolve'         => function( $root ) use ( $field_group ) {
@@ -1257,7 +1261,7 @@ class Config {
 				}
 			];
 
-			$this->register_graphql_field( $post_type->graphql_single_name, $field_name, $config );
+			$this->register_graphql_field( $post_type_object->graphql_single_name, $field_name, $config );
 
 		}
 

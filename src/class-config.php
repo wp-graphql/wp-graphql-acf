@@ -122,7 +122,7 @@ class Config {
 		/**
 		 * Get a list of post types that have been registered to show in graphql
 		 */
-		$graphql_post_types = get_post_types(['show_in_graphql' => true]);
+		$graphql_post_types = get_post_types( [ 'show_in_graphql' => true ] );
 
 		/**
 		 * If there are no post types exposed to GraphQL, bail
@@ -204,7 +204,7 @@ class Config {
 			}
 		} else {
 
-			switch (true) {
+			switch ( true ) {
 				case $root instanceof Term:
 					$id = acf_get_term_post_id( $root->taxonomyName, $root->term_id );
 					break;
@@ -215,7 +215,7 @@ class Config {
 					$id = absint( $root->menuItemId );
 					break;
 				case $root instanceof Menu:
-					$id = acf_get_term_post_id( 'nav_menu', $root->menuId  );
+					$id = acf_get_term_post_id( 'nav_menu', $root->menuId );
 					break;
 				case $root instanceof User:
 					$id = 'user_' . absint( $root->userId );
@@ -240,7 +240,7 @@ class Config {
 
 			$field_value = get_field( $acf_field['key'], $id, $format );
 
-			$value       = ! empty( $field_value ) ? $field_value : null;
+			$value = ! empty( $field_value ) ? $field_value : null;
 		}
 
 		return $value;
@@ -357,9 +357,10 @@ class Config {
 				if ( 0 === $acf_field['multiple'] ) {
 					$field_config['type'] = 'String';
 				} else {
-					$field_config['type'] = [ 'list_of' => 'String' ];
+					$field_config['type']    = [ 'list_of' => 'String' ];
 					$field_config['resolve'] = function( $root ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
+
 						return ! empty( $value ) && is_array( $value ) ? $value : [];
 					};
 				}
@@ -382,15 +383,17 @@ class Config {
 				$field_config = [
 					'type'    => 'String',
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
-						if (isset($root->ID)) {
-							return get_field($acf_field['key'], $root->ID, true);
+						if ( isset( $root->ID ) ) {
+							return get_field( $acf_field['key'], $root->ID, true );
 						}
 						//handle sub fields
-						if (isset($root[$acf_field['key']])) {
-							$value = $root[$acf_field['key']];
-							$timestamp = strtotime($value);
-							return date($acf_field['return_format'], $timestamp);
+						if ( isset( $root[ $acf_field['key'] ] ) ) {
+							$value     = $root[ $acf_field['key'] ];
+							$timestamp = strtotime( $value );
+
+							return date( $acf_field['return_format'], $timestamp );
 						}
+
 						return null;
 					},
 				];
@@ -436,11 +439,12 @@ class Config {
 							foreach ( $value as $post_id ) {
 								$post_object = get_post( $post_id );
 								if ( $post_object instanceof \WP_Post ) {
-									$post_model = new Post( $post_object );
+									$post_model     = new Post( $post_object );
 									$relationship[] = $post_model;
 								}
 							}
 						}
+
 						return isset( $value ) ? $relationship : null;
 
 					},
@@ -554,7 +558,7 @@ class Config {
 								$post_object = get_post( (int) $image );
 								if ( $post_object instanceof \WP_Post ) {
 									$post_model = new Post( $post_object );
-									$gallery[] = $post_model;
+									$gallery[]  = $post_model;
 								}
 							}
 						}
@@ -682,6 +686,7 @@ class Config {
 						],
 						'resolve'     => function( $source ) use ( $acf_field ) {
 							$repeater = $this->get_acf_field_value( $source, $acf_field );
+
 							return ! empty( $repeater ) ? $repeater : [];
 						},
 					]
@@ -767,6 +772,7 @@ class Config {
 					$field_config['type']    = [ 'list_of' => $field_type_name ];
 					$field_config['resolve'] = function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
+
 						return ! empty( $value ) ? $value : [];
 					};
 				}
@@ -917,7 +923,7 @@ class Config {
 
 				$field_group['type'] = 'group';
 				$field_group['name'] = $field_name;
-				$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
+				$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 				$config              = [
 					'name'            => $field_name,
 					'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to the "%2$s" taxonomy', 'wp-graphql-acf' ), $field_group['title'], $tax_object->name ),
@@ -947,7 +953,7 @@ class Config {
 		 */
 		$field_groups = acf_get_field_groups();
 
-		foreach( $field_groups as $field_group ) {
+		foreach ( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
 				foreach ( $field_group['location'] as $locations ) {
 					if ( ! empty( $locations ) && is_array( $locations ) ) {
@@ -977,7 +983,7 @@ class Config {
 
 			$field_group['type'] = 'group';
 			$field_group['name'] = $field_name;
-			$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
+			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
 				'name'            => $field_name,
 				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Comments', 'wp-graphql-acf' ), $field_group['title'] ),
@@ -1008,7 +1014,7 @@ class Config {
 		 */
 		$field_groups = acf_get_field_groups();
 
-		foreach( $field_groups as $field_group ) {
+		foreach ( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
 				foreach ( $field_group['location'] as $locations ) {
 					if ( ! empty( $locations ) && is_array( $locations ) ) {
@@ -1039,7 +1045,7 @@ class Config {
 
 			$field_group['type'] = 'group';
 			$field_group['name'] = $field_name;
-			$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
+			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
 				'name'            => $field_name,
 				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Menus', 'wp-graphql-acf' ), $field_group['title'] ),
@@ -1069,7 +1075,7 @@ class Config {
 		 * Get the field groups associated with the taxonomy
 		 */
 		$field_groups = acf_get_field_groups();
-		foreach( $field_groups as $field_group ) {
+		foreach ( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
 				foreach ( $field_group['location'] as $locations ) {
 					if ( ! empty( $locations ) && is_array( $locations ) ) {
@@ -1099,7 +1105,7 @@ class Config {
 
 			$field_group['type'] = 'group';
 			$field_group['name'] = $field_name;
-			$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
+			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
 				'name'            => $field_name,
 				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Menu Items', 'wp-graphql-acf' ), $field_group['title'] ),
@@ -1129,7 +1135,7 @@ class Config {
 		 */
 		$field_groups = acf_get_field_groups();
 
-		foreach( $field_groups as $field_group ) {
+		foreach ( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
 				foreach ( $field_group['location'] as $locations ) {
 					if ( ! empty( $locations ) && is_array( $locations ) ) {
@@ -1159,7 +1165,7 @@ class Config {
 
 			$field_group['type'] = 'group';
 			$field_group['name'] = $field_name;
-			$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
+			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
 				'name'            => $field_name,
 				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to attachments', 'wp-graphql-acf' ), $field_group['title'] ),
@@ -1184,10 +1190,10 @@ class Config {
 		 */
 		$field_groups = acf_get_field_groups();
 
-		$allowed_post_types = get_post_types([
-			'show_ui' => true,
+		$allowed_post_types = get_post_types( [
+			'show_ui'         => true,
 			'show_in_graphql' => true
-		]);
+		] );
 
 		/**
 		 * Remove the `attachment` post_type, as it's treated special and we don't
@@ -1195,7 +1201,7 @@ class Config {
 		 */
 		unset( $allowed_post_types['attachment'] );
 
-		foreach( $field_groups as $field_group ) {
+		foreach ( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
 				foreach ( $field_group['location'] as $locations ) {
 					if ( ! empty( $locations ) && is_array( $locations ) ) {
@@ -1214,9 +1220,9 @@ class Config {
 							 */
 							if ( in_array( $location['param'], $allowed_post_types, true ) && '==' === $location['operator'] ) {
 								$post_field_groups[] = [
-									'type' => $location['param'],
+									'type'        => $location['param'],
 									'field_group' => $field_group,
-									'post_id' => $location['value']
+									'post_id'     => $location['value']
 								];
 							}
 						}
@@ -1245,14 +1251,13 @@ class Config {
 
 			$post_object = get_post( (int) $group['post_id'] );
 
-			$allowed_post_types = get_post_types([ 'show_in_graphql' => true ]);
+			$allowed_post_types = get_post_types( [ 'show_in_graphql' => true ] );
 			if ( ! $post_object instanceof \WP_Post || ! in_array( $post_object->post_type, $allowed_post_types, true ) ) {
 				continue;
 			}
 
-			$field_group = $group['field_group'];
+			$field_group      = $group['field_group'];
 			$post_type_object = get_post_type_object( $post_object->post_type );
-
 
 
 			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
@@ -1284,30 +1289,30 @@ class Config {
 		/**
 		 * Get the field groups associated with the User edit form
 		 */
-		$user_edit_field_groups = acf_get_field_groups([
+		$user_edit_field_groups = acf_get_field_groups( [
 			'user_form' => 'edit',
-		]);
+		] );
 
 		/**
 		 * Get the field groups associated with the User register form
 		 */
-		$user_register_field_groups = acf_get_field_groups([
+		$user_register_field_groups = acf_get_field_groups( [
 			'user_form' => 'register',
-		]);
+		] );
 
 		/**
 		 * Get a unique list of groups that match the register and edit user location rules
 		 */
 		$field_groups = array_merge( $user_edit_field_groups, $user_register_field_groups );
-		$field_groups = array_intersect_key( $field_groups, array_unique( array_map('serialize', $field_groups ) ) );
+		$field_groups = array_intersect_key( $field_groups, array_unique( array_map( 'serialize', $field_groups ) ) );
 
 
-		foreach( $field_groups as $field_group ) {
+		foreach ( $field_groups as $field_group ) {
 
-			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+			$field_name          = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
 			$field_group['type'] = 'group';
 			$field_group['name'] = $field_name;
-			$description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
+			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
 				'name'            => $field_name,
 				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to Users edit or register form', 'wp-graphql-acf' ), $field_group['title'] ),

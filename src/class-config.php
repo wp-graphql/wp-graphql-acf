@@ -382,7 +382,16 @@ class Config {
 				$field_config = [
 					'type'    => 'String',
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
-						return isset( $root->ID ) ? get_field( $acf_field['key'], $root->ID, true ) : null;
+						if (isset($root->ID)) {
+							return get_field($acf_field['key'], $root->ID, true);
+						}
+						//handle sub fields
+						if (isset($root[$acf_field['key']])) {
+							$value = $root[$acf_field['key']];
+							$timestamp = strtotime($value);
+							return date($acf_field['return_format'], $timestamp);
+						}
+						return null;
 					},
 				];
 				break;

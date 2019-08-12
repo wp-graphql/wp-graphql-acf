@@ -8,6 +8,7 @@
  * Text Domain:     wp-graphql-acf
  * Domain Path:     /languages
  * Version:         0.2.0
+ * Requires PHP:    7.0
  *
  * @package         WPGraphQL_ACF
  */

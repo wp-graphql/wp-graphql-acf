@@ -208,9 +208,6 @@ class Config {
 				case $root instanceof Term:
 					$id = acf_get_term_post_id( $root->taxonomyName, $root->term_id );
 					break;
-				case $root instanceof Post:
-					$id = absint( $root->ID );
-					break;
 				case $root instanceof MenuItem:
 					$id = absint( $root->menuItemId );
 					break;
@@ -222,6 +219,9 @@ class Config {
 					break;
 				case $root instanceof Comment:
 					$id = 'comment_' . absint( $root->comment_ID );
+					break;
+				case ! empty( $root->ID ):
+					$id = absint( $root->ID );
 					break;
 				default:
 					$id = null;

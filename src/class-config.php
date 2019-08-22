@@ -1276,7 +1276,9 @@ class Config {
 			];
 
 			$this->register_graphql_field( $post_type_object->graphql_single_name, $field_name, $config );
-
+			if ( current_user_can( $post_type_object->cap->edit_post, $post_object->ID ) ) {
+				$this->register_graphql_field( get_post_type_object( 'revision' )->graphql_single_name, $field_name, $config );
+			}
 		}
 
 	}

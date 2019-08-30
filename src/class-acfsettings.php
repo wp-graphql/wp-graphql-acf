@@ -41,7 +41,7 @@ class ACF_Settings {
 	 * Register admin JS.
 	 */
 	public function register_assets() {
-		wp_register_script( 'wp-graphql-acf', plugin_dir_url( WPGRAPHQL_ACF_FILE ) . 'assets/js/wp-graphql-acf.js', array( 'jquery' ) );
+		wp_register_script( 'wp-graphql-acf', plugin_dir_url( WPGRAPHQL_ACF_FILE ) . 'assets/js/wp-graphql-acf.js', array( 'jquery' ), WPGRAPHQL_ACF_VERSION, true );
 	}
 
 	/**

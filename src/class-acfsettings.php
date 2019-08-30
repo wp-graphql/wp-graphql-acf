@@ -34,7 +34,7 @@ class ACF_Settings {
 		/**
 		 * Register admin scripts.
 		 */
-		add_action('admin_enqueue_scripts', [$this, 'register_assets']);
+		add_action( 'admin_enqueue_scripts', [ $this, 'register_assets' ] );
 	}
 
 	/**

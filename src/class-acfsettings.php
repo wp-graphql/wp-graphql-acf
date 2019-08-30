@@ -31,6 +31,17 @@ class ACF_Settings {
 		 */
 		add_action( 'acf/render_field_settings', [ $this, 'add_field_settings' ], 10, 1 );
 
+		/**
+		 * Register admin scripts.
+		 */
+		add_action('admin_enqueue_scripts', [$this, 'register_assets']);
+	}
+
+	/**
+	 * Register admin JS.
+	 */
+	public function register_assets() {
+		wp_register_script( 'wp-graphql-acf', plugin_dir_url( WPGRAPHQL_ACF_FILE ) . 'assets/js/wp-graphql-acf.js', array( 'jquery' ) );
 	}
 
 	/**
@@ -48,6 +59,11 @@ class ACF_Settings {
 		if ( empty( $supported_fields ) || ! is_array( $supported_fields ) || ! in_array( $field['type'], $supported_fields, true ) ) {
 			return;
 		}
+
+		/**
+		 * Enqueue the admin JS.
+		 */
+		wp_enqueue_script( 'wp-graphql-acf' );
 
 		/**
 		 * Render the "show_in_graphql" setting for the field.

@@ -25,6 +25,7 @@ require_once( __DIR__ . '/vendor/autoload.php' );
  * Define constants
  */
 const WPGRAPHQL_REQUIRED_MIN_VERSION = '0.3.2';
+const WPGRAPHQL_ACF_FILE = __FILE__;
 
 /**
  * Initialize the plugin

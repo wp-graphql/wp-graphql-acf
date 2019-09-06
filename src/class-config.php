@@ -453,6 +453,7 @@ class Config {
             case 'page_link':
             case 'post_object':
 
+                $type = 'PostObjectUnion';
                 if ( isset( $acf_field['post_type'] ) && is_array( $acf_field['post_type'] ) ) {
                     $field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
                     if ( TypeRegistry::get_type( $field_type_name ) == $field_type_name ) {
@@ -464,22 +465,16 @@ class Config {
                                 $type_names[ $post_type ] = get_post_type_object( $post_type )->graphql_single_name;
                             }
                         }
-                        if ( empty( $type_names ) ) {
-                            $field_config['type'] = "PostObjectUnion";
-                            $type = 'PostObjectUnion';
-                        } else {
+                        if (! empty( $type_names ) ) {
                             register_graphql_union_type( $field_type_name, [
                                 'typeNames'   => $type_names,
                                 'resolveType' => function( $value ) use ( $type_names ) {
                                     return ! empty( $value->post_type ) ? Types::post_object( $value->post_type ) : null;
                                 }
                             ] );
-
                             $type = $field_type_name;
                         }
                     }
-                } else {
-                    $type = 'PostObjectUnion';
                 }
 
                 $field_config = [
@@ -494,7 +489,6 @@ class Config {
 
                     },
                 ];
-
                 break;
             case 'link':
 
@@ -679,7 +673,7 @@ class Config {
                         'fields'      => [
                             'fieldGroupName' => [
                                 'type'    => 'String',
-                                'resolve' => function( $source ) use ( $acf_field,  $field_type_name) {
+                                'resolve' => function( $source ) use ( $acf_field ) {
                                     return ! empty( $acf_field['name'] ) ? $acf_field['name'] : null;
                                 },
                             ],
@@ -691,6 +685,7 @@ class Config {
                         },
                     ]
                 );
+
                 $acf_field["show_in_graphql"] = true;
                 $this->add_field_group_fields( $acf_field, $field_type_name );
 

@@ -224,7 +224,7 @@ class Config {
 					$id = 'comment_' . absint( $root->comment_ID );
 					break;
 				default:
-					$id = null;
+					$id = apply_filters( 'graphql_acf_get_root_id', null, $root );
 					break;
 			}
 

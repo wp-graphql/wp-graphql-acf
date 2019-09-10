@@ -224,9 +224,17 @@ class Config {
 					$id = 'comment_' . absint( $root->comment_ID );
 					break;
 				default:
-					$id = apply_filters( 'graphql_acf_get_root_id', null, $root );
+					$id = null;
 					break;
 			}
+
+			/**
+			 * For resolving IDs for custom types.
+			 * 
+			 * @param null|integer $id    ID of source object connected to ACF field.
+			 * @param null|mixed   $root  Source object connected to ACF field.
+			 */
+			$id = apply_filters( 'graphql_acf_get_root_id', $id, $root );
 
 			if ( empty( $id ) ) {
 				return null;

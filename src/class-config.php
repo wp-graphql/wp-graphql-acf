@@ -569,11 +569,19 @@ class Config {
 				break;
 			case 'user':
 				$field_config = [
-					'type'    => 'User',
+					'type'    => [ 'list_of' => 'User' ],
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 
-						return DataSource::resolve_user( (int) $value, $context );
+						$users = [];
+
+						if ( ! empty( $value ) && is_array( $value ) ) {
+							foreach ( $value as $user ) {
+								$users[] = DataSource::resolve_user( (int) $user, $context );
+							}
+						}
+
+						return $users;
 					},
 				];
 				break;

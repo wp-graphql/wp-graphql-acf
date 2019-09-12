@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:     WPGraphQL for Advanced Custom Fields
+ * Plugin Name:     WPGraphQL for Advanced Custom Fields - YT Advisors
  * Plugin URI:      https://wpgraphql.com/acf
  * Description:     Adds Advanced Custom Fields to the WPGraphQL Schema
  * Author:          WPGraphQL, Jason Bahl

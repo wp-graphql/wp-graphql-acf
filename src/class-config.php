@@ -229,10 +229,10 @@ class Config {
 			}
 
 			/**
-			 * For resolving IDs for custom types.
-			 * 
-			 * @param null|integer $id    ID of source object connected to ACF field.
-			 * @param null|mixed   $root  Source object connected to ACF field.
+			 * Filters the root ID, allowing additional Models the ability to provide a way to resolve their ID
+			 *
+			 * @param int   $id    The ID of the object. Default null
+			 * @param mixed $root  The Root object being resolved. The ID is typically a property of this object.
 			 */
 			$id = apply_filters( 'graphql_acf_get_root_id', $id, $root );
 

@@ -1333,6 +1333,9 @@ class Config {
 
 	}
 
+	/**
+	 * Adds options pages and options page field groups to the schema.
+	 */
 	protected function add_acf_fields_to_options_pages() {
 		global $acf_options_page;
 

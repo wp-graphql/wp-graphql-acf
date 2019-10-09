@@ -318,15 +318,19 @@ class Config {
 			return false;
 		}
 
-		$field_config = [
+		/**
+		 * filter the field config for custom field types
+		 *
+		 * @param array $field_config
+		 */
+		$field_config = apply_filters( 'wpgraphql_acf_register_graphql_field', [
 			'type'    => null,
 			'resolve' => isset( $config['resolve'] ) && is_callable( $config['resolve'] ) ? $config['resolve'] : function( $root, $args, $context, $info ) use ( $acf_field ) {
 				$value = $this->get_acf_field_value( $root, $acf_field );
 
 				return ! empty( $value ) ? $value : null;
 			},
-		];
-
+		], $type_name, $field_name, $config );
 
 		switch ( $acf_type ) {
 			case 'button_group':

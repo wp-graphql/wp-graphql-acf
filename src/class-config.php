@@ -37,6 +37,7 @@ class Config {
 		$this->add_acf_fields_to_media_items();
 		$this->add_acf_fields_to_individual_posts();
 		$this->add_acf_fields_to_users();
+		$this->add_acf_fields_to_user_roles();
 	}
 
 	/**
@@ -1341,6 +1342,53 @@ class Config {
 		}
 
 	}
+
+    function add_acf_fields_to_user_roles(){
+
+
+        /**
+         * Get the field groups for every user role
+         */
+
+        global $wp_roles;
+
+        $field_groups = [];
+
+        foreach( $wp_roles->roles as $role_slug => $role ) {
+
+            $field_role_groups = acf_get_field_groups([
+                'user_role' => $role_slug,
+            ]);
+
+            $field_groups = array_merge( $field_groups, $field_role_groups );
+        }
+
+        /**
+         * Get a unique list of groups that match the user role location rules
+         */
+
+        foreach( $field_groups as $field_group ) {
+
+            $field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+            $field_group['type'] = 'group';
+            $field_group['name'] = $field_name;
+            $description = $field_group['description'] ? $field_group['description'] . ' | ' : '';
+            $config              = [
+                'name'            => $field_name,
+                'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to User Role', 'wp-graphql-acf' ), $field_group['title'] ),
+                'acf_field'       => $field_group,
+                'acf_field_group' => null,
+                'resolve'         => function( $root ) use ( $field_group ) {
+                    return isset( $root ) ? $root : null;
+                }
+            ];
+
+            $this->register_graphql_field( 'User', $field_name, $config );
+
+        }
+
+
+    }
 
 	protected function add_acf_fields_to_options_pages() {
 		// @todo: Coming soon

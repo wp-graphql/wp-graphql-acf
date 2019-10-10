@@ -238,7 +238,16 @@ class Config {
 				$format = true;
 			}
 
-			$field_value = get_field( $acf_field['key'], $id, $format );
+			/**
+			 * Check if cloned field and retrieve the key accordingly.
+			 */
+			if ( ! empty( $acf_field['_clone'] ) ) {
+				$key = $acf_field['__key'];
+			} else {
+				$key = $acf_field['key'];
+			}
+
+			$field_value = get_field( $key, $id, $format );
 
 			$value = ! empty( $field_value ) ? $field_value : null;
 		}
@@ -825,9 +834,19 @@ class Config {
 		}
 
 		/**
+		 * Stores field keys to prevent duplicate field registration for cloned fields
+		 */
+		$processed_keys = [];
+
+		/**
 		 * Loop over the fields and register them to the Schema
 		 */
 		foreach ( $acf_fields as $acf_field ) {
+			if ( in_array( $acf_field['key'], $processed_keys, true ) ) {
+				continue;
+			} else {
+				$processed_keys[] = $acf_field['key'];
+			}
 
 			/**
 			 * Setup data for register_graphql_field

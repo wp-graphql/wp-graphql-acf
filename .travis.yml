@@ -43,8 +43,11 @@ before_script:
     fi
   - |
     if [[ "$WP_TRAVISCI" == "phpcs" ]]; then
-      composer global require wp-coding-standards/wpcs
-      phpcs --config-set installed_paths $HOME/.composer/vendor/wp-coding-standards/wpcs
+      COMPOSER_MEMORY_LIMIT=-1 travis_retry composer require \
+        squizlabs/php_codesniffer \
+        phpcompatibility/phpcompatibility-wp wp-coding-standards/wpcs \
+        dealerdirect/phpcodesniffer-composer-installer
+      COMPOSER_MEMORY_LIMIT=-1 travis_retry composer install --no-dev
     fi
 
 script:

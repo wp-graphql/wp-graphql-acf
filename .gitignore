@@ -15,3 +15,4 @@ vendor/*
 !vendor/composer
 vendor/composer/installed.json
 vendor/composer/*/
+composer.lock

@@ -37,6 +37,7 @@ before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
     if [[ ! -z "$WP_VERSION" ]]; then
+      cp .env.dist .env
       COMPOSER_MEMORY_LIMIT=-1 travis_retry composer install-wp-tests
       COMPOSER_MEMORY_LIMIT=-1 travis_retry composer install
     fi

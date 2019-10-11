@@ -65,5 +65,7 @@ script:
     fi
   - |
     if [[ "$WP_TRAVISCI" == "phpcs" ]]; then
-      phpcs --standard=phpcs.ruleset.xml $(find . -name '*.php')
+      vendor/bin/phpcs \
+        wp-graphql-acf.php \
+        src/*.php --standard=WordPress
     fi

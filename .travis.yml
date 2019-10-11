@@ -34,6 +34,13 @@ matrix:
     - php: 5.3
       env: WP_VERSION=latest
 
+install:
+  - |
+    cd $TRAVIS_BUILD_DIR
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    chmod +x wp-cli.phar
+    sudo mv wp-cli.phar /usr/local/bin/wp
+
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |

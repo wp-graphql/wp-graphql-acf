@@ -27,7 +27,7 @@ extensions:
         - Codeception\Command\GenerateWPCanonical
         - Codeception\Command\GenerateWPXMLRPC
 params:
-    - .env.dist
+    - .env
 modules:
     config:
         WPDb:

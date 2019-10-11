@@ -37,9 +37,9 @@ before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
     if [[ ! -z "$WP_VERSION" ]]; then
-      cp .env.dist .env
-      COMPOSER_MEMORY_LIMIT=-1 travis_retry composer install-wp-tests
-      COMPOSER_MEMORY_LIMIT=-1 travis_retry composer install
+       cp .env.dist .env
+      composer install-wp-tests
+      COMPOSER_MEMORY_LIMIT=-1 travis_retry composer install --prefer-source --no-interaction
     fi
   - |
     if [[ "$WP_TRAVISCI" == "phpcs" ]]; then

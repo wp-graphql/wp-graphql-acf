@@ -37,7 +37,6 @@ fi
 PLUGIN_DIR=$(pwd)
 WP_TESTS_DIR=${WP_TESTS_DIR-/tmp/wp-graphql-acf/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-/tmp/wp-graphql-acf/wordpress/}
-DB_SERVE_NAME=${DB_SERVE_NAME-wpgraphql_acf_serve}
 
 download() {
     if [ `which curl` ]; then
@@ -180,11 +179,6 @@ activate_plugins() {
 	fi
 
     cd $WP_CORE_DIR
-
-    # activate the plugin
-    wp plugin activate wp-graphql
-    wp plugin activate wp-graphql-acf
-    wp plugin activate advanced-custom-fields-pro
 
     # Flush the permalinks
     wp rewrite flush

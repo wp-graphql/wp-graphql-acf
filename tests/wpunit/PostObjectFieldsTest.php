@@ -981,6 +981,31 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 	}
 
+	public function testQueryFieldOnOptionsPage() {
+		$page = acf_get_options_page( 'test-options' );
+		$expected_text_1 = 'test value';
+
+		update_field( 'text_field', $expected_text_1, $page['post_id'] );
+
+		$query = '
+			query GET_OPTIONS_PAGE_WITH_ACF_FIELD {
+				test {
+					__typename
+					postFields {
+						textField
+					}
+				}  
+			}
+		';
+
+		$actual = graphql([ 'query' => $query ]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+		$this->assertEquals( $expected_text_1, $actual['data']['test']['postFields']['textField'] );
+	}
+
 	/**
 	 * Test querying a Relationship field
 	 */
@@ -2080,7 +2105,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 					array(
 						'param' => 'options_page',
 						'operator' => '==',
-						'value' => '',
+						'value' => 'all',
 					),
 				),
 			),
@@ -2095,6 +2120,17 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			'show_in_graphql' => 1,
 			'graphql_field_name' => 'postFields',
 		));
+
+		acf_add_options_page(
+			array(
+				'page_title' 	  => 'Test',
+				'menu_title'	  => 'Test Options',
+				'menu_slug' 	  => 'test-options',
+				'capability'	  => 'manage-options',
+				'redirect'		  => false,
+				'show_in_graphql' => true,
+			)
+		);
 
 	}
 

@@ -1359,6 +1359,9 @@ class Config {
 		 * Loop over the post types exposed to GraphQL
 		 */
 		foreach ( $graphql_options_pages as $options_page_key => $options_page ) {
+			if ( empty( $options_page['show_in_graphql'] ) ) {
+				continue;
+			}
 
 			/**
 			 * Get options page properties.

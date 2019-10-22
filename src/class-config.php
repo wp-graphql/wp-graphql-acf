@@ -193,6 +193,8 @@ class Config {
 	protected function get_acf_field_value( $root, $acf_field ) {
 
 		$value = null;
+		$id = null;
+
 		if ( is_array( $root ) ) {
 			if ( isset( $root[ $acf_field['key'] ] ) ) {
 				$value = $root[ $acf_field['key'] ];
@@ -251,7 +253,15 @@ class Config {
 			$value = ! empty( $field_value ) ? $field_value : null;
 		}
 
-		return $value;
+		/**
+		 * Filters the returned ACF field value
+		 *
+		 * @param mixed $value     The resolved ACF field value
+		 * @param array $acf_field The ACF field config
+		 * @param mixed $root      The Root object being resolved. The ID is typically a property of this object.
+		 * @param int   $id        The ID of the object
+		 */
+		return apply_filters( 'graphql_acf_field_value', $value, $acf_field, $root, $id );
 
 	}
 

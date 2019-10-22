@@ -1,21 +1,42 @@
 #!/usr/bin/env bash
 
-if [ $# -lt 3 ]; then
-	echo "usage: $0 <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]"
-	exit 1
-fi
+source .env
 
-DB_NAME=$1
-DB_USER=$2
-DB_PASS=$3
-DB_HOST=${4-localhost}
-WP_VERSION=${5-latest}
-SKIP_DB_CREATE=${6-false}
+print_usage_instruction() {
+	echo "Ensure that .env file exist in project root directory exists."
+	echo "And run the following 'composer install-wp-tests' in the project root directory"
+	exit 1
+}
+
+if [[ -z "$TEST_DB_NAME" ]]; then
+	echo "TEST_DB_NAME not found"
+	print_usage_instruction
+else
+	DB_NAME=$TEST_DB_NAME
+fi
+if [[ -z "$TEST_DB_USER" ]]; then 
+	echo "TEST_DB_USER not found"
+	print_usage_instruction
+else
+	DB_USER=$TEST_DB_USER
+fi
+if [[ -z "$TEST_DB_PASSWORD" ]]; then 
+	DB_PASS=""
+else
+	DB_PASS=$TEST_DB_PASSWORD
+fi
+if [[ -z "$TEST_DB_HOST" ]]; then 
+	DB_HOST=localhost
+else
+	DB_HOST=$TEST_DB_HOST
+fi
+if [ -z "$SKIP_DB_CREATE" ]; then 
+	SKIP_DB_CREATE=false
+fi
 
 PLUGIN_DIR=$(pwd)
 WP_TESTS_DIR=${WP_TESTS_DIR-/tmp/wp-graphql-acf/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-/tmp/wp-graphql-acf/wordpress/}
-DB_SERVE_NAME=${DB_SERVE_NAME-wpgraphql_acf_serve}
 
 download() {
     if [ `which curl` ]; then
@@ -93,7 +114,7 @@ install_test_suite() {
 		sed $ioption "s/youremptytestdbnamehere/$DB_NAME/" "$WP_TESTS_DIR"/wp-tests-config.php
 		sed $ioption "s/yourusernamehere/$DB_USER/" "$WP_TESTS_DIR"/wp-tests-config.php
 		sed $ioption "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR"/wp-tests-config.php
-		sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
+		sed $ioption "s|localhost|$DB_HOST|" "$WP_TESTS_DIR"/wp-tests-config.php
 	fi
 
 }
@@ -127,32 +148,37 @@ install_db() {
 configure_wordpress() {
 
     cd $WP_CORE_DIR
-    wp config create --dbname="$DB_SERVE_NAME" --dbuser=root --dbpass="$DB_PASS" --dbhost="$DB_HOST" --skip-check --force=true
-    wp core install --url=wpgraphql.test --title="WPGraphQL Tests" --admin_user=admin --admin_password=password --admin_email=admin@wpgraphql.test
+    wp config create --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASS" --dbhost="$DB_HOST" --skip-check --force=true
+    wp core install --url=wpgraphql.test --title="WPGraphQL ACF Tests" --admin_user=admin --admin_password=password --admin_email=admin@wpgraphql.test
     wp rewrite structure '/%year%/%monthnum%/%postname%/'
 }
 
 install_wpgraphql() {
-	echo "Cloning WPGraphQL"
-	git clone https://github.com/wp-graphql/wp-graphql.git $WP_CORE_DIR/wp-content/plugins/wp-graphql
+	if [ ! -d $WP_CORE_DIR/wp-content/plugins/wp-graphql ]; then
+		echo "Cloning WPGraphQL"
+		git clone https://github.com/wp-graphql/wp-graphql.git $WP_CORE_DIR/wp-content/plugins/wp-graphql
+	fi
+	echo "Activating WPGraphQL"
+	wp plugin activate wp-graphql
 }
 
 install_acf_pro() {
+	if [ ! -d $WP_CORE_DIR/wp-content/plugins/advanced-custom-fields-pro ]; then
+		echo "Cloning ACF PRO"
+		git clone https://github.com/wp-premium/advanced-custom-fields-pro.git $WP_CORE_DIR/wp-content/plugins/advanced-custom-fields-pro
+	fi
 	echo "Cloning ACF PRO"
-	git clone git@github.com:AdvancedCustomFields/acf-pro.git $WP_CORE_DIR/wp-content/plugins/advanced-custom-fields-pro
+	wp plugin activate advanced-custom-fields-pro
 }
 
 activate_plugins() {
 
     # Add this repo as a plugin to the repo
-    ln -s $PLUGIN_DIR $WP_CORE_DIR/wp-content/plugins/wp-graphql-acf
+	if [ ! -d $WP_CORE_DIR/wp-content/plugins/wp-graphql-acf ]; then
+    	ln -s $PLUGIN_DIR $WP_CORE_DIR/wp-content/plugins/wp-graphql-acf
+	fi
 
     cd $WP_CORE_DIR
-
-    # activate the plugin
-    wp plugin activate wp-graphql
-    wp plugin activate wp-graphql-acf
-    wp plugin activate advanced-custom-fields-pro
 
     # Flush the permalinks
     wp rewrite flush

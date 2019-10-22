@@ -8,3 +8,11 @@ node_modules/
 .idea*
 .env
 c3.php
+codeception.yml
+!vendor/
+vendor/*
+!vendor/autoload.php
+!vendor/composer
+vendor/composer/installed.json
+vendor/composer/*/
+composer.lock

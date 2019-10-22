@@ -237,6 +237,14 @@ class Config {
 					break;
 			}
 
+			/**
+			 * Filters the root ID, allowing additional Models the ability to provide a way to resolve their ID
+			 *
+			 * @param int   $id    The ID of the object. Default null
+			 * @param mixed $root  The Root object being resolved. The ID is typically a property of this object.
+			 */
+			$id = apply_filters( 'graphql_acf_get_root_id', $id, $root );
+
 			if ( empty( $id ) ) {
 				return null;
 			}
@@ -327,15 +335,19 @@ class Config {
 			return false;
 		}
 
-		$field_config = [
+		/**
+		 * filter the field config for custom field types
+		 *
+		 * @param array $field_config
+		 */
+		$field_config = apply_filters( 'wpgraphql_acf_register_graphql_field', [
 			'type'    => null,
 			'resolve' => isset( $config['resolve'] ) && is_callable( $config['resolve'] ) ? $config['resolve'] : function( $root, $args, $context, $info ) use ( $acf_field ) {
 				$value = $this->get_acf_field_value( $root, $acf_field );
 
 				return ! empty( $value ) ? $value : null;
 			},
-		];
-
+		], $type_name, $field_name, $config );
 
 		switch ( $acf_type ) {
 			case 'button_group':

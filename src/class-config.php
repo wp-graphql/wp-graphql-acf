@@ -37,6 +37,7 @@ class Config {
 		$this->add_acf_fields_to_media_items();
 		$this->add_acf_fields_to_individual_posts();
 		$this->add_acf_fields_to_users();
+		$this->add_acf_fields_to_options_pages();
 	}
 
 	/**
@@ -193,7 +194,7 @@ class Config {
 	protected function get_acf_field_value( $root, $acf_field ) {
 
 		$value = null;
-		if ( is_array( $root ) ) {
+		if ( is_array( $root ) && ! ( ! empty( $root['type'] ) && 'options_page' === $root['type'] ) ) {
 			if ( isset( $root[ $acf_field['key'] ] ) ) {
 				$value = $root[ $acf_field['key'] ];
 
@@ -222,6 +223,9 @@ class Config {
 					break;
 				case $root instanceof Comment:
 					$id = 'comment_' . absint( $root->comment_ID );
+					break;
+				case ! empty( $root['type'] ) && 'options_page' === $root['type']:
+					$id = $root['post_id'];
 					break;
 				default:
 					$id = null;
@@ -318,7 +322,6 @@ class Config {
 	 * @return mixed
 	 */
 	protected function register_graphql_field( $type_name, $field_name, $config ) {
-
 		$acf_field = isset( $config['acf_field'] ) ? $config['acf_field'] : null;
 		$acf_type  = isset( $acf_field['type'] ) ? $acf_field['type'] : null;
 
@@ -1342,8 +1345,140 @@ class Config {
 
 	}
 
+	/**
+	 * Adds options pages and options page field groups to the schema.
+	 */
 	protected function add_acf_fields_to_options_pages() {
-		// @todo: Coming soon
+		global $acf_options_page;
+
+		if ( ! isset( $acf_options_page ) ) {
+			return ;
+		}
+
+		/**
+		 * Get a list of post types that have been registered to show in graphql
+		 */
+		$graphql_options_pages = acf_get_options_pages();
+
+		/**
+		 * If there are no post types exposed to GraphQL, bail
+		 */
+		if ( empty( $graphql_options_pages ) || ! is_array( $graphql_options_pages ) ) {
+			return;
+		}
+
+		/**
+		 * Loop over the post types exposed to GraphQL
+		 */
+		foreach ( $graphql_options_pages as $options_page_key => $options_page ) {
+			if ( empty( $options_page['show_in_graphql'] ) ) {
+				continue;
+			}
+
+			/**
+			 * Get options page properties.
+			 */
+			$page_title = $options_page['page_title'];
+			$page_slug  = $options_page['menu_slug'];
+
+			/**
+			 * Get the field groups associated with the options page
+			 */
+			$field_groups = acf_get_field_groups(
+				[
+					'options_page' => $options_page['menu_slug'],
+				]
+			);
+
+			/**
+			 * If there are no field groups for this options page, move on to the next one.
+			 */
+			if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
+				continue;
+			}
+
+			/**
+			 * Loop over the field groups for this options page.
+			 */
+			$options_page_fields = array();
+			foreach ( $field_groups as $field_group ) {
+				$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+
+				$field_group['type'] = 'group';
+				$field_group['name'] = $field_name;
+				$config              = [
+					'name'            => $field_name,
+					'description'     => $field_group['description'],
+					'acf_field'       => $field_group,
+					'acf_field_group' => null,
+					'resolve'         => function( $root ) use ( $field_group ) {
+						return isset( $root ) ? $root : null;
+					}
+				];
+
+				$options_page_fields[ $field_name ] = $config; 
+
+			}
+
+			/**
+			 * Continue if no options to show in GraphQL
+			 */
+			if ( empty( $options_page_fields ) ) {
+				continue;
+			}
+
+			/**
+			 * Create type name
+			 */
+			$type_name = ucfirst( Config::camel_case( $page_title ) );
+
+			/**
+			 * Register options page type to schema.
+			 */
+			register_graphql_object_type(
+				$type_name,
+				[
+					'description' => sprintf( __( '%s options', 'wp-graphql-acf' ), $page_title ),
+					'fields'      => [
+						'pageTitle' => [
+							'type'    => 'String',
+							'resolve' => function( $source ) use ( $page_title ) {
+								return ! empty( $page_title ) ? $page_title : null;
+							},
+						],
+						'pageSlug' => [
+							'type'    => 'String',
+							'resolve' => function( $source ) use ( $page_slug ) {
+								return ! empty( $page_slug ) ? $page_slug : null;
+							},
+						],
+					],
+				]
+			);
+
+			/**
+			 * Register options page type to the "RootQuery"
+			 */
+			$options_page['type'] = 'options_page';
+			register_graphql_field(
+				'RootQuery',
+				Config::camel_case( $page_title ),
+				[
+					'type'        => $type_name,
+					'description' => sprintf( __( '%s options', 'wp-graphql-acf' ), $options_page['page_title'] ),
+					'resolve'     => function() use ( $options_page ) {
+						return ! empty( $options_page ) ? $options_page : null;
+					}
+				]
+			);
+
+			/**
+			 * Register option page fields to the option page type.
+			 */
+			foreach ( $options_page_fields as $name => $config ) {
+				$this->register_graphql_field( $type_name, $name, $config );
+			}
+		}
 	}
 
 }

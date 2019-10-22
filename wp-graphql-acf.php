@@ -7,7 +7,7 @@
  * Author URI:      https://www.wpgraphql.com
  * Text Domain:     wp-graphql-acf
  * Domain Path:     /languages
- * Version:         0.2.1
+ * Version:         0.3.0
  * Requires PHP:    7.0
  *
  * @package         WPGraphQL_ACF
@@ -24,7 +24,7 @@ require_once( __DIR__ . '/vendor/autoload.php' );
 /**
  * Define constants
  */
-const WPGRAPHQL_REQUIRED_MIN_VERSION = '0.3.2';
+const WPGRAPHQL_REQUIRED_MIN_VERSION = '0.4.0';
 
 /**
  * Initialize the plugin

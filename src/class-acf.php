@@ -87,7 +87,7 @@ final class ACF {
 
 		// Plugin version.
 		if ( ! defined( 'WPGRAPHQL_ACF_VERSION' ) ) {
-			define( 'WPGRAPHQL_ACF_VERSION', '0.1.0' );
+			define( 'WPGRAPHQL_ACF_VERSION', '0.3.0' );
 		}
 
 		// Plugin Folder Path.

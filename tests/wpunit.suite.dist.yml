@@ -7,17 +7,3 @@ modules:
     enabled:
         - WPLoader
         - \Helper\Wpunit
-    config:
-        WPLoader:
-            wpRootFolder: "/tmp/wp-graphql-acf/wordpress"
-            dbName: "wpgraphql_acf_serve"
-            dbHost: "127.0.0.1"
-            dbUser: "root"
-            dbPassword: ""
-            tablePrefix: "wp_"
-            domain: "wp.localhost"
-            adminEmail: "admin@wp.localhost"
-            title: "Test"
-            plugins: ['wp-graphql/wp-graphql.php', 'wp-graphql-acf/wp-graphql-acf.php', 'advanced-custom-fields-pro/acf.php']
-            activatePlugins: ['wp-graphql/wp-graphql.php', 'wp-graphql-acf/wp-graphql-acf.php', 'advanced-custom-fields-pro/acf.php']
-            configFile: "tests/_data/config.php"

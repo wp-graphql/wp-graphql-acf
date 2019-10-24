@@ -779,6 +779,7 @@ class Config {
 						if ( $layout_type ) {
 							$union_types[ $layout['name'] ] = $layout_type;
 						} else {
+
 							register_graphql_object_type( $flex_field_layout_name, [
 								'description' => __( 'Group within the flex field', 'wp-graphql-acf' ),
 								'fields'      => [
@@ -790,8 +791,9 @@ class Config {
 									],
 								],
 							] );
-							$layout_type                    = $this->type_registry->get_type( $flex_field_layout_name );
-							$union_types[ $layout['name'] ] = $layout_type;
+
+							$union_types[ $layout['name'] ] = $flex_field_layout_name;
+
 
 							$layout['parent']          = $acf_field;
 							$layout['show_in_graphql'] = isset( $acf_field['show_in_graphql'] ) ? (bool) $acf_field['show_in_graphql'] : true;
@@ -800,9 +802,9 @@ class Config {
 					}
 
 					register_graphql_union_type( $field_type_name, [
-						'types'       => $union_types,
+						'typeNames'       => $union_types,
 						'resolveType' => function( $value ) use ( $union_types ) {
-							return isset( $union_types[ $value['acf_fc_layout'] ] ) ? $union_types[ $value['acf_fc_layout'] ] : null;
+							return isset( $union_types[ $value['acf_fc_layout'] ] ) ? $this->type_registry->get_type( $union_types[ $value['acf_fc_layout'] ] ) : null;
 						}
 					] );
 
@@ -1440,7 +1442,7 @@ class Config {
 					}
 				];
 
-				$options_page_fields[ $field_name ] = $config; 
+				$options_page_fields[ $field_name ] = $config;
 
 			}
 

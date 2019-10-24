@@ -236,7 +236,7 @@ class Config {
 				case $root instanceof Comment:
 					$id = 'comment_' . absint( $root->comment_ID );
 					break;
-				case ! empty( $root['type'] ) && 'options_page' === $root['type']:
+				case is_array( $root ) && ! empty( $root['type'] ) && 'options_page' === $root['type']:
 					$id = $root['post_id'];
 					break;
 				default:

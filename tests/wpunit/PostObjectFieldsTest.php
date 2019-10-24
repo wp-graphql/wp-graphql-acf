@@ -1347,8 +1347,6 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			] );
 		});
 
-
-
 		acf_add_local_field_group(array(
 			'key' => 'group_5c8c7abfe98f7',
 			'title' => 'Post Fields',

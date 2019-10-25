@@ -436,31 +436,34 @@ class Config {
 			case 'relationship':
 
 				if ( isset( $acf_field['post_type'] ) && is_array( $acf_field['post_type'] ) ) {
+
 					$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
+
 					if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
 						$type = $field_type_name;
 					} else {
 						$type_names = [];
 						foreach ( $acf_field['post_type'] as $post_type ) {
-							if ( in_array( $post_type, \WPGraphQL::$allowed_post_types, true ) ) {
+							if ( in_array( $post_type, get_post_types([ 'show_in_graphql' => true ]), true ) ) {
 								$type_names[ $post_type ] = get_post_type_object( $post_type )->graphql_single_name;
 							}
 						}
 
 						if ( empty( $type_names ) ) {
-							$field_config['type'] = null;
-							break;
+							$type = 'PostObjectUnion';
+						} else {
+							register_graphql_union_type( $field_type_name, [
+								'typeNames'   => $type_names,
+								'resolveType' => function( $value ) use ( $type_names ) {
+									$post_type_object = get_post_type_object( $value->post_type );
+									return ! empty( $post_type_object->graphql_single_name ) ? $this->type_registry->get_type( $post_type_object->graphql_single_name ) : null;
+								}
+							] );
+
+							$type = $field_type_name;
 						}
 
-						register_graphql_union_type( $field_type_name, [
-							'typeNames'   => $type_names,
-							'resolveType' => function( $value ) use ( $type_names ) {
-								$post_type_object = get_post_type_object( $value->post_type );
-								return ! empty( $post_type_object->graphql_single_name ) ? $this->type_registry->get_type( $post_type_object->graphql_single_name ) : null;
-							}
-						] );
 
-						$type = $field_type_name;
 					}
 				} else {
 					$type = 'PostObjectUnion';

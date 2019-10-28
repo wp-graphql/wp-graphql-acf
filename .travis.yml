@@ -1,4 +1,5 @@
 sudo: false
+dist: trusty
 
 language: php
 
@@ -18,45 +19,55 @@ cache:
 
 matrix:
   include:
+    - php: 7.3
+      env: WP_VERSION=latest
+    - php: 7.2
+      env: WP_VERSION=latest
     - php: 7.1
       env: WP_VERSION=latest
     - php: 7.0
       env: WP_VERSION=latest
-    - php: 5.6
-      env: WP_VERSION=4.4
-    - php: 5.6
-      env: WP_VERSION=latest
-    - php: 5.6
+    - php: 7.0
       env: WP_VERSION=trunk
     - php: 5.6
-      env: WP_TRAVISCI=phpcs
-    - php: 5.3
+      env: WP_VERSION=4.9
+    - php: 5.6
       env: WP_VERSION=latest
+    - php: 5.6
+      env: WP_TRAVISCI=phpcs
+
+install:
+  - |
+    cd $TRAVIS_BUILD_DIR
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    chmod +x wp-cli.phar
+    sudo mv wp-cli.phar /usr/local/bin/wp
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
-    if [[ ! -z "$WP_VERSION" ]] ; then
-      bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
-      if [[ ${TRAVIS_PHP_VERSION:0:2} == "5." ]]; then
-        composer global require "phpunit/phpunit=4.8.*"
-      else
-        composer global require "phpunit/phpunit=5.7.*"
-      fi
+    if [[ ! -z "$WP_VERSION" ]]; then
+       cp .env.dist .env
+      composer install-wp-tests
+      COMPOSER_MEMORY_LIMIT=-1 travis_retry composer install --prefer-source --no-interaction
     fi
   - |
-    if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
-      composer global require wp-coding-standards/wpcs
-      phpcs --config-set installed_paths $HOME/.composer/vendor/wp-coding-standards/wpcs
+    if [[ "$WP_TRAVISCI" == "phpcs" ]]; then
+      COMPOSER_MEMORY_LIMIT=-1 travis_retry composer require \
+        squizlabs/php_codesniffer \
+        phpcompatibility/phpcompatibility-wp wp-coding-standards/wpcs \
+        dealerdirect/phpcodesniffer-composer-installer
+      COMPOSER_MEMORY_LIMIT=-1 travis_retry composer install --no-dev
     fi
 
 script:
   - |
-    if [[ ! -z "$WP_VERSION" ]] ; then
-      phpunit
-      WP_MULTISITE=1 phpunit
+    if [[ ! -z "$WP_VERSION" ]]; then
+      vendor/bin/codecept run wpunit
     fi
   - |
-    if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
-      phpcs --standard=phpcs.ruleset.xml $(find . -name '*.php')
+    if [[ "$WP_TRAVISCI" == "phpcs" ]]; then
+      vendor/bin/phpcs \
+        wp-graphql-acf.php \
+        src/*.php --standard=WordPress
     fi

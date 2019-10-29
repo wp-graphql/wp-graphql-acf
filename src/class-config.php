@@ -499,7 +499,7 @@ class Config {
 					} else {
 						$type_names = [];
 						foreach ( $acf_field['post_type'] as $post_type ) {
-							if ( in_array( $post_type, \WPGraphQL::$allowed_post_types, true ) ) {
+							if ( in_array( $post_type, \WPGraphQL::get_allowed_post_types(), true ) ) {
 								$type_names[ $post_type ] = get_post_type_object( $post_type )->graphql_single_name;
 							}
 						}

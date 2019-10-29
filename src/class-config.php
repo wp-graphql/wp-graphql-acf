@@ -14,7 +14,6 @@ use WPGraphQL\Model\MenuItem;
 use WPGraphQL\Model\Post;
 use WPGraphQL\Model\Term;
 use WPGraphQL\Model\User;
-use WPGraphQL\TypeRegistry;
 use WPGraphQL\Types;
 
 /**
@@ -22,10 +21,20 @@ use WPGraphQL\Types;
  */
 class Config {
 
+	protected $type_registry;
+
 	/**
 	 * Initialize WPGraphQL to ACF
+	 *
+	 * @param \WPGraphQL\Registry\TypeRegistry $type_registry Instance of the WPGraphQL TypeRegistry
 	 */
-	public function init() {
+	public function init( \WPGraphQL\Registry\TypeRegistry $type_registry ) {
+
+		/**
+		 * Set the TypeRegistry
+		 */
+		$this->type_registry = $type_registry;
+
 		/**
 		 * Add ACF Fields to GraphQL Types
 		 */
@@ -227,7 +236,7 @@ class Config {
 				case $root instanceof Comment:
 					$id = 'comment_' . absint( $root->comment_ID );
 					break;
-				case ! empty( $root['type'] ) && 'options_page' === $root['type']:
+				case is_array( $root ) && ! empty( $root['type'] ) && 'options_page' === $root['type']:
 					$id = $root['post_id'];
 					break;
 				default:
@@ -427,30 +436,34 @@ class Config {
 			case 'relationship':
 
 				if ( isset( $acf_field['post_type'] ) && is_array( $acf_field['post_type'] ) ) {
+
 					$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
-					if ( TypeRegistry::get_type( $field_type_name ) == $field_type_name ) {
+
+					if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
 						$type = $field_type_name;
 					} else {
 						$type_names = [];
 						foreach ( $acf_field['post_type'] as $post_type ) {
-							if ( in_array( $post_type, \WPGraphQL::$allowed_post_types, true ) ) {
+							if ( in_array( $post_type, get_post_types([ 'show_in_graphql' => true ]), true ) ) {
 								$type_names[ $post_type ] = get_post_type_object( $post_type )->graphql_single_name;
 							}
 						}
 
 						if ( empty( $type_names ) ) {
-							$field_config['type'] = null;
-							break;
+							$type = 'PostObjectUnion';
+						} else {
+							register_graphql_union_type( $field_type_name, [
+								'typeNames'   => $type_names,
+								'resolveType' => function( $value ) use ( $type_names ) {
+									$post_type_object = get_post_type_object( $value->post_type );
+									return ! empty( $post_type_object->graphql_single_name ) ? $this->type_registry->get_type( $post_type_object->graphql_single_name ) : null;
+								}
+							] );
+
+							$type = $field_type_name;
 						}
 
-						register_graphql_union_type( $field_type_name, [
-							'typeNames'   => $type_names,
-							'resolveType' => function( $value ) use ( $type_names ) {
-								return ! empty( $value->post_type ) ? Types::post_object( $value->post_type ) : null;
-							}
-						] );
 
-						$type = $field_type_name;
 					}
 				} else {
 					$type = 'PostObjectUnion';
@@ -481,7 +494,7 @@ class Config {
 
 				if ( isset( $acf_field['post_type'] ) && is_array( $acf_field['post_type'] ) ) {
 					$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
-					if ( TypeRegistry::get_type( $field_type_name ) == $field_type_name ) {
+					if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
 						$type = $field_type_name;
 					} else {
 						$type_names = [];
@@ -499,7 +512,8 @@ class Config {
 						register_graphql_union_type( $field_type_name, [
 							'typeNames'   => $type_names,
 							'resolveType' => function( $value ) use ( $type_names ) {
-								return ! empty( $value->post_type ) ? Types::post_object( $value->post_type ) : null;
+								$post_type_object = get_post_type_object( $value->post_type );
+								return ! empty( $post_type_object->graphql_single_name ) ? $this->type_registry->get_type( $post_type_object->graphql_single_name ) : null;
 							}
 						] );
 
@@ -525,7 +539,7 @@ class Config {
 			case 'link':
 
 				$field_type_name = 'ACF_Link';
-				if ( TypeRegistry::get_type( $field_type_name ) == $field_type_name ) {
+				if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
 					$field_config['type'] = $field_type_name;
 					break;
 				}
@@ -626,7 +640,7 @@ class Config {
 				break;
 			case 'group':
 				$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
-				if ( TypeRegistry::get_type( $field_type_name ) ) {
+				if ( $this->type_registry->get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
 					break;
 				}
@@ -654,7 +668,7 @@ class Config {
 
 			case 'google_map':
 				$field_type_name = 'ACF_GoogleMap';
-				if ( TypeRegistry::get_type( $field_type_name ) == $field_type_name ) {
+				if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
 					$field_config['type'] = $field_type_name;
 					break;
 				}
@@ -693,7 +707,7 @@ class Config {
 			case 'repeater':
 				$field_type_name = $type_name . '_' . self::camel_case( $acf_field['name'] );
 
-				if ( TypeRegistry::get_type( $field_type_name ) ) {
+				if ( $this->type_registry->get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
 					break;
 				}
@@ -751,7 +765,7 @@ class Config {
 
 				$field_config    = null;
 				$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
-				if ( TypeRegistry::get_type( $field_type_name ) ) {
+				if ( $this->type_registry->get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
 					break;
 				}
@@ -763,11 +777,12 @@ class Config {
 
 						$flex_field_layout_name = ! empty( $layout['name'] ) ? ucfirst( self::camel_case( $layout['name'] ) ) : null;
 						$flex_field_layout_name = ! empty( $flex_field_layout_name ) ? $field_type_name . '_' . $flex_field_layout_name : null;
-						$layout_type            = TypeRegistry::get_type( $flex_field_layout_name );
+						$layout_type            = $this->type_registry->get_type( $flex_field_layout_name );
 
 						if ( $layout_type ) {
 							$union_types[ $layout['name'] ] = $layout_type;
 						} else {
+
 							register_graphql_object_type( $flex_field_layout_name, [
 								'description' => __( 'Group within the flex field', 'wp-graphql-acf' ),
 								'fields'      => [
@@ -779,8 +794,9 @@ class Config {
 									],
 								],
 							] );
-							$layout_type                    = TypeRegistry::get_type( $flex_field_layout_name );
-							$union_types[ $layout['name'] ] = $layout_type;
+
+							$union_types[ $layout['name'] ] = $flex_field_layout_name;
+
 
 							$layout['parent']          = $acf_field;
 							$layout['show_in_graphql'] = isset( $acf_field['show_in_graphql'] ) ? (bool) $acf_field['show_in_graphql'] : true;
@@ -789,9 +805,9 @@ class Config {
 					}
 
 					register_graphql_union_type( $field_type_name, [
-						'types'       => $union_types,
+						'typeNames'       => $union_types,
 						'resolveType' => function( $value ) use ( $union_types ) {
-							return isset( $union_types[ $value['acf_fc_layout'] ] ) ? $union_types[ $value['acf_fc_layout'] ] : null;
+							return isset( $union_types[ $value['acf_fc_layout'] ] ) ? $this->type_registry->get_type( $union_types[ $value['acf_fc_layout'] ] ) : null;
 						}
 					] );
 
@@ -813,7 +829,7 @@ class Config {
 
 		$config = array_merge( $config, $field_config );
 
-		return register_graphql_field( $type_name, $field_name, $config );
+		return $this->type_registry->register_field( $type_name, $field_name, $config );
 	}
 
 	/**
@@ -1227,6 +1243,7 @@ class Config {
 		 */
 		unset( $allowed_post_types['attachment'] );
 
+
 		foreach ( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
 				foreach ( $field_group['location'] as $locations ) {
@@ -1245,6 +1262,7 @@ class Config {
 							 * If the param (the post_type) is in the array of allowed_post_types
 							 */
 							if ( in_array( $location['param'], $allowed_post_types, true ) && '==' === $location['operator'] ) {
+
 								$post_field_groups[] = [
 									'type'        => $location['param'],
 									'field_group' => $field_group,
@@ -1427,7 +1445,7 @@ class Config {
 					}
 				];
 
-				$options_page_fields[ $field_name ] = $config; 
+				$options_page_fields[ $field_name ] = $config;
 
 			}
 

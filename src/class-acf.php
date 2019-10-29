@@ -131,7 +131,7 @@ final class ACF {
 	 * Setup filters
 	 */
 	private function filters() {
-
+		add_filter('acf/location/rule_match', '__return_true');
 	}
 
 	/**

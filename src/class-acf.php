@@ -131,7 +131,12 @@ final class ACF {
 	 * Setup filters
 	 */
 	private function filters() {
-		add_filter('acf/location/rule_match', '__return_true');
+		add_filter( 'acf/location/rule_match', function( $query ) {
+			if ( defined( 'GRAPHQL_HTTP_REQUEST' ) ) {
+				return true;
+			}
+			return $query;
+		});
 	}
 
 	/**

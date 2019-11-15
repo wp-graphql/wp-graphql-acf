@@ -9,10 +9,5 @@ node_modules/
 .env
 c3.php
 codeception.yml
-!vendor/
-vendor/*
-!vendor/autoload.php
-!vendor/composer
-vendor/composer/installed.json
-vendor/composer/*/
+vendor
 composer.lock

@@ -87,7 +87,7 @@ final class ACF {
 
 		// Plugin version.
 		if ( ! defined( 'WPGRAPHQL_ACF_VERSION' ) ) {
-			define( 'WPGRAPHQL_ACF_VERSION', '0.1.0' );
+			define( 'WPGRAPHQL_ACF_VERSION', '0.3.0' );
 		}
 
 		// Plugin Folder Path.
@@ -140,7 +140,7 @@ final class ACF {
 	private function init() {
 
 		$config = new Config();
-		add_action( 'graphql_register_types', [ $config, 'init' ] );
+		add_action( 'graphql_register_types', [ $config, 'init' ], 10, 1 );
 
 		$acf_settings = new ACF_Settings();
 		$acf_settings->init();

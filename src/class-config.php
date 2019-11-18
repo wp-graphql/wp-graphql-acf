@@ -490,52 +490,59 @@ class Config {
 				];
 				break;
 			case 'page_link':
-			case 'post_object':
+            case 'post_object':
 
-				if ( isset( $acf_field['post_type'] ) && is_array( $acf_field['post_type'] ) ) {
-					$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
-					if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
-						$type = $field_type_name;
-					} else {
-						$type_names = [];
-						foreach ( $acf_field['post_type'] as $post_type ) {
-							if ( in_array( $post_type, \WPGraphQL::get_allowed_post_types(), true ) ) {
-								$type_names[ $post_type ] = get_post_type_object( $post_type )->graphql_single_name;
-							}
-						}
+                if ( isset( $acf_field['post_type'] ) && is_array( $acf_field['post_type'] ) ) {
+                    $field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
+                    if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
+                        $type = $field_type_name;
+                    } else {
+                        $type_names = [];
+                        foreach ( $acf_field['post_type'] as $post_type ) {
+                            if ( in_array( $post_type, \WPGraphQL::get_allowed_post_types(), true ) ) {
+                                $type_names[ $post_type ] = get_post_type_object( $post_type )->graphql_single_name;
+                            }
+                        }
 
-						if ( empty( $type_names ) ) {
-							$field_config['type'] = null;
-							break;
-						}
+                        if ( empty( $type_names ) ) {
+                            $field_config['type'] = "PostObjectUnion";
+                            $type = 'PostObjectUnion';
 
-						register_graphql_union_type( $field_type_name, [
-							'typeNames'   => $type_names,
-							'resolveType' => function( $value ) use ( $type_names ) {
-								$post_type_object = get_post_type_object( $value->post_type );
-								return ! empty( $post_type_object->graphql_single_name ) ? $this->type_registry->get_type( $post_type_object->graphql_single_name ) : null;
-							}
-						] );
+                        } else {
 
-						$type = $field_type_name;
-					}
-				} else {
-					$type = 'PostObjectUnion';
-				}
+                            register_graphql_union_type(
+                                $field_type_name,
+                                [
+                                    'typeNames' => $type_names,
+                                    'resolveType' => function ($value) use ($type_names) {
+                                        $post_type_object = get_post_type_object($value->post_type);
+                                        return !empty($post_type_object->graphql_single_name) ? $this->type_registry->get_type(
+                                            $post_type_object->graphql_single_name
+                                        ) : null;
+                                    }
+                                ]
+                            );
 
-				$field_config = [
-					'type'    => $type,
-					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
-						$value = $this->get_acf_field_value( $root, $acf_field );
-						if ( $value instanceof \WP_Post ) {
-							return new Post( $value );
-						}
+                            $type = $field_type_name;
+                        }
+                    }
+                } else {
+                    $type = 'PostObjectUnion';
+                }
 
-						return absint( $value ) ? DataSource::resolve_post_object( (int) $value, $context ) : null;
+                $field_config = [
+                    'type'    => $type,
+                    'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
+                        $value = $this->get_acf_field_value( $root, $acf_field );
+                        if ( $value instanceof \WP_Post ) {
+                            return new Post( $value );
+                        }
 
-					},
-				];
-				break;
+                        return absint( $value ) ? DataSource::resolve_post_object( (int) $value, $context ) : null;
+
+                    },
+                ];
+                break;
 			case 'link':
 
 				$field_type_name = 'ACF_Link';

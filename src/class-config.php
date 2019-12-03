@@ -14,7 +14,6 @@ use WPGraphQL\Model\MenuItem;
 use WPGraphQL\Model\Post;
 use WPGraphQL\Model\Term;
 use WPGraphQL\Model\User;
-use WPGraphQL\Types;
 
 /**
  * Config class.
@@ -777,11 +776,20 @@ class Config {
 
 						$flex_field_layout_name = ! empty( $layout['name'] ) ? ucfirst( self::camel_case( $layout['name'] ) ) : null;
 						$flex_field_layout_name = ! empty( $flex_field_layout_name ) ? $field_type_name . '_' . $flex_field_layout_name : null;
+
+						/**
+						 * If there are no layouts defined for the Flex Field
+						 */
+						if ( empty( $flex_field_layout_name ) ) {
+							continue;
+						}
+
 						$layout_type            = $this->type_registry->get_type( $flex_field_layout_name );
 
 						if ( $layout_type ) {
 							$union_types[ $layout['name'] ] = $layout_type;
 						} else {
+
 
 							register_graphql_object_type( $flex_field_layout_name, [
 								'description' => __( 'Group within the flex field', 'wp-graphql-acf' ),

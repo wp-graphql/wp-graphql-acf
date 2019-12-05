@@ -366,7 +366,6 @@ class Config {
 			case 'button_group':
 			case 'color_picker':
 			case 'email':
-			case 'textarea':
 			case 'text':
 			case 'message':
 			case 'oembed':
@@ -377,6 +376,24 @@ class Config {
 				// we're choosing to always cast as a string because with
 				// GraphQL we can't return different types
 				$field_config['type'] = 'String';
+				break;
+			case 'textarea':
+				$field_config['type'] = 'String';
+				$field_config['resolve'] = function( $root ) use ( $acf_field ) {
+					$value = $this->get_acf_field_value( $root, $acf_field );
+
+					if ( ! empty( $acf_field['new_lines'] ) ) {
+						if ( 'wpautop' === $acf_field['new_lines'] ) {
+							$value = wpautop( $value );
+						}
+						if ( 'br' === $acf_field['new_lines'] ) {
+							$value = nl2br( $value );
+						}
+					}
+					return $value;
+
+
+				};
 				break;
 			case 'select':
 

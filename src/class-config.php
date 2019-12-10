@@ -547,7 +547,22 @@ class Config {
 							return new Post( $value );
 						}
 
-						return absint( $value ) ? DataSource::resolve_post_object( (int) $value, $context ) : null;
+						/**
+						 * This hooks allows for filtering of the post object source. In case an non-core defined
+						 * post-type is being targeted.
+						 * 
+						 * @param mixed|null  $source  GraphQL Type source.
+						 * @param mixed|null  $value   Root ACF field value.
+						 * @param AppContext  $context AppContext instance.
+						 * @param ResolveInfo $info    ResolveInfo instance.
+						 */
+						return apply_filters(
+							'graphql_acf_post_object_source',
+							absint( $value ) ? DataSource::resolve_post_object( (int) $value, $context ) : null,
+							$value,
+							$context,
+							$info
+						);
 
 					},
 				];

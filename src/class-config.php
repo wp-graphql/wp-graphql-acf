@@ -141,51 +141,43 @@ class Config {
 		}
 
 		/**
-		 * Loop over the post types exposed to GraphQL
+		 * Get all field groups
 		 */
-		foreach ( $graphql_post_types as $post_type ) {
+		$field_groups = acf_get_field_groups();
 
-			/**
-			 * Get the field groups associated with the post type
-			 */
-			$field_groups = acf_get_field_groups(
-				[
-					'post_type' => $post_type,
-				]
-			);
+		/**
+		 * If there are no field groups, move on.
+		 */
+		if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
+			return;
+		}
 
-			/**
-			 * If there are no field groups for this post type, move on to the next one.
-			 */
-			if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
-				continue;
-			}
+		/**
+		 * Loop over the location rules for each field group
+		 * If it is a post type rule, register the field group to the specified post type
+		 */
+		foreach ( $field_groups as $field_group ) {
+			foreach ( $field_group['location'] as $locations ) {
+				foreach ( $locations as $location ) {
+					if ( 'post_type' === $location['param'] && '==' === $location['operator'] && in_array( $location['value'], $graphql_post_types, true ) ) {
+						$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
 
-			/**
-			 * Get the post_type_object
-			 */
-			$post_type_object = get_post_type_object( $post_type );
+						$field_group['type'] = 'group';
+						$field_group['name'] = $field_name;
+						$config              = [
+							'name'            => $field_name,
+							'description'     => $field_group['description'],
+							'acf_field'       => $field_group,
+							'acf_field_group' => null,
+							'resolve'         => function( $root ) use ( $field_group ) {
+								return isset( $root ) ? $root : null;
+							}
+						];
 
-			/**
-			 * Loop over the field groups for this post type
-			 */
-			foreach ( $field_groups as $field_group ) {
-
-				$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
-
-				$field_group['type'] = 'group';
-				$field_group['name'] = $field_name;
-				$config              = [
-					'name'            => $field_name,
-					'description'     => $field_group['description'],
-					'acf_field'       => $field_group,
-					'acf_field_group' => null,
-					'resolve'         => function( $root ) use ( $field_group ) {
-						return isset( $root ) ? $root : null;
+						$post_type_object = get_post_type_object( $location['value'] );
+						$this->register_graphql_field( $post_type_object->graphql_single_name, $field_name, $config );
 					}
-				];
-
-				$this->register_graphql_field( $post_type_object->graphql_single_name, $field_name, $config );
+				}
 			}
 		}
 

@@ -515,7 +515,7 @@ class Config {
 					} else {
 						$type_names = [];
 						foreach ( $acf_field['post_type'] as $post_type ) {
-							if ( in_array( $post_type, \WPGraphQL::get_allowed_post_types(), true ) ) {
+							if ( in_array( $post_type, \get_post_types( [ 'show_in_graphql' => true ]), true ) ) {
 								$type_names[ $post_type ] = get_post_type_object( $post_type )->graphql_single_name;
 							}
 						}
@@ -547,7 +547,22 @@ class Config {
 							return new Post( $value );
 						}
 
-						return absint( $value ) ? DataSource::resolve_post_object( (int) $value, $context ) : null;
+						/**
+						 * This hooks allows for filtering of the post object source. In case an non-core defined
+						 * post-type is being targeted.
+						 * 
+						 * @param mixed|null  $source  GraphQL Type source.
+						 * @param mixed|null  $value   Root ACF field value.
+						 * @param AppContext  $context AppContext instance.
+						 * @param ResolveInfo $info    ResolveInfo instance.
+						 */
+						return apply_filters(
+							'graphql_acf_post_object_source',
+							absint( $value ) ? DataSource::resolve_post_object( (int) $value, $context ) : null,
+							$value,
+							$context,
+							$info
+						);
 
 					},
 				];

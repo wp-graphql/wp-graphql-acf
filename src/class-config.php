@@ -320,7 +320,8 @@ class Config {
 			'color_picker',
 			'group',
 			'repeater',
-			'flexible_content'
+			'flexible_content',
+			'table'
 		];
 
 		/**
@@ -550,7 +551,7 @@ class Config {
 						/**
 						 * This hooks allows for filtering of the post object source. In case an non-core defined
 						 * post-type is being targeted.
-						 * 
+						 *
 						 * @param mixed|null  $source  GraphQL Type source.
 						 * @param mixed|null  $value   Root ACF field value.
 						 * @param AppContext  $context AppContext instance.
@@ -703,7 +704,7 @@ class Config {
 					$field_config['type'] = $field_type_name;
 					break;
 				}
-			
+
 				$fields = [
 					'streetAddress' => [
 						'type'        => 'String',
@@ -937,6 +938,61 @@ class Config {
 						return ! empty( $value ) ? $value : [];
 					};
 				}
+				break;
+			case 'table':
+				$field_type_name = 'ACF_Table';
+
+				register_graphql_object_type(
+					'ACF_Table_Row',
+					[
+						'fields' => [
+							'columns' => [
+								'type' => ['list_of' => 'String'],
+								'resolve' => function($root) {
+									return $root;
+								}
+							]
+						]
+					]
+				);
+
+				$fields = [
+					'useHeader' => [
+						'type' => 'Boolean',
+						'resolve' => function($root) {
+							return $root['p']['o']['uh'] === 1;
+						}
+					],
+					'headers' => [
+						'type' => ['list_of' => 'String'],
+						'resolve' => function($root) {
+							return !empty($root['h']) ? array_map(function($c) {
+								return $c['c'];
+							}, $root['h']) : [];
+						}
+					],
+					'rows' => [
+						'type' => ['list_of' => 'ACF_Table_Row'],
+						'resolve' => function($root) {
+							return !empty($root['b']) ? array_map(function($r) {
+								return array_map(function($c) {
+									return $c['c'];
+								}, $r);
+							}, $root['b']) : [];
+						}
+					]
+
+				];
+
+				register_graphql_object_type(
+					$field_type_name,
+					[
+						'description' => __('Table field', 'wp-graphql-acf'),
+						'fields' => $fields
+					]
+				);
+
+				$field_config['type'] = $field_type_name;
 				break;
 			default:
 				break;

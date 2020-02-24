@@ -1118,7 +1118,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    id
 		    title
 		    postFields {
-		      selectFieldMultiple
+		      selectMultiple
 		    }
 		  }
 		}';
@@ -1135,7 +1135,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		codecept_debug( $actual );
 
 		$this->assertArrayNotHasKey( 'errors', $actual );
-		$this->assertSame( $expected_value, $actual['data']['postBy']['postFields']['selectFieldMultiple'] );
+		$this->assertSame( $expected_value, $actual['data']['postBy']['postFields']['selectMultiple'] );
 
 
 	}
@@ -1169,7 +1169,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    id
 		    title
 		    postFields {
-		      selectFieldMultiple
+		      selectMultiple
 		    }
 		  }
 		}';
@@ -1185,7 +1185,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 		codecept_debug( $actual );
 
-		$this->assertSame( [], $actual['data']['postBy']['postFields']['selectFieldMultiple'] );
+		$this->assertSame( [], $actual['data']['postBy']['postFields']['selectMultiple'] );
 
 	}
 

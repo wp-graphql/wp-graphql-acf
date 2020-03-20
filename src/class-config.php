@@ -648,14 +648,33 @@ class Config {
 				];
 				break;
 			case 'user':
-				$field_config = [
-					'type'    => 'User',
-					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
-						$value = $this->get_acf_field_value( $root, $acf_field );
+				if ( 0 === $acf_field['multiple'] ) {
+					$field_config = array(
+						'type'    => 'User',
+						'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
+							$value = $this->get_acf_field_value( $root, $acf_field );
 
-						return DataSource::resolve_user( (int) $value, $context );
-					},
-				];
+							return DataSource::resolve_user( (int) $value, $context );
+						},
+					);
+				} else {
+					$field_config = array(
+						'type'    => array( 'list_of' => 'User' ),
+						'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
+							$value = $this->get_acf_field_value( $root, $acf_field );
+							if ( ! empty( $value ) && is_array( $value ) ) {
+								$users = array();
+								foreach ( $value as $single_value ) {
+									$users[] = DataSource::resolve_user( (int) $single_value, $context );
+								}
+								return $users;
+							} else {
+								return DataSource::resolve_user( (int) $value, $context );
+							}
+
+						},
+					);
+				}
 				break;
 			case 'taxonomy':
 				$field_config = [

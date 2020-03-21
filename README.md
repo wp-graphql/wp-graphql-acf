@@ -83,7 +83,7 @@ When using the ACF Graphic User Interface for creating fields, WPGraphQL for Adv
 
 Setting the value of this field to "Yes" will show the field group in the WPGraphQL Schema, if a [GraphQL Field Name](#graphql-field-name) is also set
 
-![Show in GraphQL Setting for ACF Field Groups](https://github.com/wp-graphql/wp-graphql-acf/docs/img/field-group-show-in-graphql.png)
+![Show in GraphQL Setting for ACF Field Groups](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/field-group-show-in-graphql.png?raw=true)
 
 ##### Registering Fields in PHP
 
@@ -92,11 +92,11 @@ When registering ACF Fields in PHP, `@todo`
 ## Supported Fields
 In order to document interacting with the fields in GraphQL, an example field group has been created with one field of each type. 
 
-To replicate the same field group documented here you can [download the exported field group](https://github.com/wp-graphql/wp-graphql-acf/docs/download/field-group-export.zip) and [import it](https://support.advancedcustomfields.com/forums/topic/importing-exporting-acf-settings/) into your environment. 
+To replicate the same field group documented here you can [download the exported field group](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/download/field-group-export.zip) and [import it](https://support.advancedcustomfields.com/forums/topic/importing-exporting-acf-settings/) into your environment. 
 
 For the sake of documentation, this example field group has the [location rule](#location-rules) set to "Post Type is equal to Post", which will allow for the fields to be entered when creating and editing Posts in the WordPress dashboard, and will expose the fields to the `Post` type in the WPGraphQL Schema.
 
-![Location rule set to Post Type is equal to Post](https://github.com/wp-graphql/wp-graphql-acf/docs/img/location-rule-post-type-post.png)
+![Location rule set to Post Type is equal to Post](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/location-rule-post-type-post.png?raw=true)
 
 ### Text Field <a name="text-field" />
 
@@ -106,7 +106,7 @@ Text fields can be queried and a String will be returned.
 
 Here, we have a Text field named `text` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![Text field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/text-field-input.png)
+![Text field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/text-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -134,7 +134,7 @@ and the results of the query would be:
 }
 ```
 
-![Text field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/text-field-query.png)
+![Text field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/text-field-query.png?raw=true)
 
 ### Text Area Field <a name="text-area-field" />
 
@@ -144,7 +144,7 @@ Text Area fields can be queried and a String will be returned.
 
 Here, we have a Text Area field named `text_area` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![Text Area field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/text-area-field-input.png)
+![Text Area field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/text-area-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -172,7 +172,7 @@ and the results of the query would be:
 }
 ```
 
-![Text field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/text-field-query.png)
+![Text field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/text-field-query.png?raw=true)
 
 
 ### Number Field <a name="number-field" />
@@ -183,7 +183,7 @@ Number fields can be queried and an Integer will be returned.
 
 Here, we have a Number field named `number` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![Number field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/number-field-input.png)
+![Number field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/number-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -211,7 +211,7 @@ and the results of the query would be:
 }
 ```
 
-![Number field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/number-field-query.png)
+![Number field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/number-field-query.png?raw=true)
 
 ### Range Field <a name="range-field" />
 
@@ -221,7 +221,7 @@ Range fields can be queried and an Integer will be returned.
 
 Here, we have a Range field named `range` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![Range field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/range-field-input.png)
+![Range field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/range-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -249,7 +249,7 @@ and the results of the query would be:
 }
 ```
 
-![Range field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/range-field-query.png)
+![Range field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/range-field-query.png?raw=true)
 
 ### Email Field <a name="email-field" />
 
@@ -259,7 +259,7 @@ Email fields can be queried and a String will be returned.
 
 Here, we have an Email field named `email` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![Email field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/email-field-input.png)
+![Email field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/email-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -287,7 +287,7 @@ and the results of the query would be:
 }
 ```
 
-![Email field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/email-field-query.png)
+![Email field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/email-field-query.png?raw=true)
 
 ### URL Field <a name="url-field" />
 
@@ -297,7 +297,7 @@ Url fields can be queried and a String will be returned.
 
 Here, we have a URL field named `url` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![Url field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/url-field-input.png)
+![Url field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/url-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -325,7 +325,7 @@ and the results of the query would be:
 }
 ```
 
-![URL field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/url-field-query.png)
+![URL field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/url-field-query.png?raw=true)
 
 ### Password Field <a name="password-field" />
 
@@ -335,7 +335,7 @@ Password fields can be queried and a String will be returned.
 
 Here, we have a Password field named `password` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![Password field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/password-field-input.png)
+![Password field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/password-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -363,7 +363,7 @@ and the results of the query would be:
 }
 ```
 
-![Password field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/password-field-query.png)
+![Password field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/password-field-query.png?raw=true)
 
 ### Image Field <a name="image-field" />
 
@@ -375,7 +375,7 @@ The `MediaItem` type is an Object type that has it's own fields that can be sele
 
 Here, we have an Image field named `image` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![Image field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/image-field-input.png)
+![Image field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/image-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -407,7 +407,7 @@ And the results of the query would be:
 }
 ```
 
-![Image field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/image-field-query.png)
+![Image field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/image-field-query.png?raw=true)
 
 ### File Field <a name="file-field" />
 
@@ -419,7 +419,7 @@ The `MediaItem` type is an Object type that has it's own fields that can be sele
 
 Here, we have a File field named `file` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![File field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/file-field-input.png)
+![File field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/file-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -453,7 +453,7 @@ And the results of the query would be:
 }
 ```
 
-![File field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/file-field-query.png)
+![File field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/file-field-query.png?raw=true)
 
 ### WYSIWYG Editor Field <a name="wysiwyg-field" />
 
@@ -463,7 +463,7 @@ WYSIWYG fields can be queried and a String will be returned.
 
 Here, we have a WYSIWYG field named `wysiwyg` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![WYSIWYG field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/wysiwyg-field-input.png)
+![WYSIWYG field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/wysiwyg-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -491,7 +491,7 @@ and the results of the query would be:
 }
 ```
 
-![WYSIWYG field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/wysiwyg-field-query.png)
+![WYSIWYG field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/wysiwyg-field-query.png?raw=true)
 
 
 ### oEmbed Field <a name="oembed-field" />
@@ -502,7 +502,7 @@ oEmbed fields can be queried and a String will be returned.
 
 Here, we have a oEmbed field named `oembed` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![oEmbed field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/oembed-field-input.png)
+![oEmbed field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/oembed-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -531,7 +531,7 @@ and the results of the query would be:
 }
 ```
 
-![oEmbed field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/oembed-field-query.png)
+![oEmbed field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/oembed-field-query.png?raw=true)
 
 
 ### Gallery Field <a name="gallery-field" />
@@ -544,7 +544,7 @@ Since the type is a list, we can expect an array to be returned. And since the T
 
 Here, we have a Gallery field named `gallery` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![Gallery field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/gallery-field-input.png)
+![Gallery field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/gallery-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -584,7 +584,7 @@ and the results of the query would be:
 }
 ```
 
-![Gallery field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/gallery-field-query.png)
+![Gallery field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/gallery-field-query.png?raw=true)
 
 ### Select Field <a name="select-field" />
 
@@ -594,7 +594,7 @@ Select fields, without multiple selections allowed, can be queried and a String 
 
 Here, we have a Select field named `select` on the Post Edit screen within the "ACF Docs" Field Group, and "Choice 1" is selected.
 
-![Select field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/select-field-input.png)
+![Select field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/select-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -622,7 +622,7 @@ and the results of the query would be:
 }
 ```
 
-![Select field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/select-field-query.png)
+![Select field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/select-field-query.png?raw=true)
 
 ### Checkbox Field <a name="checkbox-field" />
 
@@ -632,7 +632,7 @@ Checkbox fields can be queried and a list (array) of Strings (the selected value
 
 Here, we have a Checkbox field named `checkbox` on the Post Edit screen within the "ACF Docs" Field Group, and "Choice 1" is selected.
 
-![Checkbox field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/checkbox-field-input.png)
+![Checkbox field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/checkbox-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -662,7 +662,7 @@ and the results of the query would be:
 }
 ```
 
-![Checkbox field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/checkbox-field-query.png)
+![Checkbox field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/checkbox-field-query.png?raw=true)
 
 ### Radio Button Field <a name="radio-button-field" />
 
@@ -672,7 +672,7 @@ Radio Button fields can be queried and a String will be returned.
 
 Here, we have a Radio Button field named `radio_button` on the Post Edit screen within the "ACF Docs" Field Group, and "Choice 2" is selected.
 
-![Radio Button field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/radio-button-field-input.png)
+![Radio Button field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/radio-button-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -700,7 +700,7 @@ and the results of the query would be:
 }
 ```
 
-![Radio Button field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/radio-button-field-query.png)
+![Radio Button field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/radio-button-field-query.png?raw=true)
 
 ### Button Group Field <a name="button-group-field" />
 
@@ -710,7 +710,7 @@ Button Group fields can be queried and a String will be returned.
 
 Here, we have a Button Group field named `button_group` on the Post Edit screen within the "ACF Docs" Field Group, and "Choice 2" is selected.
 
-![Button Group field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/button-group-field-input.png)
+![Button Group field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/button-group-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -738,7 +738,7 @@ and the results of the query would be:
 }
 ```
 
-![Radio Button field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/radio-button-field-query.png)
+![Radio Button field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/radio-button-field-query.png?raw=true)
 
 ### True/False Field <a name="true-false-field" />
 
@@ -748,7 +748,7 @@ True/False fields can be queried and a String will be returned.
 
 Here, we have a True/False field named `true_false` on the Post Edit screen within the "ACF Docs" Field Group, and "true" is selected.
 
-![True/False field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/true-false-group-field-input.png)
+![True/False field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/true-false-group-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -776,7 +776,7 @@ and the results of the query would be:
 }
 ```
 
-![True/False field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/true-false-field-query.png)
+![True/False field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/true-false-field-query.png?raw=true)
 
 ### Link Field <a name="link-field" />
 
@@ -792,7 +792,7 @@ The available fields on the `ACF_Link` Type are:
 
 Here, we have a Link field named `link` on the Post Edit screen within the "ACF Docs" Field Group.
 
-![Link field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/link-group-field-input.png)
+![Link field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/link-group-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -828,7 +828,7 @@ and the results of the query would be:
 }
 ```
 
-![Link field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/link-field-query.png)
+![Link field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/link-field-query.png?raw=true)
 
 ### Post Object Field <a name="post-object-field" />
 
@@ -840,15 +840,15 @@ Since Post Object fields can be configured to be limited to certain Post Types, 
 
 For example, if the Post Object field is configured to allow Posts of the `post` and `page` types to be selected: 
 
-![Post Object field Post Type Config](https://github.com/wp-graphql/wp-graphql-acf/docs/img/post-object-field-post-type-config.png)
+![Post Object field Post Type Config](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/post-object-field-post-type-config.png?raw=true)
 
 Then the Union type for the field will allow `Post` and `Page` types to be returned, as seen in the Schema via GraphiQL:
 
-![Post Object field Union Possible Types](https://github.com/wp-graphql/wp-graphql-acf/docs/img/post-object-field-possible-types.png)
+![Post Object field Union Possible Types](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/post-object-field-possible-types.png?raw=true)
 
 Here, we have a Post Object field named `post_object` on the Post Edit screen within the "ACF Docs" Field Group, configured with the Post "Hello World".
 
-![Post Object field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/post-object-field-input-post.png)
+![Post Object field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/post-object-field-input-post.png?raw=true)
 
 As a GraphQL consumer, we don't know in advance if the value is going to be a Page or a Post. 
 
@@ -896,11 +896,11 @@ and the results of the query would be:
 }
 ```
 
-![Post Object field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/post-object-field-query-post.png)
+![Post Object field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/post-object-field-query-post.png?raw=true)
 
 If the input of the field was saved as a Page, instead of a Post, like so:
 
-![Post Object field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/post-object-field-input-page.png)
+![Post Object field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/post-object-field-input-page.png?raw=true)
 
 Then the same query above, would return the following results:
 
@@ -920,13 +920,13 @@ Then the same query above, would return the following results:
 }
 ```
 
-![Post Object field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/post-object-field-query-page.png)
+![Post Object field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/post-object-field-query-page.png?raw=true)
 
 Now, if the field were configured to allow multiple values, the field would be added to the Schema as a `listOf`, returning an Array of the Union.
 
 If the field were set with a value of one Page, and one Post, like so:
 
-![Post Object field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/post-object-field-input-multi.png)
+![Post Object field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/post-object-field-input-multi.png?raw=true)
 
 Then the results of the same query as above would be: 
 
@@ -954,7 +954,7 @@ Then the results of the same query as above would be:
 }
 ```
 
-![Post Object field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/post-object-field-query-multi.png)
+![Post Object field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/post-object-field-query-multi.png?raw=true)
 
 ### Page Link Field <a name="page-link-field" />
 
@@ -964,15 +964,15 @@ Since Page Link fields can be configured to be limited to certain Post Types, th
 
 For example, if the Post Object field is configured to allow Posts of the `post` and `page` types to be selected: 
 
-![Page Link field Post Type Config](https://github.com/wp-graphql/wp-graphql-acf/docs/img/page-link-field-post-type-config.png)
+![Page Link field Post Type Config](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/page-link-field-post-type-config.png?raw=true)
 
 Then the Union type for the field will allow `Post` and `Page` types to be returned, as seen in the Schema via GraphiQL:
 
-![Page Link field Union Possible Types](https://github.com/wp-graphql/wp-graphql-acf/docs/img/page-link-field-possible-types.png)
+![Page Link field Union Possible Types](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/page-link-field-possible-types.png?raw=true)
 
 Here, we have a Page Link field named `page_link` on the Post Edit screen within the "ACF Docs" Field Group, and the value is set to the "Sample Page" page.
 
-![Page Link field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/page-link-field-input-page.png)
+![Page Link field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/page-link-field-input-page.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -1015,11 +1015,11 @@ and the results of the query would be:
 }
 ```
 
-![Page Link field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/link-field-query-page.png)
+![Page Link field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/link-field-query-page.png?raw=true)
 
 Here, we set the value to the "Hello World" Post:
 
-![Page Link field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/page-link-field-input-post.png)
+![Page Link field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/page-link-field-input-post.png?raw=true)
 
 And the results of the same query are now: 
 
@@ -1040,7 +1040,7 @@ And the results of the same query are now:
 }
 ```
 
-![Page Link field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/link-field-query-post.png)
+![Page Link field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/link-field-query-post.png?raw=true)
 
 ### Relationship Field <a name="relationship-field" />
 
@@ -1050,15 +1050,15 @@ Since Relationship fields can be configured to be limited to certain Post Types,
 
 For example, if the Post Object field is configured to allow Posts of the `post` and `page` types to be selected: 
 
-![Relationship field Post Type Config](https://github.com/wp-graphql/wp-graphql-acf/docs/img/relationship-field-post-type-config.png)
+![Relationship field Post Type Config](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/relationship-field-post-type-config.png?raw=true)
 
 Then the Union type for the field will allow `Post` and `Page` types to be returned, as seen in the Schema via GraphiQL:
 
-![Relationship field Union Possible Types](https://github.com/wp-graphql/wp-graphql-acf/docs/img/relationship-field-possible-types.png)
+![Relationship field Union Possible Types](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/relationship-field-possible-types.png?raw=true)
 
 Here, we have a Relationship field named `relationship` on the Post Edit screen within the "ACF Docs" Field Group, and the value is set to "Hello World!" post, and the "Sample Page" page.
 
-![Relationship field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/relationship-field-input.png)
+![Relationship field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/relationship-field-input.png?raw=true)
 
 This field can be Queried in GraphQL like so:
 
@@ -1109,7 +1109,7 @@ and the results of the query would be:
 }
 ```
 
-![Relationship field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/relationship-field-query.png)
+![Relationship field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/relationship-field-query.png?raw=true)
 
 ### Taxonomy Field <a name="taxonomy-field" />
 
@@ -1117,11 +1117,11 @@ The Taxonomy field is added to the GraphQL Schema as a List Of the Taxonomy Type
 
 For example, if the field is configured to the "Category" taxonomy, then the field in the Schema will be a List of the Category type.
 
-![Taxonomy field Taxonomy Config](https://github.com/wp-graphql/wp-graphql-acf/docs/img/taxonomy-field-taxonomy-config.png)
+![Taxonomy field Taxonomy Config](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/taxonomy-field-taxonomy-config.png?raw=true)
 
 Here, we have a Taxonomy field named `taxonomy` on the Post Edit screen within the "ACF Docs" Field Group, configured with the Category "Test Category".
 
-![Taxonomy field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/taxonomy-field-input.png)
+![Taxonomy field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/taxonomy-field-input.png?raw=true)
 
 This field can be queried like so: 
 
@@ -1159,7 +1159,7 @@ and the results of the query would be:
 }
 ```
 
-![Taxonomy field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/taxonomy-field-query.png)
+![Taxonomy field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/taxonomy-field-query.png?raw=true)
 
 ### User Field <a name="user-field" />
 
@@ -1167,7 +1167,7 @@ User fields are added to the WPGraphQL Schema as a field with a User type.
 
 Here, we have a User field named `user` on the Post Edit screen within the "ACF Docs" Field Group, set with the User "jasonbahl" as the value.
 
-![User field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/user-field-input.png)
+![User field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/user-field-input.png?raw=true)
 
 This field can be queried in GraphQL like so:
 
@@ -1205,13 +1205,13 @@ and the response would look like:
 }
 ```
 
-![User field Query with one selection](https://github.com/wp-graphql/wp-graphql-acf/docs/img/user-field-query.png)
+![User field Query with one selection](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/user-field-query.png?raw=true)
 
 If the field is configured to allow multiple selections, it's added to the Schema as a List Of the User type.
 
 Here, we have a User field named `user` on the Post Edit screen within the "ACF Docs" Field Group, set with the User "jasonbahl" as the value.
 
-![User field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/user-field-input-multi.png)
+![User field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/user-field-input-multi.png?raw=true)
 
 and the response to the same query would look like: 
 
@@ -1239,7 +1239,7 @@ and the response to the same query would look like:
   }
 }
 ```
-![User field Query with multiple selections](https://github.com/wp-graphql/wp-graphql-acf/docs/img/user-field-query-multiple.png)
+![User field Query with multiple selections](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/user-field-query-multiple.png?raw=true)
 
 ### Google Map Field <a name="google-map-field" />
 
@@ -1263,7 +1263,7 @@ The `ACF_GoogleMap` Type has fields that expose location data. The available fie
 
 Here, we have a Google Map field named `google_map` on the Post Edit screen within the "ACF Docs" Field Group, set with the Address "1 Infinite Loop, Cupertino, CA 95014, USA" as the value.
 
-![Google Map field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/google-map-field-input.png)
+![Google Map field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/google-map-field-input.png?raw=true)
 
 This field can be queried in GraphQL like so:
 
@@ -1309,7 +1309,7 @@ and the response would look like:
 }
 ```
 
-![Google Map field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/google-map-field-query.png)
+![Google Map field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/google-map-field-query.png?raw=true)
 
 ### Date Picker Field <a name="date-picker-field" />
 
@@ -1319,7 +1319,7 @@ Date Picker fields can be queried and a String will be returned.
 
 Here, we have a Date Picker field named `date_picker` on the Post Edit screen within the "ACF Docs" Field Group, and "13/03/2020" is the date set.
 
-![Date Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/date-picker-field-input.png)
+![Date Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/date-picker-field-input.png?raw=true)
 
 This field can be queried in GraphQL like so: 
 
@@ -1347,7 +1347,7 @@ and the result of the query would be:
 }
 ```
 
-![Date Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/date-picker-field-query.png)
+![Date Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/date-picker-field-query.png?raw=true)
 
 ### Date/Time Picker Field <a name="date-time-picker-field" />
 
@@ -1357,7 +1357,7 @@ Date/Time Picker fields can be queried and a String will be returned.
 
 Here, we have a Date/Time Picker field named `date_time_picker` on the Post Edit screen within the "ACF Docs" Field Group, and "20/03/2020 8:15 am" is the value.
 
-![Date Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/date-time-picker-field-input.png)
+![Date Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/date-time-picker-field-input.png?raw=true)
 
 This field can be queried in GraphQL like so: 
 
@@ -1385,7 +1385,7 @@ and the result of the query would be:
 }
 ```
 
-![Date/Time Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/date-time-picker-field-query.png)
+![Date/Time Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/date-time-picker-field-query.png?raw=true)
 
 ### Time Picker Field <a name="time-picker-field" />
 
@@ -1395,7 +1395,7 @@ Time Picker fields can be queried and a String will be returned.
 
 Here, we have a Time Picker field named `time_picker` on the Post Edit screen within the "ACF Docs" Field Group, and "12:30 am" is the value.
 
-![Time Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/time-picker-field-input.png)
+![Time Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/time-picker-field-input.png?raw=true)
 
 This field can be queried in GraphQL like so: 
 
@@ -1423,7 +1423,7 @@ and the result of the query would be:
 }
 ```
 
-![Time Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/time-picker-field-query.png)
+![Time Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/time-picker-field-query.png?raw=true)
 
 ### Color Picker Field <a name="color-picker-field" />
 
@@ -1433,7 +1433,7 @@ Color Picker fields can be queried and a String will be returned.
 
 Here, we have a Color Picker field named `color_picker` on the Post Edit screen within the "ACF Docs" Field Group, and "#dd3333" is the value.
 
-![Color Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/color-picker-field-input.png)
+![Color Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/color-picker-field-input.png?raw=true)
 
 This field can be queried in GraphQL like so: 
 
@@ -1461,7 +1461,7 @@ and the result of the query would be:
 }
 ```
 
-![Color Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/color-picker-field-query.png)
+![Color Picker field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/color-picker-field-query.png?raw=true)
 
 ### Message Field <a name="message-field" />
 
@@ -1481,7 +1481,7 @@ Group Fields are added to the WPGraphQL Schema as fields resolving to an Object 
 
 Here, we have a Group field named `group` on the Post Edit screen within the "ACF Docs" Field Group. Within the "group" field, we have a Text Field named `text_field_in_group` and a Text Area field named `text_area_field_in_group`
 
-![Group field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/group-field-input.png)
+![Group field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/group-field-input.png?raw=true)
 
 We can query the fields within the group like so: 
 
@@ -1515,7 +1515,7 @@ And the results of the query would be:
 }
 ```
 
-![Group field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/group-field-query.png)
+![Group field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/group-field-query.png?raw=true)
 
 ### Repeater Field <a name="repeater-field" />
 
@@ -1531,7 +1531,7 @@ Here, the Repeater Field is populated with 2 rows:
   - Text Field: Text Value 2
   - Image: 255
 
-![Repeater field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/repeater-field-input.png)
+![Repeater field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/repeater-field-input.png?raw=true)
 
 This field can be queried in GraphQL like so:
 
@@ -1581,7 +1581,7 @@ and the results of the query would be:
 }
 ```
 
-![Repeater field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/repeater-field-query.png)
+![Repeater field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/repeater-field-query.png?raw=true)
 
 ### Flexible Content Field <a name="flexible-content-field" />
 
@@ -1595,7 +1595,7 @@ The Union for a Flex Field is made up of each Layout in the Flex Field as the po
 
 In our example, we've created a Flex Field with 3 layouts named "Layout 1", "Layout 2" and "Layout 3". In the Schema, we can see the Flex Field Union's Possible Types are these 3 layouts.
 
-![Flex Fields Schema Union Possible Types](https://github.com/wp-graphql/wp-graphql-acf/docs/img/flex-field-union-possible-types.png)
+![Flex Fields Schema Union Possible Types](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/flex-field-union-possible-types.png?raw=true)
 
 Each of these Layout types will contain the fields defined for the layout and can be queried like fields in any other Group. 
 
@@ -1613,7 +1613,7 @@ Above are the possible layouts and their fields. These layouts can be added and 
 
 Here's an example of a Flex Field named `flexible_content` with the values saved as "Layout One", "Layout Two" and "Layout Three", in that order, all populated with their respective fields. 
 
-![Flex field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/docs/img/flex-field-input.png)
+![Flex field in the Edit Post screen](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/flex-field-input.png?raw=true)
 
 We can query this field like so: 
 
@@ -1686,7 +1686,7 @@ and the results of the query would be:
 }
 ```
 
-![Flex field Query](https://github.com/wp-graphql/wp-graphql-acf/docs/img/flex-field-query.png)
+![Flex field Query](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/flex-field-query.png?raw=true)
 
 If we were to re-arrange the layouts, so that the order was "Layout Three", "Layout One", "Layout Two", the results of the query would be:
 
@@ -1726,7 +1726,7 @@ If we were to re-arrange the layouts, so that the order was "Layout Three", "Lay
   }
 ```
 
-![Flex field Query 2](https://github.com/wp-graphql/wp-graphql-acf/docs/img/flex-field-query2.png)
+![Flex field Query 2](https://github.com/wp-graphql/wp-graphql-acf/blob/master/docs/img/flex-field-query2.png?raw=true)
 
 ### Clone Field <a name="clone-field" />
 

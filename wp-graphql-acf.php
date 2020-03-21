@@ -1,14 +1,15 @@
 <?php
 /**
- * Plugin Name:     WPGraphQL for Advanced Custom Fields
- * Plugin URI:      https://wpgraphql.com/acf
- * Description:     Adds Advanced Custom Fields to the WPGraphQL Schema
- * Author:          WPGraphQL, Jason Bahl
- * Author URI:      https://www.wpgraphql.com
- * Text Domain:     wp-graphql-acf
- * Domain Path:     /languages
- * Version:         0.3.1
- * Requires PHP:    7.0
+ * Plugin Name:       WPGraphQL for Advanced Custom Fields
+ * Plugin URI:        https://wpgraphql.com/acf
+ * Description:       Adds Advanced Custom Fields to the WPGraphQL Schema
+ * Author:            WPGraphQL, Jason Bahl
+ * Author URI:        https://www.wpgraphql.com
+ * Text Domain:       wp-graphql-acf
+ * Domain Path:       /languages
+ * Version:           0.3.1
+ * Requires PHP:      7.0
+ * GitHub Plugin URI: https://github.com/afragen/github-updater
  *
  * @package         WPGraphQL_ACF
  */

@@ -677,7 +677,7 @@ class Config {
 				];
 				break;
 			case 'user':
-
+        
 				$type = 'User';
 
 				if ( isset( $acf_field['multiple'] ) &&  1 === $acf_field['multiple'] ) {

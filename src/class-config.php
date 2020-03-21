@@ -7,6 +7,8 @@
 
 namespace WPGraphQL\ACF;
 
+use GraphQL\Type\Definition\ResolveInfo;
+use WPGraphQL\AppContext;
 use WPGraphQL\Data\DataSource;
 use WPGraphQL\Model\Comment;
 use WPGraphQL\Model\Menu;
@@ -499,6 +501,7 @@ class Config {
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$relationship = [];
 						$value        = $this->get_acf_field_value( $root, $acf_field );
+
 						if ( ! empty( $value ) && is_array( $value ) ) {
 							foreach ( $value as $post_id ) {
 								$post_object = get_post( $post_id );
@@ -548,18 +551,44 @@ class Config {
 					$type = 'PostObjectUnion';
 				}
 
+				// If the field is allowed to be a multi select
+				if ( 0 !== $acf_field['multiple'] ) {
+					$type = [ 'list_of' => $type ];
+				}
+
 				$field_config = [
 					'type'    => $type,
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
-						if ( $value instanceof \WP_Post ) {
-							return new Post( $value );
+
+						$return = [];
+						if ( ! empty( $value ) ) {
+							if ( is_array( $value ) ) {
+								foreach ($value as $id ) {
+									$post = get_post( $id );
+									if ( ! empty( $post ) ) {
+										$return[] = new Post( $post );
+									}
+								}
+							} else {
+								$post = get_post( absint( $value ) );
+								if ( ! empty( $post ) ) {
+									$return[] = new Post( $post );
+								}
+							}
+						}
+
+						// If the field is allowed to be a multi select
+						if ( 0 !== $acf_field['multiple'] ) {
+							$return = ! empty( $return ) ? $return : null;
+						} else {
+							$return = ! empty( $return[0] ) ? $return[0] : null;
 						}
 
 						/**
 						 * This hooks allows for filtering of the post object source. In case an non-core defined
 						 * post-type is being targeted.
-						 * 
+						 *
 						 * @param mixed|null  $source  GraphQL Type source.
 						 * @param mixed|null  $value   Root ACF field value.
 						 * @param AppContext  $context AppContext instance.
@@ -567,7 +596,7 @@ class Config {
 						 */
 						return apply_filters(
 							'graphql_acf_post_object_source',
-							absint( $value ) ? DataSource::resolve_post_object( (int) $value, $context ) : null,
+							$return,
 							$value,
 							$context,
 							$info
@@ -648,37 +677,65 @@ class Config {
 				];
 				break;
 			case 'user':
-				if ( 0 === $acf_field['multiple'] ) {
-					$field_config = array(
-						'type'    => 'User',
-						'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
-							$value = $this->get_acf_field_value( $root, $acf_field );
+        
+				$type = 'User';
 
-							return DataSource::resolve_user( (int) $value, $context );
-						},
-					);
-				} else {
-					$field_config = array(
-						'type'    => array( 'list_of' => 'User' ),
-						'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
-							$value = $this->get_acf_field_value( $root, $acf_field );
-							if ( ! empty( $value ) && is_array( $value ) ) {
-								$users = array();
-								foreach ( $value as $single_value ) {
-									$users[] = DataSource::resolve_user( (int) $single_value, $context );
-								}
-								return $users;
-							} else {
-								return DataSource::resolve_user( (int) $value, $context );
-							}
-
-						},
-					);
+				if ( isset( $acf_field['multiple'] ) &&  1 === $acf_field['multiple'] ) {
+					$type = [ 'list_of' => $type ];
 				}
+
+				$field_config = [
+					'type'    => $type,
+					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
+						$value = $this->get_acf_field_value( $root, $acf_field );
+
+						$return = [];
+						if ( ! empty( $value ) ) {
+							if ( is_array( $value ) ) {
+								foreach ($value as $id ) {
+									$user = get_user_by( 'id', $id );
+									if ( ! empty( $user ) ) {
+										$user = new User( $user );
+										if ( 'private' !== $user->get_visibility() ) {
+											$return[] = $user;
+										}
+									}
+								}
+							} else {
+								$user = get_user_by( 'id', absint( $value ) );
+								if ( ! empty( $user ) ) {
+									$user = new User( $user );
+									if ( 'private' !== $user->get_visibility() ) {
+										$return[] = $user;
+									}
+								}
+							}
+						}
+
+						// If the field is allowed to be a multi select
+						if ( 0 !== $acf_field['multiple'] ) {
+							$return = ! empty( $return ) ? $return : null;
+						} else {
+							$return = ! empty( $return[0] ) ? $return[0] : null;
+						}
+
+						return $return;
+					},
+				];
 				break;
 			case 'taxonomy':
+
+				$type = 'TermObjectUnion';
+
+				if ( isset( $acf_field['taxonomy'] ) ) {
+					$tax_object = get_taxonomy( $acf_field['taxonomy'] );
+					if ( isset( $tax_object->graphql_single_name ) ) {
+						$type = $tax_object->graphql_single_name;
+					}
+				}
+
 				$field_config = [
-					'type'    => [ 'list_of' => 'TermObjectUnion' ],
+					'type'    => [ 'list_of' => $type ],
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 						$terms = [];
@@ -731,7 +788,7 @@ class Config {
 					$field_config['type'] = $field_type_name;
 					break;
 				}
-			
+
 				$fields = [
 					'streetAddress' => [
 						'type'        => 'String',

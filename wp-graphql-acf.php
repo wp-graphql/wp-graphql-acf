@@ -15,11 +15,11 @@
 
 namespace WPGraphQL\ACF;
 
-if (! defined('ABSPATH')) {
-    exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
-require_once(__DIR__ . '/vendor/autoload.php');
+require_once( __DIR__ . '/vendor/autoload.php' );
 
 /**
  * Define constants
@@ -31,27 +31,26 @@ const WPGRAPHQL_REQUIRED_MIN_VERSION = '0.4.0';
  *
  * @return ACF|void
  */
-function init()
-{
+function init() {
 
-    /**
-     * If either ACF or WPGraphQL are not active, show the admin notice and bail
-     */
-    if (false === can_load_plugin()) {
-        // Show the admin notice
-        add_action('admin_init', __NAMESPACE__ . '\show_admin_notice');
+	/**
+	 * If either ACF or WPGraphQL are not active, show the admin notice and bail
+	 */
+	if ( false === can_load_plugin() ) {
+		// Show the admin notice
+		add_action( 'admin_init', __NAMESPACE__ . '\show_admin_notice' );
 
-        // Bail
-        return;
-    }
+		// Bail
+		return;
+	}
 
-    /**
-     * Return the instance of WPGraphQL\ACF
-     */
-    return ACF::instance();
+	/**
+	 * Return the instance of WPGraphQL\ACF
+	 */
+	return ACF::instance();
 }
 
-add_action('init', '\WPGraphQL\ACF\init');
+add_action( 'init', '\WPGraphQL\ACF\init' );
 
 /**
  * Show admin notice to admins if this plugin is active but either ACF and/or WPGraphQL
@@ -59,56 +58,55 @@ add_action('init', '\WPGraphQL\ACF\init');
  *
  * @return bool
  */
-function show_admin_notice()
-{
+function show_admin_notice() {
 
-    /**
-     * For users with lower capabilities, don't show the notice
-     */
-    if (! current_user_can('manage_options')) {
-        return false;
-    }
+	/**
+	 * For users with lower capabilities, don't show the notice
+	 */
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return false;
+	}
 
-    add_action(
-        'admin_notices',
-        function () {
-            ?>
-		<div class="error notice">
-			<p><?php esc_html_e(sprintf('Both WPGraphQL (v%s+) and Advanced Custom Fields (v5.7+) must be active for "wp-graphql-acf" to work', WPGRAPHQL_REQUIRED_MIN_VERSION), 'wp-graphiql-acf'); ?></p>
-		</div>
+	add_action(
+		'admin_notices',
+		function() {
+			?>
+			<div class="error notice">
+				<p><?php esc_html_e( sprintf( 'Both WPGraphQL (v%s+) and Advanced Custom Fields (v5.7+) must be active for "wp-graphql-acf" to work', WPGRAPHQL_REQUIRED_MIN_VERSION ), 'wp-graphiql-acf' ); ?></p>
+			</div>
 			<?php
-        }
-    );
+		}
+	);
 }
 
 
 /**
- * Check whether ACF and WPGraphQL are active, and whether the minimum version requirement has been met
+ * Check whether ACF and WPGraphQL are active, and whether the minimum version requirement has been
+ * met
  *
  * @return bool
  * @since 0.3
  */
-function can_load_plugin()
-{
-    // Is ACF active?
-    if (! class_exists('ACF')) {
-        return false;
-    }
+function can_load_plugin() {
+	// Is ACF active?
+	if ( ! class_exists( 'ACF' ) ) {
+		return false;
+	}
 
-    // Is WPGraphQL active?
-    if (! class_exists('WPGraphQL')) {
-        return false;
-    }
+	// Is WPGraphQL active?
+	if ( ! class_exists( 'WPGraphQL' ) ) {
+		return false;
+	}
 
-    // Do we have a WPGraphQL version to check against?
-    if (empty(defined('WPGRAPHQL_VERSION'))) {
-        return false;
-    }
+	// Do we have a WPGraphQL version to check against?
+	if ( empty( defined( 'WPGRAPHQL_VERSION' ) ) ) {
+		return false;
+	}
 
-    // Have we met the minimum version requirement?
-    if (true === version_compare(WPGRAPHQL_VERSION, WPGRAPHQL_REQUIRED_MIN_VERSION, 'lt')) {
-        return false;
-    }
+	// Have we met the minimum version requirement?
+	if ( true === version_compare( WPGRAPHQL_VERSION, WPGRAPHQL_REQUIRED_MIN_VERSION, 'lt' ) ) {
+		return false;
+	}
 
-    return true;
+	return true;
 }

@@ -1672,9 +1672,16 @@ class Config {
 			}
 
 			/**
-			 * Create type name
+			 * Create field and type names. Use explicit graphql_field_name
+			 * if available and fallback to generating from title if not available.
 			 */
-			$type_name = ucfirst( Config::camel_case( $page_title ) );
+			if ( ! empty( $options_page['graphql_field_name'] ) ) {
+				$field_name = $options_page['graphql_field_name'];
+				$type_name = ucfirst( $options_page['graphql_field_name'] );
+			} else {
+				$field_name = Config::camel_case( $page_title );
+				$type_name = ucfirst( Config::camel_case( $page_title ) );
+			}
 
 			/**
 			 * Register options page type to schema.
@@ -1706,7 +1713,7 @@ class Config {
 			$options_page['type'] = 'options_page';
 			register_graphql_field(
 				'RootQuery',
-				Config::camel_case( $page_title ),
+				$field_name,
 				[
 					'type'        => $type_name,
 					'description' => sprintf( __( '%s options', 'wp-graphql-acf' ), $options_page['page_title'] ),

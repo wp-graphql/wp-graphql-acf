@@ -504,16 +504,21 @@ class Config {
 
 						if ( ! empty( $value ) && is_array( $value ) ) {
 							foreach ( $value as $post_id ) {
+								$post_model  = null;
 								$post_object = get_post( $post_id );
 								if ( $post_object instanceof \WP_Post ) {
 									$post_model     = new Post( $post_object );
+								}
+								
+								$post_model = apply_filters( 'graphql_acf_relationship_post_model', $post_model, $post_id, $root, $acf_field );
+								
+								if ( ! empty( $post_model ) ) {
 									$relationship[] = $post_model;
 								}
 							}
 						}
 
 						return isset( $value ) ? $relationship : null;
-
 					},
 				];
 				break;

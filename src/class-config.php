@@ -409,8 +409,6 @@ class Config {
 				break;
 			case 'select':
 
-				codecept_debug( $acf_field );
-
 				/**
 				 * If the select field is configured to not allow multiple values
 				 * the field will return a string, but if it is configured to allow

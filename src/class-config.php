@@ -198,10 +198,11 @@ class Config {
 	 *
 	 * @param [type] $root Undocumented.
 	 * @param [type] $acf_field Undocumented.
+	 * @param boolean $format Whether ACF should apply formatting to the field. Default false.
 	 *
 	 * @return mixed
 	 */
-	protected function get_acf_field_value( $root, $acf_field ) {
+	protected function get_acf_field_value( $root, $acf_field, $format = false ) {
 
 		$value = null;
 		$id = null;
@@ -416,7 +417,7 @@ class Config {
 				 *
 				 * @see: https://github.com/wp-graphql/wp-graphql-acf/issues/25
 				 */
-				if ( 0 === $acf_field['multiple'] ) {
+				if ( empty( $acf_field['multiple'] ) ) {
 					$field_config['type'] = 'String';
 				} else {
 					$field_config['type']    = [ 'list_of' => 'String' ];
@@ -445,18 +446,13 @@ class Config {
 				$field_config = [
 					'type'    => 'String',
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
-						if ( isset( $root->ID ) ) {
-							return get_field( $acf_field['key'], $root->ID, true );
-						}
-						//handle sub fields
-						if ( isset( $root[ $acf_field['key'] ] ) ) {
-							$value     = $root[ $acf_field['key'] ];
-							$timestamp = strtotime( $value );
 
-							return date( $acf_field['return_format'], $timestamp );
-						}
+						$value = $this->get_acf_field_value( $root, $acf_field, true );
 
-						return null;
+						if ( ! empty( $value ) && ! empty( $acf_field['return_format'] ) ) {
+							$value = date( $acf_field['return_format'], $value );
+						}
+						return ! empty( $value ) ? $value : null;
 					},
 				];
 				break;
@@ -677,7 +673,7 @@ class Config {
 				];
 				break;
 			case 'user':
-        
+
 				$type = 'User';
 
 				if ( isset( $acf_field['multiple'] ) &&  1 === $acf_field['multiple'] ) {

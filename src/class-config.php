@@ -138,7 +138,7 @@ class Config {
 	 *
 	 * Get the field groups associated with the post type
 	 */
-	protected function get_acf_field_groups($args) {
+	protected function get_acf_field_groups($args = array()) {
 		add_filter('acf/location/screen', array( $this, 'add_wp_graphql_acf_to_acf_screen' ), 10, 2);
 
 		$field_groups = acf_get_field_groups($args);

@@ -178,11 +178,12 @@ class Config {
 				$field_group['type'] = 'group';
 				$field_group['name'] = $field_name;
 				$config              = [
-					'name'            => $field_name,
-					'description'     => $field_group['description'],
-					'acf_field'       => $field_group,
-					'acf_field_group' => null,
-					'resolve'         => function( $root ) use ( $field_group ) {
+					'name'               => $field_name,
+					'description'        => $field_group['description'],
+					'acf_field'          => $field_group,
+					'acf_field_group'    => null,
+					'custom_type_prefix' => ( ! empty( $field_group['graphql_type_prefix'] ) ) ? $field_group['graphql_type_prefix'] : null,
+					'resolve'            => function( $root ) use ( $field_group ) {
 						return isset( $root ) ? $root : null;
 					}
 				];
@@ -355,6 +356,7 @@ class Config {
 	protected function register_graphql_field( $type_name, $field_name, $config ) {
 		$acf_field = isset( $config['acf_field'] ) ? $config['acf_field'] : null;
 		$acf_type  = isset( $acf_field['type'] ) ? $acf_field['type'] : null;
+		$type_prefix = isset( $config['custom_type_prefix'] ) ? $config['custom_type_prefix'] : $type_name;
 
 		if ( empty( $acf_type ) ) {
 			return false;
@@ -460,7 +462,7 @@ class Config {
 
 				if ( isset( $acf_field['post_type'] ) && is_array( $acf_field['post_type'] ) ) {
 
-					$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
+					$field_type_name = $type_prefix . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
 
 					if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
 						$type = $field_type_name;
@@ -517,7 +519,7 @@ class Config {
 			case 'post_object':
 
 				if ( isset( $acf_field['post_type'] ) && is_array( $acf_field['post_type'] ) ) {
-					$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
+					$field_type_name = $type_prefix . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
 					if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
 						$type = $field_type_name;
 					} else {
@@ -751,7 +753,7 @@ class Config {
 				$field_config = null;
 				break;
 			case 'group':
-				$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
+				$field_type_name = $type_prefix . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
 				if ( $this->type_registry->get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
 					break;
@@ -896,7 +898,7 @@ class Config {
 				$field_config['type'] = $field_type_name;
 				break;
 			case 'repeater':
-				$field_type_name = $type_name . '_' . self::camel_case( $acf_field['name'] );
+				$field_type_name = $type_prefix . '_' . self::camel_case( $acf_field['name'] );
 
 				if ( $this->type_registry->get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
@@ -955,7 +957,7 @@ class Config {
 			case 'flexible_content':
 
 				$field_config    = null;
-				$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
+				$field_type_name = $type_prefix . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
 				if ( $this->type_registry->get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
 					break;
@@ -1178,11 +1180,12 @@ class Config {
 				$field_group['name'] = $field_name;
 				$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 				$config              = [
-					'name'            => $field_name,
-					'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to the "%2$s" taxonomy', 'wp-graphql-acf' ), $field_group['title'], $tax_object->name ),
-					'acf_field'       => $field_group,
-					'acf_field_group' => null,
-					'resolve'         => function( $root ) use ( $field_group ) {
+					'name'               => $field_name,
+					'description'        => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to the "%2$s" taxonomy', 'wp-graphql-acf' ), $field_group['title'], $tax_object->name ),
+					'acf_field'          => $field_group,
+					'acf_field_group'    => null,
+					'custom_type_prefix' => ( ! empty( $field_group['graphql_type_prefix'] ) ) ? $field_group['graphql_type_prefix'] : null,
+					'resolve'            => function( $root ) use ( $field_group ) {
 						return isset( $root ) ? $root : null;
 					}
 				];
@@ -1238,11 +1241,12 @@ class Config {
 			$field_group['name'] = $field_name;
 			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
-				'name'            => $field_name,
-				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Comments', 'wp-graphql-acf' ), $field_group['title'] ),
-				'acf_field'       => $field_group,
-				'acf_field_group' => null,
-				'resolve'         => function( $root ) use ( $field_group ) {
+				'name'               => $field_name,
+				'description'        => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Comments', 'wp-graphql-acf' ), $field_group['title'] ),
+				'acf_field'          => $field_group,
+				'acf_field_group'    => null,
+				'custom_type_prefix' => ( ! empty( $field_group['graphql_type_prefix'] ) ) ? $field_group['graphql_type_prefix'] : null,
+				'resolve'            => function( $root ) use ( $field_group ) {
 					return isset( $root ) ? $root : null;
 				}
 			];
@@ -1300,11 +1304,12 @@ class Config {
 			$field_group['name'] = $field_name;
 			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
-				'name'            => $field_name,
-				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Menus', 'wp-graphql-acf' ), $field_group['title'] ),
-				'acf_field'       => $field_group,
-				'acf_field_group' => null,
-				'resolve'         => function( $root ) use ( $field_group ) {
+				'name'               => $field_name,
+				'description'        => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Menus', 'wp-graphql-acf' ), $field_group['title'] ),
+				'acf_field'          => $field_group,
+				'acf_field_group'    => null,
+				'custom_type_prefix' => ( ! empty( $field_group['graphql_type_prefix'] ) ) ? $field_group['graphql_type_prefix'] : null,
+				'resolve'            => function( $root ) use ( $field_group ) {
 					return isset( $root ) ? $root : null;
 				}
 			];
@@ -1360,11 +1365,12 @@ class Config {
 			$field_group['name'] = $field_name;
 			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
-				'name'            => $field_name,
-				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Menu Items', 'wp-graphql-acf' ), $field_group['title'] ),
-				'acf_field'       => $field_group,
-				'acf_field_group' => null,
-				'resolve'         => function( $root ) use ( $field_group ) {
+				'name'               => $field_name,
+				'description'        => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to Menu Items', 'wp-graphql-acf' ), $field_group['title'] ),
+				'acf_field'          => $field_group,
+				'acf_field_group'    => null,
+				'custom_type_prefix' => ( ! empty( $field_group['graphql_type_prefix'] ) ) ? $field_group['graphql_type_prefix'] : null,
+				'resolve'            => function( $root ) use ( $field_group ) {
 					return isset( $root ) ? $root : null;
 				}
 			];
@@ -1420,11 +1426,12 @@ class Config {
 			$field_group['name'] = $field_name;
 			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
-				'name'            => $field_name,
-				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to attachments', 'wp-graphql-acf' ), $field_group['title'] ),
-				'acf_field'       => $field_group,
-				'acf_field_group' => null,
-				'resolve'         => function( $root ) use ( $field_group ) {
+				'name'               => $field_name,
+				'description'        => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%s" was assigned to attachments', 'wp-graphql-acf' ), $field_group['title'] ),
+				'acf_field'          => $field_group,
+				'acf_field_group'    => null,
+				'custom_type_prefix' => ( ! empty( $field_group['graphql_type_prefix'] ) ) ? $field_group['graphql_type_prefix'] : null,
+				'resolve'            => function( $root ) use ( $field_group ) {
 					return isset( $root ) ? $root : null;
 				}
 			];
@@ -1521,11 +1528,12 @@ class Config {
 			$field_group['name'] = $field_name;
 			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
-				'name'            => $field_name,
-				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to an individual post of the post_type: "%2$s". The group will be present in the Schema for the "%3$s" Type, but will only resolve if the entity has content saved.', 'wp-graphql-acf' ), $field_group['title'], $post_type_object->name, $post_type_object->graphql_plural_name ),
-				'acf_field'       => $field_group,
-				'acf_field_group' => null,
-				'resolve'         => function( $root ) use ( $field_group ) {
+				'name'               => $field_name,
+				'description'        => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to an individual post of the post_type: "%2$s". The group will be present in the Schema for the "%3$s" Type, but will only resolve if the entity has content saved.', 'wp-graphql-acf' ), $field_group['title'], $post_type_object->name, $post_type_object->graphql_plural_name ),
+				'acf_field'          => $field_group,
+				'acf_field_group'    => null,
+				'custom_type_prefix' => ( ! empty( $field_group['graphql_type_prefix'] ) ) ? $field_group['graphql_type_prefix'] : null,
+				'resolve'            => function( $root ) use ( $field_group ) {
 					return isset( $root ) ? $root : null;
 				}
 			];
@@ -1569,11 +1577,12 @@ class Config {
 			$field_group['name'] = $field_name;
 			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
 			$config              = [
-				'name'            => $field_name,
-				'description'     => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to Users edit or register form', 'wp-graphql-acf' ), $field_group['title'] ),
-				'acf_field'       => $field_group,
-				'acf_field_group' => null,
-				'resolve'         => function( $root ) use ( $field_group ) {
+				'name'               => $field_name,
+				'description'        => $description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to Users edit or register form', 'wp-graphql-acf' ), $field_group['title'] ),
+				'acf_field'          => $field_group,
+				'acf_field_group'    => null,
+				'custom_type_prefix' => ( ! empty( $field_group['graphql_type_prefix'] ) ) ? $field_group['graphql_type_prefix'] : null,
+				'resolve'            => function( $root ) use ( $field_group ) {
 					return isset( $root ) ? $root : null;
 				}
 			];

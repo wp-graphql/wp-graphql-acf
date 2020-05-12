@@ -109,6 +109,22 @@ class ACF_Settings {
 			]
 		);
 
+		/**
+		 * Render a field in the Field Group settings to allow for a Field Group to have a custom type prefix.
+		 */
+		acf_render_field_wrap(
+			[
+				'label'        => __( 'Custom GraphQL Type Prefix', 'acf' ),
+				'instructions' => __( 'Override the type prefix to use for the GraphQL type of this field group. Leave empty to use the default', 'wp-graphql-acf' ),
+				'type'         => 'text',
+				'prefix'       => 'acf_field_group',
+				'name'         => 'graphql_type_prefix',
+				'required'     => false,
+				'placeholder'  => ! empty( $field_group['graphql_type_prefix'] ) ? $field_group['graphql_type_prefix'] : null,
+				'value'        => ! empty( $field_group['graphql_type_prefix'] ) ? $field_group['graphql_type_prefix'] : null,
+			]
+		);
+
 	}
 
 }

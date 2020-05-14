@@ -71,7 +71,7 @@ Whatever method you use to register ACF fields to your WordPress site should wor
 
 The first step in using Advanced Custom Fields with WPGraphQL is to [create an ACF Field Group](https://www.advancedcustomfields.com/resources/creating-a-field-group/). 
 
-By default, field groups are _not_ exposed to WPGraphQL. You must opt-in to expose your ACF Field Groups and fields to the WPGraphQL Schema as some information managed my your ACF fields may not be intended for exposure in a queryable API like WPGraphQL.
+By default, field groups are _not_ exposed to WPGraphQL. You must opt-in to expose your ACF Field Groups and fields to the WPGraphQL Schema as some information managed by your ACF fields may not be intended for exposure in a queryable API like WPGraphQL.
 
 #### Show in GraphQL Setting
 

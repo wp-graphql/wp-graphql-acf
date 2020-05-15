@@ -1021,7 +1021,7 @@ class Config {
 					};
 				}
 				break;
-			case 'forms':
+			case 'forms' && class_exists( 'ACFGravityformsField\\Init' ) :
 				/**
 				 * If the select field is configured to not allow multiple values
 				 * the field will return a string, but if it is configured to allow
@@ -1032,13 +1032,51 @@ class Config {
 				 */
 				if ( empty( $acf_field['multiple'] ) ) {
 					if ($acf_field['return_format'] === 'post_object') {
-						//$field_config['type'] = 'PostObject';
-						$field_config['type'] = 'Integer';
+
+						$field_type_name = 'GravityForm';
+						if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
+							$field_config['type'] = $field_type_name;
+							break;
+						}
+
+						register_graphql_object_type(
+							$field_type_name,
+							[
+								'description' => __( 'Gravity Form Object', 'wp-graphql-acf' ),
+								'fields'      => [
+									'id' => [
+										'type'        => 'Integer',
+										'description' => __( 'The id of the Gravity Form', 'wp-graphql-acf' ),
+									],
+									'title'  => [
+										'type'        => 'String',
+										'description' => __( 'The title of the Gravity Form', 'wp-graphql-acf' ),
+									],
+									'description' => [
+										'type'        => 'String',
+										'description' => __( 'The description of the Gravity Form', 'wp-graphql-acf' ),
+									],
+									'labelPlacement' => [
+										'type'        => 'String',
+										'description' => __( 'The label placement of the Gravity Form', 'wp-graphql-acf' ),
+									],
+									'descriptionPlacement' => [
+										'type'        => 'String',
+										'description' => __( 'The description placement of the Gravity Form', 'wp-graphql-acf' ),
+									],
+									'fields'  => [
+										'type'        => [ 'list_of' => 'String' ],
+										'description' => __( 'The fields of the Gravity Form', 'wp-graphql-acf' ),
+									]
+								],
+							]
+						);
+						$field_config['type']    = $field_type_name;
 						$field_config['resolve'] = function( $root ) use ( $acf_field ) {
 							$value = $this->get_acf_field_value( $root, $acf_field );
-							$gform = GFAPI::get_form($value);
+							$gform = class_exists( 'GFAPI' ) ? \GFAPI::get_form($value) : null;
 
-							return ! empty( $value ) ? $value : null;
+							return ! empty( $gform ) ? $gform : null;
 						};
 					} else {
 						$field_config['type'] = 'Integer';

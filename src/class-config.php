@@ -333,7 +333,8 @@ class Config {
 			'color_picker',
 			'group',
 			'repeater',
-			'flexible_content'
+			'flexible_content',
+			'forms'
 		];
 
 		/**
@@ -1017,6 +1018,37 @@ class Config {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 
 						return ! empty( $value ) ? $value : [];
+					};
+				}
+				break;
+			case 'forms':
+				/**
+				 * If the select field is configured to not allow multiple values
+				 * the field will return a string, but if it is configured to allow
+				 * multiple values it will return a list of strings, and an empty array
+				 * if no values are set.
+				 *
+				 * @see: https://github.com/wp-graphql/wp-graphql-acf/issues/25
+				 */
+				if ( empty( $acf_field['multiple'] ) ) {
+					if ($acf_field['return_format'] === 'post_object') {
+						//$field_config['type'] = 'PostObject';
+						$field_config['type'] = 'Integer';
+						$field_config['resolve'] = function( $root ) use ( $acf_field ) {
+							$value = $this->get_acf_field_value( $root, $acf_field );
+							$gform = GFAPI::get_form($value);
+
+							return ! empty( $value ) ? $value : null;
+						};
+					} else {
+						$field_config['type'] = 'Integer';
+					}
+				} else {
+					$field_config['type']    = [ 'list_of' => 'String' ];
+					$field_config['resolve'] = function( $root ) use ( $acf_field ) {
+						$value = $this->get_acf_field_value( $root, $acf_field );
+
+						return ! empty( $value ) && is_array( $value ) ? $value : [];
 					};
 				}
 				break;

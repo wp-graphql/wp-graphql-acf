@@ -1707,14 +1707,12 @@ class Config {
 			 * Register options page type to the "RootQuery"
 			 */
 			$options_page['type'] = 'options_page';
-			$field_config = apply_filters( 'wpgraphql_acf_register_root_field', [
-				[
-					'type'        => $type_name,
-					'description' => sprintf( __( '%s options', 'wp-graphql-acf' ), $options_page['page_title'] ),
-					'resolve'     => function() use ( $options_page ) {
-						return ! empty( $options_page ) ? $options_page : null;
-					}
-				]
+			$field_config = apply_filters( 'wpgraphql_acf_register_root_field_options_page', [
+				'type'        => $type_name,
+				'description' => sprintf( __( '%s options', 'wp-graphql-acf' ), $options_page['page_title'] ),
+				'resolve'     => function() use ( $options_page ) {
+					return ! empty( $options_page ) ? $options_page : null;
+				}
 			],  $field_name );
 
 			register_graphql_field( 'RootQuery', $field_name, $field_config );

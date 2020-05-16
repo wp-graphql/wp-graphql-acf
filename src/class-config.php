@@ -1715,7 +1715,7 @@ class Config {
 						return ! empty( $options_page ) ? $options_page : null;
 					}
 				]
-			],  $field_name);
+			],  $field_name );
 
 			register_graphql_field( 'RootQuery', $field_name, $field_config );
 

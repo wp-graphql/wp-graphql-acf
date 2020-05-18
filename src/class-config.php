@@ -16,6 +16,8 @@ use WPGraphQL\Model\MenuItem;
 use WPGraphQL\Model\Post;
 use WPGraphQL\Model\Term;
 use WPGraphQL\Model\User;
+use WPGraphQLGravityForms\Types\Union\ObjectFieldUnion;
+use WPGraphQLGravityForms\Types\Button\Button;
 
 /**
  * Config class.
@@ -1069,25 +1071,7 @@ class Config {
 										'description' => __( 'Determines if the field description is displayed above the field input (i.e. immediately after the field label) or below the field input.', 'wp-graphql-acf' ),
 									],
 									'button' => [
-										'type'        => [ 'list_of' => [
-												'type'   => [
-													'type'        => 'String',
-													'description' => __( 'Specifies the type of button to be displayed. Possible values: text, image.', 'wp-graphql-gravity-forms' ),
-												],
-												'text' => [
-													'type'        => 'String',
-													'description' => __( 'Contains the button text. Only applicable when type is set to text.', 'wp-graphql-gravity-forms' ),
-												],
-												'imageUrl' => [
-													'type'        => 'String',
-													'description' => __( 'Contains the URL for the image button. Only applicable when type is set to image.', 'wp-graphql-gravity-forms' ),
-												],
-												// 'conditionalLogic' => [
-												// 	'type'        => ConditionalLogic::TYPE,
-												// 	'description' => __( 'Controls when the form button should be visible based on values selected on the form.', 'wp-graphql-gravity-forms' ),
-												// ],
-											]
-										],
+										'type'        => Button::TYPE,
 										'description' => __( 'Contains the form button settings such as the button text or image button source.', 'wp-graphql-acf' ),
 									],
 									'useCurrentUserAsAuthor'   => [
@@ -1126,26 +1110,26 @@ class Config {
 										'type'        => 'Boolean',
 										'description' => __( 'Determines if the post title template functionality is enabled. When enabled, the post title will be created based on the template specified by postTitleTemplate.', 'wp-graphql-acf' ),
 									],
-									// 'lastPageButton'   => [
-									// 	'type'        => Button::TYPE,
-									// 	'description' => __( 'Last page button data.', 'wp-graphql-acf' ),
-									// ],
-									// 'pagination'   => [
-									// 	'type'        => FormPagination::TYPE,
-									// 	'description' => __( 'Pagination data.', 'wp-graphql-acf' ),
-									// ],
+									'lastPageButton'   => [
+										'type'        => Button::TYPE,
+										'description' => __( 'Last page button data.', 'wp-graphql-acf' ),
+									],
+									'pagination'   => [
+										'type'        => FormPagination::TYPE,
+										'description' => __( 'Pagination data.', 'wp-graphql-acf' ),
+									],
 									'firstPageCssClass'   => [
 										'type'        => 'String',
 										'description' => __( 'CSS class for the first page.', 'wp-graphql-acf' ),
 									],
-									// 'notifications' => [
-									// 	'type'        => [ 'list_of' => FormNotification::TYPE ],
-									// 	'description' => __( 'The properties for all the email notifications which exist for a form.', 'wp-graphql-acf' ),
-									// ],
-									// 'confirmations' => [
-									// 	'type'        => [ 'list_of' => FormConfirmation::TYPE ],
-									// 	'description' => __( 'Contains the form confirmation settings such as confirmation text or redirect URL', 'wp-graphql-acf' ),
-									// ],
+									'notifications' => [
+										'type'        => [ 'list_of' => FormNotification::TYPE ],
+										'description' => __( 'The properties for all the email notifications which exist for a form.', 'wp-graphql-acf' ),
+									],
+									'confirmations' => [
+										'type'        => [ 'list_of' => FormConfirmation::TYPE ],
+										'description' => __( 'Contains the form confirmation settings such as confirmation text or redirect URL', 'wp-graphql-acf' ),
+									],
 									'cssClass'   => [
 										'type'        => 'String',
 										'description' => __( 'String containing the custom CSS classes to be added to the <form> tag.', 'wp-graphql-acf' ),
@@ -1158,10 +1142,10 @@ class Config {
 										'type'        => 'Boolean',
 										'description' => __( 'When enabled, conditional logic hide/show operation will be performed with a jQuery slide animation. Only applicable to forms with conditional logic.', 'wp-graphql-acf' ),
 									],
-									// 'save'   => [
-									// 	'type'        => SaveAndContinue::TYPE,
-									// 	'description' => __( '"Save and Continue" data.', 'wp-graphql-acf' ),
-									// ],
+									'save'   => [
+										'type'        => SaveAndContinue::TYPE,
+										'description' => __( '"Save and Continue" data.', 'wp-graphql-acf' ),
+									],
 									'limitEntries'   => [
 										'type'        => 'Boolean',
 										'description' => __( 'Specifies if this form has a limit on the number of submissions. 1 if the form limits submissions, 0 otherwise.', 'wp-graphql-acf' ),

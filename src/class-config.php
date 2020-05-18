@@ -16,6 +16,8 @@ use WPGraphQL\Model\MenuItem;
 use WPGraphQL\Model\Post;
 use WPGraphQL\Model\Term;
 use WPGraphQL\Model\User;
+
+// WPGraphQLGravityForms classes
 use WPGraphQLGravityForms\Types\Form\Form;
 use WPGraphQLGravityForms\DataManipulators;
 use WPGraphQLGravityForms\Types\Form\FormPagination;
@@ -24,7 +26,6 @@ use WPGraphQLGravityForms\Types\Form\FormConfirmation;
 use WPGraphQLGravityForms\Types\Form\SaveAndContinue;
 use WPGraphQLGravityForms\Types\Union\ObjectFieldUnion;
 use WPGraphQLGravityForms\Types\Button\Button;
-
 
 /**
  * Config class.
@@ -45,12 +46,14 @@ class Config {
 	 * @param \WPGraphQL\Registry\TypeRegistry $type_registry Instance of the WPGraphQL TypeRegistry
 	 */
 	public function init( \WPGraphQL\Registry\TypeRegistry $type_registry ) {
-
 		/**
 		 * Set the TypeRegistry
 		 */
 		$this->type_registry = $type_registry;
 
+		/**
+		 * Set the DataManipulators
+		 */
 		$this->fields_data_manipulator = new DataManipulators\FieldsDataManipulator();
 		$this->form_data_manipulator   = new DataManipulators\FormDataManipulator( $this->fields_data_manipulator );
 
@@ -1039,57 +1042,69 @@ class Config {
 					};
 				}
 				break;
-			case 'forms' && class_exists( 'ACFGravityformsField\\Init' ) :
-				/**
-				 * If the select field is configured to not allow multiple values
-				 * the field will return a string, but if it is configured to allow
-				 * multiple values it will return a list of strings, and an empty array
-				 * if no values are set.
-				 *
-				 * @see: https://github.com/wp-graphql/wp-graphql-acf/issues/25
-				 */
-				$field_type_name = Form::TYPE;
-				if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
-					$field_config['type'] = $field_type_name;
-					break;
-				}
-				
+			/*
+			 * Add acf-gravityforms-add-on support
+			 */
+			case 'forms' && class_exists( 'GFAPI' ) && class_exists( 'ACFGravityformsField\\Init' ) :
 				// Single form
 				if ( empty( $acf_field['multiple'] ) ) {
 					if ($acf_field['return_format'] === 'post_object') {
-						$field_config['type'] = $field_type_name;
-						$field_config['resolve'] = function( $root, $args ) use ( $acf_field ) {
-							$form_id  = $this->get_acf_field_value( $root, $acf_field );
-							$form_raw = class_exists( 'GFAPI' ) ? \GFAPI::get_form($form_id) : null;
+						if (class_exists('WPGraphQLGravityForms\WPGraphQLGravityForms\Types\Form')) {
+							$field_config['type'] =  Form::TYPE;
+							$field_config['resolve'] = function( $root, $args ) use ( $acf_field ) {
+								$form_id  = $this->get_acf_field_value( $root, $acf_field );
+								$form_raw = \GFAPI::get_form($form_id);
 
-							if ( ! $form_raw ) {
-								throw new UserError( __( 'A valid form ID must be provided.', 'wp-graphql-acf' ) );
-							}
+								if ( ! $form_raw ) {
+									throw new UserError( __( 'A valid form ID must be provided.', 'wp-graphql-acf' ) );
+								}
 
-							$form = $this->form_data_manipulator->manipulate( $form_raw, $args );
-							return apply_filters( 'wp_graphql_gf_form_object', $form );
-						};
+								$form = $this->form_data_manipulator->manipulate( $form_raw, $args );
+								return apply_filters( 'wp_graphql_gf_form_object', $form );
+							};
+						} else {
+							$field_config['type'] = 'String';
+							$field_config['resolve'] = function( $root ) use ( $acf_field ) {
+								$message = __( 'WPGraphQL for Gravity Forms plugin must be installed and activated in order to retrieve the Gravity Form object.', 'wp-graphql-acf' );
+
+								return $message;
+							};
+						}
 					} else {
 						$field_config['type'] = 'Integer';
 					}
 				// Multiple forms
 				} else {
-					if ($acf_field['return_format'] === 'post_object') {
-						$field_config['type']    = [ 'list_of' => $field_type_name ];
-						$field_config['resolve'] = function( $root ) use ( $acf_field ) {
-							$forms    = [];
-							$form_ids = $this->get_acf_field_value( $root, $acf_field );
+					if ($acf_field['return_format'] === 'post_object' && class_exists('WPGraphQLGravityForms')) {
+						if (class_exists('WPGraphQLGravityForms\WPGraphQLGravityForms\Types\Form')) {
+							$field_config['type']    = [ 'list_of' => $field_type_name ];
+							$field_config['resolve'] = function( $root, $args ) use ( $acf_field ) {
+								$forms    = [];
+								$form_ids = $this->get_acf_field_value( $root, $acf_field );
 
-							if ( ! empty( $form_ids ) && is_array( $form_ids ) ) {
-								foreach ( $form_ids as $form_id ) {
-									$form_raw = class_exists( 'GFAPI' ) ? \GFAPI::get_form($form_id) : null;
-									$forms[]  = $form_raw;
+								if ( ! empty( $form_ids ) && is_array( $form_ids ) ) {
+									foreach ( $form_ids as $form_id ) {
+										$form_raw = \GFAPI::get_form($form_id);
+
+										if ( ! $form_raw ) {
+											throw new UserError( __( 'A valid form ID must be provided.', 'wp-graphql-acf' ) );
+										}
+
+										$form = apply_filters( 'wp_graphql_gf_form_object', $this->form_data_manipulator->manipulate( $form_raw, $args ) );
+										$forms[] = $form;
+									}
 								}
-							}
 
+								return ! empty( $forms ) ? $forms : [];
+							};
+						} else {
+							$field_config['type'] = 'String';
+							$field_config['resolve'] = function( $root ) use ( $acf_field ) {
+								$message = __( 'WPGraphQL for Gravity Forms plugin must be installed and activated in order to retrieve the Gravity Form object.', 'wp-graphql-acf' );
 
-							return ! empty( $forms ) ? $forms : [];
-						};
+								return $message;
+							};
+						}
 					} else {
 						$field_config['type']    = [ 'list_of' => 'Integer' ];
 						$field_config['resolve'] = function( $root ) use ( $acf_field ) {

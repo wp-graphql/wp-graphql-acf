@@ -814,79 +814,79 @@ class Config {
 				// ACF 5.8.6 added more data to Google Maps field value
 				// https://www.advancedcustomfields.com/changelog/
 				if (\acf_version_compare(acf_get_db_version(), '>=', '5.8.6')) {
-                    $fields += [
-                        'streetName' => [
+					$fields += [
+						'streetName' => [
 							'type'        => 'String',
 							'description' => __( 'The street name associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['street_name'] ) ? $root['street_name'] : null;
 							},
-                        ],
-                        'streetNumber' => [
+						],
+						'streetNumber' => [
 							'type'        => 'String',
 							'description' => __( 'The street number associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['street_number'] ) ? $root['street_number'] : null;
 							},
-                        ],
-                        'city' => [
+						],
+						'city' => [
 							'type'        => 'String',
 							'description' => __( 'The city associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['city'] ) ? $root['city'] : null;
 							},
-                        ],
-                        'state' => [
+						],
+						'state' => [
 							'type'        => 'String',
 							'description' => __( 'The state associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['state'] ) ? $root['state'] : null;
 							},
-                        ],
-                        'stateShort' => [
+						],
+						'stateShort' => [
 							'type'        => 'String',
 							'description' => __( 'The state abbreviation associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['state_short'] ) ? $root['state_short'] : null;
 							},
-                        ],
-                        'postCode' => [
+						],
+						'postCode' => [
 							'type'        => 'String',
 							'description' => __( 'The post code associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['post_code'] ) ? $root['post_code'] : null;
 							},
-                        ],
-                        'country' => [
+						],
+						'country' => [
 							'type'        => 'String',
 							'description' => __( 'The country associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['country'] ) ? $root['country'] : null;
 							},
-                        ],
-                        'countryShort' => [
+						],
+						'countryShort' => [
 							'type'        => 'String',
 							'description' => __( 'The country abbreviation associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['country_short'] ) ? $root['country_short'] : null;
 							},
-                        ],
-                        'placeId' => [
+						],
+						'placeId' => [
 							'type'        => 'String',
 							'description' => __( 'The country associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['place_id'] ) ? $root['place_id'] : null;
 							},
-                        ],
-                        'zoom' => [
+						],
+						'zoom' => [
 							'type'        => 'String',
 							'description' => __( 'The zoom defined with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['zoom'] ) ? $root['zoom'] : null;
 							},
-                        ],
-                    ];
-                }
+						],
+					];
+				}
 
 				register_graphql_object_type(
 					$field_type_name,
@@ -1045,29 +1045,197 @@ class Config {
 								'description' => __( 'Gravity Form Object', 'wp-graphql-acf' ),
 								'fields'      => [
 									'id' => [
-										'type'        => 'Integer',
-										'description' => __( 'The id of the Gravity Form', 'wp-graphql-acf' ),
+										'type'        => [ 'non_null' => 'ID' ],
+										'description' => __( 'Unique global ID for the object.', 'wp-graphql-acf' ),
 									],
-									'title'  => [
+									'formId' => [
+										'type'        => 'Int',
+										'description' => __( 'Form ID.', 'wp-graphql-acf' ),
+									],
+									'title' => [
 										'type'        => 'String',
-										'description' => __( 'The title of the Gravity Form', 'wp-graphql-acf' ),
+										'description' => __( 'Form title.', 'wp-graphql-acf' ),
 									],
 									'description' => [
 										'type'        => 'String',
-										'description' => __( 'The description of the Gravity Form', 'wp-graphql-acf' ),
+										'description' => __( 'Form description.', 'wp-graphql-acf' ),
 									],
 									'labelPlacement' => [
 										'type'        => 'String',
-										'description' => __( 'The label placement of the Gravity Form', 'wp-graphql-acf' ),
+										'description' => __( 'Determines if the field labels are displayed on top of the fields (top_label), beside the fields and aligned to the left (left_label) or beside the fields and aligned to the right (right_label).', 'wp-graphql-acf' ),
 									],
 									'descriptionPlacement' => [
 										'type'        => 'String',
-										'description' => __( 'The description placement of the Gravity Form', 'wp-graphql-acf' ),
+										'description' => __( 'Determines if the field description is displayed above the field input (i.e. immediately after the field label) or below the field input.', 'wp-graphql-acf' ),
 									],
-									'fields'  => [
+									'button' => [
+										'type'        => Button::TYPE,
+										'description' => __( 'Contains the form button settings such as the button text or image button source.', 'wp-graphql-acf' ),
+									],
+									'useCurrentUserAsAuthor'   => [
+										'type'        => 'Boolean',
+										'description' => __( 'For forms with Post fields, this determines if the post should be created using the current logged in user as the author. 1 to use the current user, 0 otherwise.', 'wp-graphql-acf' ),
+									],
+									'postAuthor' => [
+										'type'        => 'Int',
+										'description' => __( 'When useCurrentUserAsAuthor is set to 0, this property contains the user Id that will be used as the Post author.', 'wp-graphql-acf' ),
+									],
+									'postCategory' => [
+										'type'        => 'Int',
+										'description' => __( 'Form forms with Post fields, but without a Post Category field, this property determines the default category that the post will be associated with when created.', 'wp-graphql-acf' ),
+									],
+									'postContentTemplate' => [
+										'type'        => 'String',
+										'description' => __( 'Template to be used when creating the post content. Field variables (i.e. {Name:3} ) can be added to the template to insert user submitted values into the post content. Only applicable when postContentTemplateEnabled is true.', 'wp-graphql-acf' ),
+									],
+									'postContentTemplateEnabled' => [
+										'type'        => 'Boolean',
+										'description' => __( 'Determines if the post template functionality is enabled. When enabled, the post content will be created based on the template specified by postContentTemplate.', 'wp-graphql-acf' ),
+									],
+									'postFormat' => [
+										'type'        => 'String',
+										'description' => __( 'For forms with Post fields, determines the format that the Post should be created with.', 'wp-graphql-acf' ),
+									],
+									'postStatus' => [
+										'type'        => 'String',
+										'description' => __( 'For forms with Post fields, determines the status that the Post should be created with.', 'wp-graphql-acf' ),
+									],
+									'postTitleTemplate' => [
+										'type'        => 'String',
+										'description' => __( 'Template to be used when creating the post title. Field variables (i.e. {Name:3} ) can be added to the template to insert user submitted values into the post title. Only applicable when postTitleTemplateEnabled is true', 'wp-graphql-acf' ),
+									],
+									'postTitleTemplateEnabled' => [
+										'type'        => 'Boolean',
+										'description' => __( 'Determines if the post title template functionality is enabled. When enabled, the post title will be created based on the template specified by postTitleTemplate.', 'wp-graphql-acf' ),
+									],
+									'lastPageButton'   => [
+										'type'        => Button::TYPE,
+										'description' => __( 'Last page button data.', 'wp-graphql-acf' ),
+									],
+									'pagination'   => [
+										'type'        => FormPagination::TYPE,
+										'description' => __( 'Pagination data.', 'wp-graphql-acf' ),
+									],
+									'firstPageCssClass'   => [
+										'type'        => 'String',
+										'description' => __( 'CSS class for the first page.', 'wp-graphql-acf' ),
+									],
+									'notifications' => [
+										'type'        => [ 'list_of' => FormNotification::TYPE ],
+										'description' => __( 'The properties for all the email notifications which exist for a form.', 'wp-graphql-acf' ),
+									],
+									'confirmations' => [
+										'type'        => [ 'list_of' => FormConfirmation::TYPE ],
+										'description' => __( 'Contains the form confirmation settings such as confirmation text or redirect URL', 'wp-graphql-acf' ),
+									],
+									'cssClass'   => [
+										'type'        => 'String',
+										'description' => __( 'String containing the custom CSS classes to be added to the <form> tag.', 'wp-graphql-acf' ),
+									],
+									'enableHoneypot'   => [
+										'type'        => 'Boolean',
+										'description' => __( 'Specifies if the form has the Honeypot spam-protection feature.', 'wp-graphql-acf' ),
+									],
+									'enableAnimation'   => [
+										'type'        => 'Boolean',
+										'description' => __( 'When enabled, conditional logic hide/show operation will be performed with a jQuery slide animation. Only applicable to forms with conditional logic.', 'wp-graphql-acf' ),
+									],
+									'save'   => [
+										'type'        => SaveAndContinue::TYPE,
+										'description' => __( '"Save and Continue" data.', 'wp-graphql-acf' ),
+									],
+									'limitEntries'   => [
+										'type'        => 'Boolean',
+										'description' => __( 'Specifies if this form has a limit on the number of submissions. 1 if the form limits submissions, 0 otherwise.', 'wp-graphql-acf' ),
+									],
+									'limitEntriesCount'   => [
+										'type'        => 'Int',
+										'description' => __( 'When limitEntries is set to 1, this property specifies the number of submissions allowed.', 'wp-graphql-acf' ),
+									],
+									'limitEntriesPeriod' => [
+										'type'        => 'String',
+										'description' => __( 'When limitEntries is set to 1, this property specifies the time period during which submissions are allowed. Options are "day", "week", "month" and "year".', 'wp-graphql-acf' ),
+									],
+									'limitEntriesMessage' => [
+										'type'        => 'String',
+										'description' => __( 'Message that will be displayed when the maximum number of submissions have been reached.', 'wp-graphql-acf' ),
+									],
+									'scheduleForm' => [
+										'type'        => 'Boolean',
+										'description' => __( 'Specifies if this form is scheduled to be displayed only during a certain configured date/time.', 'wp-graphql-acf' ),
+									],
+									'scheduleStart' => [
+										'type'        => 'String',
+										'description' => __( 'Date in the format (mm/dd/yyyy) that the form will become active/visible.', 'wp-graphql-acf' ),
+									],
+									'scheduleStartHour' => [
+										'type'        => 'Int',
+										'description' => __( 'Hour (1 to 12) that the form will become active/visible.', 'wp-graphql-acf' ),
+									],
+									'scheduleStartMinute' => [
+										'type'        => 'Int',
+										'description' => __( 'Minute that the form will become active/visible.', 'wp-graphql-acf' ),
+									],
+									'scheduleStartAmpm' => [
+										'type'        => 'String',
+										'description' => __( '"am" or "pm". Applies to scheduleStartHour', 'wp-graphql-acf' ),
+									],
+									'scheduleEnd' => [
+										'type'        => 'String',
+										'description' => __( 'Date in the format (mm/dd/yyyy) that the form will become inactive/hidden.', 'wp-graphql-acf' ),
+									],
+									'scheduleEndHour' => [
+										'type'        => 'Int',
+										'description' => __( 'Hour (1 to 12) that the form will become inactive/hidden.', 'wp-graphql-acf' ),
+									],
+									'scheduleEndMinute' => [
+										'type'        => 'Int',
+										'description' => __( 'Minute that the form will become inactive/hidden.', 'wp-graphql-acf' ),
+									],
+									'scheduleEndAmpm' => [
+										'type'        => 'String',
+										'description' => __( '"am? or "pm?. Applies to scheduleEndHour', 'wp-graphql-acf' ),
+									],
+									'scheduleMessage' => [
+										'type'        => 'String',
+										'description' => __( 'Message to be displayed when form is no longer available', 'wp-graphql-acf' ),
+									],
+									'schedulePendingMessage' => [
+										'type'        => 'String',
+										'description' => __( 'Message to be displayed when form is not yet available.', 'wp-graphql-acf' ),
+									],
+									'subLabelPlacement'   => [
+										'type'        => 'String',
+										'description' => __( 'How sub-labels are aligned.', 'wp-graphql-acf' ),
+									],
+									'cssClassList'   => [
 										'type'        => [ 'list_of' => 'String' ],
-										'description' => __( 'The fields of the Gravity Form', 'wp-graphql-acf' ),
-									]
+										'description' => __( 'Array of the custom CSS classes to be added to the <form> tag.', 'wp-graphql-acf' ),
+									],
+									'requireLogin' => [
+										'type'        => 'Boolean',
+										'description' => __( 'Whether the form is configured to be displayed only to logged in users.', 'wp-graphql-acf' ),
+									],
+									'requireLoginMessage' => [
+										'type'        => 'String',
+										'description' => __( 'When requireLogin is set to true, this controls the message displayed when non-logged in user tries to access the form.', 'wp-graphql-acf' ),
+									],
+									'nextFieldId' => [
+										'type'        => 'Int',
+										'description' => __( 'The ID to assign to the next field that is added to the form.', 'wp-graphql-acf' ),
+									],
+									'isActive' => [
+										'type'        => 'Boolean',
+										'description' => __( 'Determines whether the form is active.', 'wp-graphql-acf' ),
+									],
+									'dateCreated' => [
+										'type'        => 'String',
+										'description' => __( 'The date the form was created in this format: YYYY-MM-DD HH:mm:ss.', 'wp-graphql-acf' ),
+									],
+									'isTrash' => [
+										'type'        => 'Boolean',
+										'description' => __( 'Determines whether the form is in the trash.', 'wp-graphql-acf' ),
+									],
 								],
 							]
 						);

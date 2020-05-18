@@ -117,6 +117,7 @@ final class ACF {
 	private function includes() {
 
 		// Autoload Required Classes.
+		require_once(plugin_dir_path( __FILE__ ) . '/classes/WPGraphQLGravityForms.php');
 	}
 
 	/**

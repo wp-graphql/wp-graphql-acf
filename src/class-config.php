@@ -17,16 +17,6 @@ use WPGraphQL\Model\Post;
 use WPGraphQL\Model\Term;
 use WPGraphQL\Model\User;
 
-// WPGraphQLGravityForms classes
-use WPGraphQLGravityForms\Types\Form\Form;
-use WPGraphQLGravityForms\DataManipulators;
-use WPGraphQLGravityForms\Types\Form\FormPagination;
-use WPGraphQLGravityForms\Types\Form\FormNotification;
-use WPGraphQLGravityForms\Types\Form\FormConfirmation;
-use WPGraphQLGravityForms\Types\Form\SaveAndContinue;
-use WPGraphQLGravityForms\Types\Union\ObjectFieldUnion;
-use WPGraphQLGravityForms\Types\Button\Button;
-
 
 /**
  * Config class.
@@ -34,12 +24,6 @@ use WPGraphQLGravityForms\Types\Button\Button;
 class Config {
 
 	protected $type_registry;
-
-	/**
-	 * FormDataManipulator instance.
-	 */
-	private $fields_data_manipulator;
-	private $form_data_manipulator;
 
 	/**
 	 * Initialize WPGraphQL to ACF
@@ -53,12 +37,6 @@ class Config {
 		$this->type_registry = $type_registry;
 
 		/**
-		 * Set the DataManipulators
-		 */
-		$this->fields_data_manipulator = new DataManipulators\FieldsDataManipulator();
-		$this->form_data_manipulator   = new DataManipulators\FormDataManipulator( $this->fields_data_manipulator );
-
-		/**
 		 * Add ACF Fields to GraphQL Types
 		 */
 		$this->add_acf_fields_to_post_object_types();
@@ -70,6 +48,7 @@ class Config {
 		$this->add_acf_fields_to_individual_posts();
 		$this->add_acf_fields_to_users();
 		$this->add_acf_fields_to_options_pages();
+		$this->add_acf_fields_to_pages();
 	}
 
 	/**
@@ -354,8 +333,7 @@ class Config {
 			'color_picker',
 			'group',
 			'repeater',
-			'flexible_content',
-			'forms'
+			'flexible_content'
 		];
 
 		/**
@@ -1040,52 +1018,6 @@ class Config {
 
 						return ! empty( $value ) ? $value : [];
 					};
-				}
-				break;
-			/*
-			 * Add acf-gravityforms-add-on support
-			 */
-			case 'forms' && class_exists( 'GFAPI' ) && class_exists( 'ACFGravityformsField\\Init' ) :
-				// GravityForm object
-				if ($acf_field['return_format'] === 'post_object' && is_plugin_active('wp-graphql-gravity-forms/wp-graphql-gravity-forms.php')) {
-					if ( empty( $acf_field['multiple'] ) ) {
-						$field_config['type'] =  Form::TYPE;
-						$field_config['resolve'] = function( $root, $args ) use ( $acf_field ) {
-							$form_id  = $this->get_acf_field_value( $root, $acf_field );
-							$form_raw = \GFAPI::get_form($form_id);
-							$form     = $this->form_data_manipulator->manipulate( $form_raw, $args );
-
-							return apply_filters( 'wp_graphql_gf_form_object', $form );
-						};
-					} else {
-						$field_config['type']    = [ 'list_of' => Form::TYPE ];
-						$field_config['resolve'] = function( $root, $args ) use ( $acf_field ) {
-							$forms    = [];
-							$form_ids = $this->get_acf_field_value( $root, $acf_field );
-
-							if ( ! empty( $form_ids ) && is_array( $form_ids ) ) {
-								foreach ( $form_ids as $form_id ) {
-									$form_raw = \GFAPI::get_form($form_id);
-									$form = apply_filters( 'wp_graphql_gf_form_object', $this->form_data_manipulator->manipulate( $form_raw, $args ) );
-									$forms[] = $form;
-								}
-							}
-
-							return ! empty( $forms ) ? $forms : [];
-						};
-					}
-				// Form id
-				} else {
-					if ( empty( $acf_field['multiple'] ) ) {
-						$field_config['type'] = 'Integer';
-					} else {
-						$field_config['type'] = [ 'list_of' => 'Integer' ];
-						$field_config['resolve'] = function( $root, $args ) use ( $acf_field ) {
-							$value = $this->get_acf_field_value( $root, $acf_field );
-
-							return ! empty( $value ) && is_array( $value ) ? $value : [];
-						};
-					}
 				}
 				break;
 			default:
@@ -1794,6 +1726,104 @@ class Config {
 			foreach ( $options_page_fields as $name => $config ) {
 				$this->register_graphql_field( $type_name, $name, $config );
 			}
+		}
+	}
+
+	/**
+	 * Add field groups for `page_type` and `page_template`.
+	 * Note that these will show up for all pages in the schema,
+	 * they will not be limited to the page types or templates assigned in the field group.
+	 */
+	protected function add_acf_fields_to_pages() {
+
+		$page_field_groups = [];
+
+		/**
+		 * Get the field groups.
+		 *
+		 * TODO: Can we filter this to only page related ACF Field Groups?
+		 */
+		$field_groups = acf_get_field_groups();
+
+		/**
+		 * We only want to add field groups for page type and template params.
+		 * Page by location is already covered by `add_acf_fields_to_individual_posts`,
+		 * so we do not want to duplicate that.
+		 */
+		$allowed_page_params = [
+			'page_type',
+			'page_template',
+		];
+
+		foreach ( $field_groups as $field_group ) {
+			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
+				foreach ( $field_group['location'] as $locations ) {
+					if ( ! empty( $locations ) && is_array( $locations ) ) {
+						foreach ( $locations as $location ) {
+
+							/**
+							 * If the operator is not equal to, we don't need to do anything,
+							 * so we can just continue
+							 */
+							if ( '!=' === $location['operator'] ) {
+								continue;
+							}
+
+							/**
+							 * Add field group if the param is page related.
+							 */
+							if ( in_array( $location['param'], $allowed_page_params, true ) && '==' === $location['operator'] ) {
+								$page_field_groups[] = [
+									'type'        => $location['param'],
+									'field_group' => $field_group,
+									'post_id'     => $location['value']
+								];
+							}
+						}
+					}
+				}
+			}
+		}
+
+
+		/**
+		 * If no field groups are assigned to pages, we don't need to modify the Schema.
+		 */
+		if ( empty( $page_field_groups ) ) {
+			return;
+		}
+
+		/**
+		 * Loop over the field groups assigned to pages
+		 * and register them to the Schema
+		 */
+		foreach ( $page_field_groups as $key => $group ) {
+
+			if ( empty( $group['field_group'] ) || ! is_array( $group['field_group'] ) ) {
+				continue;
+			}
+
+			// Initialize our field group object.
+			$field_group = $group['field_group'];
+
+			$page_type_object = get_post_type_object('page');
+
+			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+			$field_group['type'] = 'group';
+			$field_group['name'] = $field_name;
+			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
+			$config              = [
+				'name'            => $field_name,
+				'description'     => $description,
+				'acf_field'       => $field_group,
+				'acf_field_group' => null,
+				'resolve'         => function( $root ) use ( $field_group ) {
+					return isset( $root ) ? $root : null;
+				}
+			];
+
+			$this->register_graphql_field($page_type_object->graphql_single_name, $field_name, $config);
+
 		}
 	}
 }

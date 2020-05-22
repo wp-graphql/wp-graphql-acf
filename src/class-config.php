@@ -1051,11 +1051,15 @@ class Config {
 					if ( empty( $acf_field['multiple'] ) ) {
 						$field_config['type'] =  Form::TYPE;
 						$field_config['resolve'] = function( $root, $args ) use ( $acf_field ) {
+							$form     = null;
 							$form_id  = $this->get_acf_field_value( $root, $acf_field );
-							$form_raw = \GFAPI::get_form($form_id);
-							$form     = $this->form_data_manipulator->manipulate( $form_raw, $args );
 
-							return apply_filters( 'wp_graphql_gf_form_object', $form );
+							if ($form_id) {
+								$form_raw = \GFAPI::get_form($form_id);
+								$form     = $this->form_data_manipulator->manipulate( $form_raw, $args );
+							}
+
+							return $form ? apply_filters( 'wp_graphql_gf_form_object', $form ) : null;
 						};
 					} else {
 						$field_config['type']    = [ 'list_of' => Form::TYPE ];
@@ -1065,9 +1069,11 @@ class Config {
 
 							if ( ! empty( $form_ids ) && is_array( $form_ids ) ) {
 								foreach ( $form_ids as $form_id ) {
-									$form_raw = \GFAPI::get_form($form_id);
-									$form = apply_filters( 'wp_graphql_gf_form_object', $this->form_data_manipulator->manipulate( $form_raw, $args ) );
-									$forms[] = $form;
+									if ($form_id) {
+										$form_raw = \GFAPI::get_form($form_id);
+										$form = apply_filters( 'wp_graphql_gf_form_object', $this->form_data_manipulator->manipulate( $form_raw, $args ) );
+										$forms[] = $form;
+									}
 								}
 							}
 

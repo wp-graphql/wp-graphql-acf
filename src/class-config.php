@@ -70,7 +70,6 @@ class Config {
 		$this->add_acf_fields_to_individual_posts();
 		$this->add_acf_fields_to_users();
 		$this->add_acf_fields_to_options_pages();
-		$this->add_acf_fields_to_pages();
 	}
 
 	/**
@@ -1801,104 +1800,6 @@ class Config {
 			foreach ( $options_page_fields as $name => $config ) {
 				$this->register_graphql_field( $type_name, $name, $config );
 			}
-		}
-	}
-
-	/**
-	 * Add field groups for `page_type` and `page_template`.
-	 * Note that these will show up for all pages in the schema,
-	 * they will not be limited to the page types or templates assigned in the field group.
-	 */
-	protected function add_acf_fields_to_pages() {
-
-		$page_field_groups = [];
-
-		/**
-		 * Get the field groups.
-		 *
-		 * TODO: Can we filter this to only page related ACF Field Groups?
-		 */
-		$field_groups = acf_get_field_groups();
-
-		/**
-		 * We only want to add field groups for page type and template params.
-		 * Page by location is already covered by `add_acf_fields_to_individual_posts`,
-		 * so we do not want to duplicate that.
-		 */
-		$allowed_page_params = [
-			'page_type',
-			'page_template',
-		];
-
-		foreach ( $field_groups as $field_group ) {
-			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
-				foreach ( $field_group['location'] as $locations ) {
-					if ( ! empty( $locations ) && is_array( $locations ) ) {
-						foreach ( $locations as $location ) {
-
-							/**
-							 * If the operator is not equal to, we don't need to do anything,
-							 * so we can just continue
-							 */
-							if ( '!=' === $location['operator'] ) {
-								continue;
-							}
-
-							/**
-							 * Add field group if the param is page related.
-							 */
-							if ( in_array( $location['param'], $allowed_page_params, true ) && '==' === $location['operator'] ) {
-								$page_field_groups[] = [
-									'type'        => $location['param'],
-									'field_group' => $field_group,
-									'post_id'     => $location['value']
-								];
-							}
-						}
-					}
-				}
-			}
-		}
-
-
-		/**
-		 * If no field groups are assigned to pages, we don't need to modify the Schema.
-		 */
-		if ( empty( $page_field_groups ) ) {
-			return;
-		}
-
-		/**
-		 * Loop over the field groups assigned to pages
-		 * and register them to the Schema
-		 */
-		foreach ( $page_field_groups as $key => $group ) {
-
-			if ( empty( $group['field_group'] ) || ! is_array( $group['field_group'] ) ) {
-				continue;
-			}
-
-			// Initialize our field group object.
-			$field_group = $group['field_group'];
-
-			$page_type_object = get_post_type_object('page');
-
-			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
-			$field_group['type'] = 'group';
-			$field_group['name'] = $field_name;
-			$description         = $field_group['description'] ? $field_group['description'] . ' | ' : '';
-			$config              = [
-				'name'            => $field_name,
-				'description'     => $description,
-				'acf_field'       => $field_group,
-				'acf_field_group' => null,
-				'resolve'         => function( $root ) use ( $field_group ) {
-					return isset( $root ) ? $root : null;
-				}
-			];
-
-			$this->register_graphql_field($page_type_object->graphql_single_name, $field_name, $config);
-
 		}
 	}
 }

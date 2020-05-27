@@ -54,7 +54,8 @@ To install the plugin from Github, you can [download the latest release zip file
 [Click here](https://wordpress.org/support/article/managing-plugins/) to learn more about installing WordPress plugins from a Zip file.
 
 ### Installing from Composer <a name="install-with-composer" />
-`@todo`
+
+`composer require wp-graphql/wp-graphql-acf`
 
 ## Dependencies <a name="dependencies" />
 In order to use WPGraphQL for Advanced Custom Fields, you must have [WPGraphQL](https://github.com/wp-graphql/wp-graphql) and [Advanced Custom Fields](https://advancedcustomfields.com) (free or pro) installed and activated. 

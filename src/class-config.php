@@ -735,7 +735,8 @@ class Config {
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 						$terms = [];
-						if ( ! empty( $value ) && is_array( $value ) ) {
+						if ( ! empty( $value ) ) {
+							$value = is_array( $value ) ? $value : [ $value ];
 							foreach ( $value as $term ) {
 								$terms[] = DataSource::resolve_term_object( (int) $term, $context );
 							}

@@ -17,6 +17,17 @@ use WPGraphQL\Model\Post;
 use WPGraphQL\Model\Term;
 use WPGraphQL\Model\User;
 
+// WPGraphQLGravityForms classes
+use WPGraphQLGravityForms\Types\Form\Form;
+use WPGraphQLGravityForms\DataManipulators;
+use WPGraphQLGravityForms\Types\Form\FormPagination;
+use WPGraphQLGravityForms\Types\Form\FormNotification;
+use WPGraphQLGravityForms\Types\Form\FormConfirmation;
+use WPGraphQLGravityForms\Types\Form\SaveAndContinue;
+use WPGraphQLGravityForms\Types\Union\ObjectFieldUnion;
+use WPGraphQLGravityForms\Types\Button\Button;
+
+
 /**
  * Config class.
  */
@@ -25,16 +36,27 @@ class Config {
 	protected $type_registry;
 
 	/**
+	 * FormDataManipulator instance.
+	 */
+	private $fields_data_manipulator;
+	private $form_data_manipulator;
+
+	/**
 	 * Initialize WPGraphQL to ACF
 	 *
 	 * @param \WPGraphQL\Registry\TypeRegistry $type_registry Instance of the WPGraphQL TypeRegistry
 	 */
 	public function init( \WPGraphQL\Registry\TypeRegistry $type_registry ) {
-
 		/**
 		 * Set the TypeRegistry
 		 */
 		$this->type_registry = $type_registry;
+
+		/**
+		 * Set the DataManipulators
+		 */
+		$this->fields_data_manipulator = new DataManipulators\FieldsDataManipulator();
+		$this->form_data_manipulator   = new DataManipulators\FormDataManipulator( $this->fields_data_manipulator );
 
 		/**
 		 * Add ACF Fields to GraphQL Types
@@ -332,7 +354,8 @@ class Config {
 			'color_picker',
 			'group',
 			'repeater',
-			'flexible_content'
+			'flexible_content',
+			'forms'
 		];
 
 		/**
@@ -818,79 +841,79 @@ class Config {
 				// ACF 5.8.6 added more data to Google Maps field value
 				// https://www.advancedcustomfields.com/changelog/
 				if (\acf_version_compare(acf_get_db_version(), '>=', '5.8.6')) {
-                    $fields += [
-                        'streetName' => [
+					$fields += [
+						'streetName' => [
 							'type'        => 'String',
 							'description' => __( 'The street name associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['street_name'] ) ? $root['street_name'] : null;
 							},
-                        ],
-                        'streetNumber' => [
+						],
+						'streetNumber' => [
 							'type'        => 'String',
 							'description' => __( 'The street number associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['street_number'] ) ? $root['street_number'] : null;
 							},
-                        ],
-                        'city' => [
+						],
+						'city' => [
 							'type'        => 'String',
 							'description' => __( 'The city associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['city'] ) ? $root['city'] : null;
 							},
-                        ],
-                        'state' => [
+						],
+						'state' => [
 							'type'        => 'String',
 							'description' => __( 'The state associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['state'] ) ? $root['state'] : null;
 							},
-                        ],
-                        'stateShort' => [
+						],
+						'stateShort' => [
 							'type'        => 'String',
 							'description' => __( 'The state abbreviation associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['state_short'] ) ? $root['state_short'] : null;
 							},
-                        ],
-                        'postCode' => [
+						],
+						'postCode' => [
 							'type'        => 'String',
 							'description' => __( 'The post code associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['post_code'] ) ? $root['post_code'] : null;
 							},
-                        ],
-                        'country' => [
+						],
+						'country' => [
 							'type'        => 'String',
 							'description' => __( 'The country associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['country'] ) ? $root['country'] : null;
 							},
-                        ],
-                        'countryShort' => [
+						],
+						'countryShort' => [
 							'type'        => 'String',
 							'description' => __( 'The country abbreviation associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['country_short'] ) ? $root['country_short'] : null;
 							},
-                        ],
-                        'placeId' => [
+						],
+						'placeId' => [
 							'type'        => 'String',
 							'description' => __( 'The country associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['place_id'] ) ? $root['place_id'] : null;
 							},
-                        ],
-                        'zoom' => [
+						],
+						'zoom' => [
 							'type'        => 'String',
 							'description' => __( 'The zoom defined with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['zoom'] ) ? $root['zoom'] : null;
 							},
-                        ],
-                    ];
-                }
+						],
+					];
+				}
 
 				register_graphql_object_type(
 					$field_type_name,
@@ -1023,6 +1046,58 @@ class Config {
 
 						return ! empty( $value ) ? $value : [];
 					};
+				}
+				break;
+			/*
+			 * Add acf-gravityforms-add-on support
+			 */
+			case 'forms' && class_exists( 'GFAPI' ) && class_exists( 'ACFGravityformsField\\Init' ) :
+				// GravityForm object
+				if ($acf_field['return_format'] === 'post_object' && is_plugin_active('wp-graphql-gravity-forms/wp-graphql-gravity-forms.php')) {
+					if ( empty( $acf_field['multiple'] ) ) {
+						$field_config['type'] =  Form::TYPE;
+						$field_config['resolve'] = function( $root, $args ) use ( $acf_field ) {
+							$form     = null;
+							$form_id  = $this->get_acf_field_value( $root, $acf_field );
+
+							if ($form_id) {
+								$form_raw = \GFAPI::get_form($form_id);
+								$form     = $this->form_data_manipulator->manipulate( $form_raw, $args );
+							}
+
+							return $form ? apply_filters( 'wp_graphql_gf_form_object', $form ) : null;
+						};
+					} else {
+						$field_config['type']    = [ 'list_of' => Form::TYPE ];
+						$field_config['resolve'] = function( $root, $args ) use ( $acf_field ) {
+							$forms    = [];
+							$form_ids = $this->get_acf_field_value( $root, $acf_field );
+
+							if ( ! empty( $form_ids ) && is_array( $form_ids ) ) {
+								foreach ( $form_ids as $form_id ) {
+									if ($form_id) {
+										$form_raw = \GFAPI::get_form($form_id);
+										$form = apply_filters( 'wp_graphql_gf_form_object', $this->form_data_manipulator->manipulate( $form_raw, $args ) );
+										$forms[] = $form;
+									}
+								}
+							}
+
+							return ! empty( $forms ) ? $forms : [];
+						};
+					}
+				// Form id
+				} else {
+					if ( empty( $acf_field['multiple'] ) ) {
+						$field_config['type'] = 'Integer';
+					} else {
+						$field_config['type'] = [ 'list_of' => 'Integer' ];
+						$field_config['resolve'] = function( $root, $args ) use ( $acf_field ) {
+							$value = $this->get_acf_field_value( $root, $acf_field );
+
+							return ! empty( $value ) && is_array( $value ) ? $value : [];
+						};
+					}
 				}
 				break;
 			default:
@@ -1733,5 +1808,4 @@ class Config {
 			}
 		}
 	}
-
 }

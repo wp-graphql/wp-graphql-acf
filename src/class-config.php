@@ -729,19 +729,25 @@ class Config {
 						$type = $tax_object->graphql_single_name;
 					}
 				}
+				
+				$is_multiple = isset($acf_field['field_type']) && in_array( $acf_field['field_type'], array('checkbox', 'multi_select'));
 
 				$field_config = [
-					'type'    => [ 'list_of' => $type ],
-					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
+					'type'    => $is_multiple ? ['list_of' => $type ] : $type,
+					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field, $is_multiple ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
-						$terms = [];
+						/**
+						 * If this is multiple, the value will most likely always be an array.
+						 * If it isn't, we want to return a single term id.
+						 */
 						if ( ! empty( $value ) && is_array( $value ) ) {
 							foreach ( $value as $term ) {
 								$terms[] = DataSource::resolve_term_object( (int) $term, $context );
 							}
+							return $terms;
+						} else {
+							return DataSource::resolve_term_object( (int) $value, $context );
 						}
-
-						return $terms;
 					},
 				];
 				break;

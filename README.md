@@ -54,7 +54,8 @@ To install the plugin from Github, you can [download the latest release zip file
 [Click here](https://wordpress.org/support/article/managing-plugins/) to learn more about installing WordPress plugins from a Zip file.
 
 ### Installing from Composer <a name="install-with-composer" />
-`@todo`
+
+`composer require wp-graphql/wp-graphql-acf`
 
 ## Dependencies <a name="dependencies" />
 In order to use WPGraphQL for Advanced Custom Fields, you must have [WPGraphQL](https://github.com/wp-graphql/wp-graphql) and [Advanced Custom Fields](https://advancedcustomfields.com) (free or pro) installed and activated. 
@@ -71,7 +72,7 @@ Whatever method you use to register ACF fields to your WordPress site should wor
 
 The first step in using Advanced Custom Fields with WPGraphQL is to [create an ACF Field Group](https://www.advancedcustomfields.com/resources/creating-a-field-group/). 
 
-By default, field groups are _not_ exposed to WPGraphQL. You must opt-in to expose your ACF Field Groups and fields to the WPGraphQL Schema as some information managed my your ACF fields may not be intended for exposure in a queryable API like WPGraphQL.
+By default, field groups are _not_ exposed to WPGraphQL. You must opt-in to expose your ACF Field Groups and fields to the WPGraphQL Schema as some information managed by your ACF fields may not be intended for exposure in a queryable API like WPGraphQL.
 
 #### Show in GraphQL Setting
 

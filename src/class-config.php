@@ -25,6 +25,11 @@ class Config {
 	protected $type_registry;
 
 	/**
+	 * @var array <string> List of field names registered to the Schema
+	 */
+	protected $registered_field_names;
+
+	/**
 	 * Initialize WPGraphQL to ACF
 	 *
 	 * @param \WPGraphQL\Registry\TypeRegistry $type_registry Instance of the WPGraphQL TypeRegistry
@@ -48,6 +53,13 @@ class Config {
 		$this->add_acf_fields_to_individual_posts();
 		$this->add_acf_fields_to_users();
 		$this->add_acf_fields_to_options_pages();
+
+		add_filter( 'graphql_resolve_revision_meta_from_parent', function( $should, $object_id, $meta_key, $single ) {
+			if ( in_array( $meta_key, $this->registered_field_names, true ) ) {
+				return false;
+			}
+			return $should;
+		}, 10, 4 );
 	}
 
 	/**
@@ -359,6 +371,8 @@ class Config {
 		if ( empty( $acf_type ) ) {
 			return false;
 		}
+
+
 
 		/**
 		 * filter the field config for custom field types
@@ -729,7 +743,7 @@ class Config {
 						$type = $tax_object->graphql_single_name;
 					}
 				}
-				
+
 				$is_multiple = isset($acf_field['field_type']) && in_array( $acf_field['field_type'], array('checkbox', 'multi_select'));
 
 				$field_config = [
@@ -1035,6 +1049,7 @@ class Config {
 
 		$config = array_merge( $config, $field_config );
 
+		$this->registered_field_names[] = $acf_field['name'];
 		return $this->type_registry->register_field( $type_name, $field_name, $config );
 	}
 

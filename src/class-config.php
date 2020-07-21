@@ -729,7 +729,7 @@ class Config {
 						$type = $tax_object->graphql_single_name;
 					}
 				}
-				
+
 				$is_multiple = isset($acf_field['field_type']) && in_array( $acf_field['field_type'], array('checkbox', 'multi_select'));
 
 				$field_config = [
@@ -998,6 +998,12 @@ class Config {
 											return ! empty( $flex_field_layout_name ) ? $flex_field_layout_name : null;
 										},
 									],
+									'fieldName' => [
+										'type' => 'String',
+										'resolve' => function ($source) use ($layout) {
+											return !empty($layout['name']) ? $layout['name'] : null;
+										}
+									]
 								],
 							] );
 

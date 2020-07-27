@@ -7,7 +7,7 @@
  * Author URI:        https://www.wpgraphql.com
  * Text Domain:       wp-graphql-acf
  * Domain Path:       /languages
- * Version:           0.3.4
+ * Version:           0.3.5
  * Requires PHP:      7.0
  * GitHub Plugin URI: https://github.com/afragen/github-updater
  *

@@ -315,13 +315,13 @@ class Config {
 	public static function get_supported_fields() {
 		$supported_fields = [
 			'text',
-			'acfe_slug',
 			'textarea',
 			'number',
 			'range',
 			'email',
 			'url',
 			'password',
+			'acfe_slug',
 			'image',
 			'file',
 			'wysiwyg',
@@ -394,10 +394,10 @@ class Config {
 			case 'color_picker':
 			case 'email':
 			case 'text':
-			case 'acfe_slug':
 			case 'message':
 			case 'oembed':
 			case 'password':
+			case 'acfe_slug':
 			case 'wysiwyg':
 			case 'url':
 				// Even though Selects and Radios in ACF can _technically_ be an integer

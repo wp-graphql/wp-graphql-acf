@@ -315,6 +315,7 @@ class Config {
 	public static function get_supported_fields() {
 		$supported_fields = [
 			'text',
+			'acfe_slug',
 			'textarea',
 			'number',
 			'range',
@@ -393,6 +394,7 @@ class Config {
 			case 'color_picker':
 			case 'email':
 			case 'text':
+			case 'acfe_slug':
 			case 'message':
 			case 'oembed':
 			case 'password':

@@ -322,6 +322,7 @@ class Config {
 			'url',
 			'password',
 			'acfe_slug',
+			'acfe_code_editor',
 			'image',
 			'file',
 			'wysiwyg',
@@ -398,6 +399,7 @@ class Config {
 			case 'oembed':
 			case 'password':
 			case 'acfe_slug':
+			case 'acfe_code_editor':
 			case 'wysiwyg':
 			case 'url':
 				// Even though Selects and Radios in ACF can _technically_ be an integer

@@ -446,7 +446,7 @@ class Config {
 				$field_config['type'] = 'String';
 				break;
 			case 'range':
-				$field_config['type'] = 'Integer';
+				$field_config['type'] = 'String';
 				break;
 			case 'number':
 				$field_config['type'] = 'Float';

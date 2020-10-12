@@ -344,7 +344,8 @@ class Config {
 			'color_picker',
 			'group',
 			'repeater',
-			'flexible_content'
+			'flexible_content',
+			'medium_editor'
 		];
 
 		/**

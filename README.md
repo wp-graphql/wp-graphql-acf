@@ -1735,7 +1735,7 @@ The clone field is not fully supported (yet). We plan to support it in the futur
 
 ## Location Rules <a name="location-rules" />
 
-Advanced Custom Fields field groups are added to the WordPress dashboard by being assinged "Location Rules". 
+Advanced Custom Fields field groups are added to the WordPress dashboard by being assigned "Location Rules". 
 
 WPGraphQL for Advanced Custom Fields uses the Location Rules to determine where in the GraphQL Schema the field groups/fields should be added to the Schema. 
 

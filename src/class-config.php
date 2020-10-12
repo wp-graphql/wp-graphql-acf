@@ -275,6 +275,10 @@ class Config {
 			if ( 'wysiwyg' === $acf_field['type'] ) {
 				$format = true;
 			}
+			
+			if ( 'select' === $acf_field['type'] ) {
+				$format = true;
+			}
 
 			/**
 			 * Check if cloned field and retrieve the key accordingly.
@@ -432,7 +436,16 @@ class Config {
 				 * @see: https://github.com/wp-graphql/wp-graphql-acf/issues/25
 				 */
 				if ( empty( $acf_field['multiple'] ) ) {
-					$field_config['type'] = 'String';
+					if('array' === $acf_field['return_format'] ){
+						$field_config['type'] = [ 'list_of' => 'String' ];
+						$field_config['resolve'] = function( $root ) use ( $acf_field) {
+							$value = $this->get_acf_field_value( $root, $acf_field, true);
+							
+							return ! empty( $value ) && is_array( $value ) ? $value : [];
+						};
+					}else{
+						$field_config['type'] = 'String';
+					}
 				} else {
 					$field_config['type']    = [ 'list_of' => 'String' ];
 					$field_config['resolve'] = function( $root ) use ( $acf_field ) {

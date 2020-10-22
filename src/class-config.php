@@ -446,7 +446,7 @@ class Config {
 				$field_config['type'] = 'String';
 				break;
 			case 'range':
-				$field_config['type'] = 'Integer';
+				$field_config['type'] = 'Float';
 				break;
 			case 'number':
 				$field_config['type'] = 'Float';
@@ -1020,7 +1020,7 @@ class Config {
 
 							$layout['parent']          = $acf_field;
 							$layout['show_in_graphql'] = isset( $acf_field['show_in_graphql'] ) ? (bool) $acf_field['show_in_graphql'] : true;
-							$this->add_field_group_fields( $layout, $flex_field_layout_name );
+							$this->add_field_group_fields( $layout, $flex_field_layout_name, true );
 						}
 					}
 
@@ -1058,8 +1058,9 @@ class Config {
 	 *
 	 * @param array  $field_group The group to add to the Schema.
 	 * @param string $type_name   The Type name in the GraphQL Schema to add fields to.
+	 * @param bool   $layout      Whether or not these fields are part of a Flex Content layout.
 	 */
-	protected function add_field_group_fields( $field_group, $type_name ) {
+	protected function add_field_group_fields( $field_group, $type_name, $layout = false ) {
 
 		/**
 		 * If the field group has the show_in_graphql setting configured, respect it's setting
@@ -1078,7 +1079,7 @@ class Config {
 		/**
 		 * Get the fields in the group.
 		 */
-		$acf_fields = ! empty( $field_group['sub_fields'] ) ? $field_group['sub_fields'] : acf_get_fields( $field_group );
+		$acf_fields = ! empty( $field_group['sub_fields'] ) || $layout ? $field_group['sub_fields'] : acf_get_fields( $field_group );
 
 		/**
 		 * If there are no fields, bail

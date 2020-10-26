@@ -1577,10 +1577,24 @@ class Config {
 			'user_form' => 'register',
 		] );
 
+		$user_role_field_groups = [];
+
+		/**
+		 * Get the fields groups associated with the User
+		 */
+		foreach( wp_roles()->roles as $role_slug => $role ) {
+
+			$field_role_groups = acf_get_field_groups([
+				'user_role' => $role_slug,
+			]);
+
+			$user_role_field_groups = array_unique( array_merge( $user_role_field_groups, $field_role_groups ), SORT_REGULAR );
+		}
+
 		/**
 		 * Get a unique list of groups that match the register and edit user location rules
 		 */
-		$field_groups = array_merge( $user_edit_field_groups, $user_register_field_groups );
+		$field_groups = array_merge( $user_edit_field_groups, $user_register_field_groups, $user_role_field_groups );
 		$field_groups = array_intersect_key( $field_groups, array_unique( array_map( 'serialize', $field_groups ) ) );
 
 

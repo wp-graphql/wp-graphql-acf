@@ -233,7 +233,7 @@ class Config {
 
 			switch ( true ) {
 				case $root instanceof Term:
-					$id = acf_get_term_post_id( $root->taxonomyName, $root->term_id );
+					$id = 'term_' . $root->term_id;
 					break;
 				case $root instanceof Post:
 					$id = absint( $root->ID );
@@ -242,7 +242,7 @@ class Config {
 					$id = absint( $root->menuItemId );
 					break;
 				case $root instanceof Menu:
-					$id = acf_get_term_post_id( 'nav_menu', $root->menuId );
+					$id = 'term_' . $root->menuId;
 					break;
 				case $root instanceof User:
 					$id = 'user_' . absint( $root->userId );

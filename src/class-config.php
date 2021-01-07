@@ -55,6 +55,10 @@ class Config {
 		$this->add_acf_fields_to_options_pages();
 
 		add_filter( 'graphql_resolve_revision_meta_from_parent', function( $should, $object_id, $meta_key, $single ) {
+			// Pull meta_key out of repeater sub-fields such as "items_0_title"
+			if ( preg_match('/(\w+)_\d_\w+/', $meta_key, $matches) ) {
+				$meta_key = $matches[1];
+			}
 			if ( in_array( $meta_key, $this->registered_field_names, true ) ) {
 				return false;
 			}

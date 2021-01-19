@@ -54,10 +54,44 @@ class Config {
 		$this->add_acf_fields_to_users();
 		$this->add_acf_fields_to_options_pages();
 
+		// This filter tells WPGraphQL to resolve revision meta for ACF fields from the revision's meta, instead
+		// of the parent (published post) meta.
 		add_filter( 'graphql_resolve_revision_meta_from_parent', function( $should, $object_id, $meta_key, $single ) {
-			if ( in_array( $meta_key, $this->registered_field_names, true ) ) {
-				return false;
+
+			// Loop through all registered ACF fields that show in GraphQL.
+			if ( is_array( $this->registered_field_names ) && ! empty( $this->registered_field_names ) ) {
+
+				$matches = null;
+
+				// Iterate over all field names
+				foreach ( $this->registered_field_names as $field_name ) {
+
+					// If the field name is an exact match with the $meta_key, the ACF field should
+					// resolve from the revision meta, so we can return false here, so that meta can
+					// resolve from the revision instead of the parent
+					if ( $field_name === $meta_key ) {
+						return false;
+					}
+
+					// For flex fields/repeaters, the meta keys are structured a bit funky.
+					// This checks to see if the $meta_key starts with the same string as one of the
+					// acf fields (a flex/repeater field) and then checks if it's preceeded by an underscore and a number.
+					if ( $field_name === substr( $meta_key, 0, strlen( $field_name ) ) ) {
+						// match any string that starts with the field name, followed by an underscore, followed by a number, followed by another string
+						// ex my_flex_field_0_text_field or some_repeater_field_12_25MostPopularDogToys
+						$pattern = '/' . $field_name . '_\d+_\w+/m';
+						preg_match( $pattern, $meta_key, $matches );
+					}
+
+					// If the meta key matches the pattern, treat it as a sub-field of an ACF Field Group
+					if ( null !== $matches ) {
+						return false;
+					}
+
+				}
+
 			}
+
 			return $should;
 		}, 10, 4 );
 	}

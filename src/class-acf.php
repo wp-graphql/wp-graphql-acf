@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ACF
  *
@@ -27,7 +28,7 @@ final class ACF {
 	 */
 	public static function instance() {
 
-		if ( ! isset( self::$instance ) && ! ( self::$instance instanceof ACF ) ) {
+		if (!isset(self::$instance) && !(self::$instance instanceof ACF)) {
 			self::$instance = new ACF();
 			self::$instance->setup_constants();
 			self::$instance->includes();
@@ -41,7 +42,7 @@ final class ACF {
 		 *
 		 * @param ACF $instance The instance of the WPGraphQL\ACF class
 		 */
-		do_action( 'graphql_acf_init', self::$instance );
+		do_action('graphql_acf_init', self::$instance);
 
 		/**
 		 * Return the WPGraphQL Instance
@@ -60,8 +61,7 @@ final class ACF {
 	public function __clone() {
 
 		// Cloning instances of the class is forbidden.
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'The \WPGraphQL\ACF class should not be cloned.', 'wp-graphql-acf' ), '0.0.1' );
-
+		_doing_it_wrong(__FUNCTION__, esc_html__('The \WPGraphQL\ACF class should not be cloned.', 'wp-graphql-acf'), '0.0.1');
 	}
 
 	/**
@@ -73,8 +73,7 @@ final class ACF {
 	public function __wakeup() {
 
 		// De-serializing instances of the class is forbidden.
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'De-serializing instances of the \WPGraphQL\ACF class is not allowed', 'wp-graphql-acf' ), '0.0.1' );
-
+		_doing_it_wrong(__FUNCTION__, esc_html__('De-serializing instances of the \WPGraphQL\ACF class is not allowed', 'wp-graphql-acf'), '0.0.1');
 	}
 
 	/**
@@ -85,26 +84,20 @@ final class ACF {
 	 */
 	private function setup_constants() {
 
-		// Plugin version.
-		if ( ! defined( 'WPGRAPHQL_ACF_VERSION' ) ) {
-			define( 'WPGRAPHQL_ACF_VERSION', '0.3.0' );
-		}
-
 		// Plugin Folder Path.
-		if ( ! defined( 'WPGRAPHQL_ACF_PLUGIN_DIR' ) ) {
-			define( 'WPGRAPHQL_ACF_PLUGIN_DIR', plugin_dir_path( __FILE__ . '/..' ) );
+		if (!defined('WPGRAPHQL_ACF_PLUGIN_DIR')) {
+			define('WPGRAPHQL_ACF_PLUGIN_DIR', plugin_dir_path(__FILE__ . '/..'));
 		}
 
 		// Plugin Folder URL.
-		if ( ! defined( 'WPGRAPHQL_ACF_PLUGIN_URL' ) ) {
-			define( 'WPGRAPHQL_ACF_PLUGIN_URL', plugin_dir_url( __FILE__ . '/..' ) );
+		if (!defined('WPGRAPHQL_ACF_PLUGIN_URL')) {
+			define('WPGRAPHQL_ACF_PLUGIN_URL', plugin_dir_url(__FILE__ . '/..'));
 		}
 
 		// Plugin Root File.
-		if ( ! defined( 'WPGRAPHQL_ACF_PLUGIN_FILE' ) ) {
-			define( 'WPGRAPHQL_ACF_PLUGIN_FILE', __FILE__ . '/..' );
+		if (!defined('WPGRAPHQL_ACF_PLUGIN_FILE')) {
+			define('WPGRAPHQL_ACF_PLUGIN_FILE', __FILE__ . '/..');
 		}
-
 	}
 
 	/**
@@ -124,14 +117,12 @@ final class ACF {
 	 * cycle
 	 */
 	private function actions() {
-
 	}
 
 	/**
 	 * Setup filters
 	 */
 	private function filters() {
-
 	}
 
 	/**
@@ -140,11 +131,9 @@ final class ACF {
 	private function init() {
 
 		$config = new Config();
-		add_action( 'graphql_register_types', [ $config, 'init' ], 10, 1 );
+		add_action('graphql_register_types', [$config, 'init'], 10, 1);
 
 		$acf_settings = new ACF_Settings();
 		$acf_settings->init();
-
 	}
-
 }

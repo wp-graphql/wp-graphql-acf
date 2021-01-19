@@ -1,5 +1,4 @@
 <?php
-
 /**
  * ACF extension for WP-GraphQL
  *
@@ -24,13 +23,14 @@ class ACF_Settings {
 		 * Creates a field group setting to allow a field group to be
 		 * shown in the GraphQL Schema.
 		 */
-		add_action('acf/render_field_group_settings', [$this, 'add_field_group_settings'], 10, 1);
+		add_action( 'acf/render_field_group_settings', [ $this, 'add_field_group_settings' ], 10, 1 );
 
 		/**
 		 * Add settings to individual fields to allow each field granular control
 		 * over how it's shown in the GraphQL Schema
 		 */
-		add_action('acf/render_field_settings', [$this, 'add_field_settings'], 10, 1);
+		add_action( 'acf/render_field_settings', [ $this, 'add_field_settings' ], 10, 1 );
+
 	}
 
 	/**
@@ -38,14 +38,14 @@ class ACF_Settings {
 	 *
 	 * @param array $field The field to add the setting to.
 	 */
-	public function add_field_settings($field) {
+	public function add_field_settings( $field ) {
 
 		$supported_fields = Config::get_supported_fields();
 
 		/**
 		 * If there are no supported fields, or the field is not supported, don't add a setting field.
 		 */
-		if (empty($supported_fields) || !is_array($supported_fields) || !in_array($field['type'], $supported_fields, true)) {
+		if ( empty( $supported_fields ) || ! is_array( $supported_fields ) || ! in_array( $field['type'], $supported_fields, true ) ) {
 			return;
 		}
 
@@ -55,16 +55,17 @@ class ACF_Settings {
 		acf_render_field_setting(
 			$field,
 			[
-				'label'         => __('Show in GraphQL', 'wp-graphql-acf'),
-				'instructions'  => __('Whether the field should be queryable via GraphQL', 'wp-graphql-acf'),
+				'label'         => __( 'Show in GraphQL', 'wp-graphql-acf' ),
+				'instructions'  => __( 'Whether the field should be queryable via GraphQL', 'wp-graphql-acf' ),
 				'name'          => 'show_in_graphql',
 				'type'          => 'true_false',
 				'ui'            => 1,
 				'default_value' => 1,
-				'value'        => isset($field['show_in_graphql']) ? (bool) $field['show_in_graphql'] : true,
+				'value'        => isset( $field['show_in_graphql'] ) ? (bool) $field['show_in_graphql'] : true,
 			],
 			true
 		);
+
 	}
 
 	/**
@@ -75,19 +76,19 @@ class ACF_Settings {
 	 *
 	 * @param array $field_group The field group to add settings to.
 	 */
-	public function add_field_group_settings($field_group) {
+	public function add_field_group_settings( $field_group ) {
 
 		/**
 		 * Render a field in the Field Group settings to allow for a Field Group to be shown in GraphQL.
 		 */
 		acf_render_field_wrap(
 			[
-				'label'        => __('Show in GraphQL', 'acf'),
-				'instructions' => __('If the field group is active, and this is set to show, the fields in this group will be available in the WPGraphQL Schema based on the respective Location rules.'),
+				'label'        => __( 'Show in GraphQL', 'acf' ),
+				'instructions' => __( 'If the field group is active, and this is set to show, the fields in this group will be available in the WPGraphQL Schema based on the respective Location rules.' ),
 				'type'         => 'true_false',
 				'name'         => 'show_in_graphql',
 				'prefix'       => 'acf_field_group',
-				'value'        => isset($field_group['show_in_graphql']) ? (bool) $field_group['show_in_graphql'] : false,
+				'value'        => isset( $field_group['show_in_graphql'] ) ? (bool) $field_group['show_in_graphql'] : false,
 				'ui'           => 1,
 			]
 		);
@@ -97,29 +98,30 @@ class ACF_Settings {
 		 */
 		acf_render_field_wrap(
 			[
-				'label'        => __('GraphQL Field Name', 'acf'),
-				'instructions' => __('The name of the field group in the GraphQL Schema.', 'wp-graphql-acf'),
+				'label'        => __( 'GraphQL Field Name', 'acf' ),
+				'instructions' => __( 'The name of the field group in the GraphQL Schema.', 'wp-graphql-acf' ),
 				'type'         => 'text',
 				'prefix'       => 'acf_field_group',
 				'name'         => 'graphql_field_name',
 				'required'     => true,
-				'placeholder'  => !empty($field_group['graphql_field_name']) ? $field_group['graphql_field_name'] : null,
-				'value'        => !empty($field_group['graphql_field_name']) ? $field_group['graphql_field_name'] : null,
+				'placeholder'  => ! empty( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null,
+				'value'        => ! empty( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null,
 			]
 		);
 
 		$choices = Config::get_all_graphql_types();
 		acf_render_field_wrap(
 			[
-				'label'        => __('GraphQL Types to Show the Field Group On', 'wp-graphql-acf'),
-				'instructions' => __('Select the Types in the WPGraphQl Schema to show the fields in this fiedl group on', 'wp-graphql-acf'),
+				'label'        => __( 'GraphQL Types to Show the Field Group On', 'wp-graphql-acf' ),
+				'instructions' => __( 'Select the Types in the WPGraphQl Schema to show the fields in this fiedl group on', 'wp-graphql-acf' ),
 				'type'         => 'checkbox',
 				'prefix'       => 'acf_field_group',
 				'name'         => 'graphql_types_on',
-				'value'			=> !empty($field_group['graphql_types_on']) ? $field_group['graphql_types_on'] : null,
+				'value'			=> ! empty( $field_group['graphql_types_on'] ) ? $field_group['graphql_types_on'] : null,
 				'toggle'		=> true,
 				'choices' 		=> $choices
 			]
 		);
 	}
+
 }

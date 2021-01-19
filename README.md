@@ -43,6 +43,7 @@ WPGraphQL for Advanced Custom Fields automatically exposes your ACF fields to th
   - [Repeater](#repeater-field)
   - [Flexible Content](#flexible-content-field)
   - [Clone](#clone-field)
+- [Options Pages](#options-pages)
 - [Location Rules](#location-rules)
 
 ## Install and Activate <a name="install-and-activate" />
@@ -1732,6 +1733,45 @@ If we were to re-arrange the layouts, so that the order was "Layout Three", "Lay
 ### Clone Field <a name="clone-field" />
 
 The clone field is not fully supported (yet). We plan to support it in the future.
+
+## Options Pages
+
+**Reference**: https://www.advancedcustomfields.com/add-ons/options-page/
+
+To add an option page and expose it to the graphql schema, simply add 'show_in_graphql' => true when you register an option page.
+
+**Example Usage**
+
+```php
+function register_acf_options_pages() {
+
+    // check function exists
+    if ( ! function_exists( 'acf_add_options_page' ) ) {
+        return;
+    }
+
+    // register options page
+    $my_options_page = acf_add_options_page(
+        array(
+            'page_title'      => __( 'My Options Page' ),
+            'menu_title'      => __( 'My Options Page' ),
+            'menu_slug'       => 'my-options-page',
+            'capability'      => 'edit_posts',
+            'show_in_graphql' => true,
+        )
+    );
+}
+
+add_action( 'acf/init', 'register_acf_options_pages' )
+Example Query
+query GetMyOptionsPage {
+    myOptionsPage {
+        someCustomField
+    }
+}
+```
+
+Alternatively, it's you can check the Fields API Reference to learn about exposing your custom fields to the Schema.
 
 ## Location Rules <a name="location-rules" />
 

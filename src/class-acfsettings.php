@@ -113,7 +113,7 @@ class ACF_Settings {
 		acf_render_field_wrap(
 			[
 				'label'        => __( 'GraphQL Types to Show the Field Group On', 'wp-graphql-acf' ),
-				'instructions' => __( 'Select the Types in the WPGraphQl Schema to show the fields in this fiedl group on', 'wp-graphql-acf' ),
+				'instructions' => __( 'Select the Types in the WPGraphQl Schema to show the fields in this field group on', 'wp-graphql-acf' ),
 				'type'         => 'checkbox',
 				'prefix'       => 'acf_field_group',
 				'name'         => 'graphql_types_on',

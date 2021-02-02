@@ -27,6 +27,9 @@ require_once( __DIR__ . '/vendor/autoload.php' );
  */
 const WPGRAPHQL_REQUIRED_MIN_VERSION = '0.4.0';
 
+const WPGRAPHQL_ACF_VERSION = '0.2.1'; // Used for JS cache-busting.
+const WPGRAPHQL_ACF_FILE = __FILE__;
+
 /**
  * Initialize the plugin
  *

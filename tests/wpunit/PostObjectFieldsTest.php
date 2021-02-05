@@ -1338,6 +1338,14 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 	}
 
+	public function test_flex_field_preview() {
+		// @todo: test that previewing flex fields work
+	}
+
+	public function test_repeater_field_preview() {
+		// @todo: test that previewing repeater fields work
+	}
+
 	protected function register_fields() {
 
 		add_action( 'init', function() {

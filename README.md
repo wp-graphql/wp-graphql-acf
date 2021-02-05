@@ -1775,7 +1775,7 @@ Alternatively, it's you can check the Fields API Reference to learn about exposi
 
 ## Location Rules <a name="location-rules" />
 
-Advanced Custom Fields field groups are added to the WordPress dashboard by being assinged "Location Rules". 
+Advanced Custom Fields field groups are added to the WordPress dashboard by being assigned "Location Rules". 
 
 WPGraphQL for Advanced Custom Fields uses the Location Rules to determine where in the GraphQL Schema the field groups/fields should be added to the Schema. 
 

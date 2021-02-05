@@ -9,7 +9,7 @@
  * Domain Path:       /languages
  * Version:           0.4.1
  * Requires PHP:      7.0
- * GitHub Plugin URI: https://github.com/afragen/github-updater
+ * GitHub Plugin URI: wp-graphql/wp-graphql-acf
  *
  * @package         WPGraphQL_ACF
  */

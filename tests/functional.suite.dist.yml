@@ -5,10 +5,12 @@
 
 actor: FunctionalTester
 modules:
-    enabled:
-      - \Helper\Functional
-      - REST
-      - WPDb
-      - WPBrowser
-      - Asserts
-      - WPLoader
+  enabled:
+    - Asserts
+    - REST
+    - WPBrowser
+    - WPDb
+    - WPLoader
+  config:
+    WPDb:
+      cleanup: false

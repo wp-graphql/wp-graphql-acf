@@ -43,6 +43,13 @@
     ],
     "phpstan": ["phpstan analyze --ansi --memory-limit=1G"]
   },
+  "require": {
+    "php": "^7"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "process-timeout": 0
+  },
   "require-dev": {
     "lucatume/wp-browser": "^2.4",
     "codeception/module-asserts": "^1.0",

@@ -46,13 +46,13 @@ fi
 # Install and activate ACF Pro
 if [ ! -f "${PLUGINS_DIR}/advanced-custom-fields-pro/acf.php" ]; then
     wp plugin install \
-        https://github.com/wp-premium/advanced-custom-fields-pro/archive/${CORE_BRANCH-master}.zip \
+        https://github.com/wp-premium/advanced-custom-fields-pro/archive/master.zip \
         --activate --allow-root
 else
     wp plugin activate advanced-custom-fields-pro --allow-root
 fi
 
-# Install and activate WPGraphQL ACF
+# Install and activate WPGatsby
 wp plugin activate wp-graphql-acf --allow-root
 
 # Set pretty permalinks.

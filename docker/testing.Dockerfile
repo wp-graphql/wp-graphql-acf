@@ -19,10 +19,6 @@ ENV USING_XDEBUG=${USE_XDEBUG}
 # Install php extensions
 RUN docker-php-ext-install pdo_mysql
 
-# Install zip/unzip
-RUN apt-get install zip unzip -y
-RUN apt-get install "php${PHP_VERSION}-zip"
-
 # Install PCOV and XDebug
 # This is needed for Codeception / PHPUnit to track code coverage
 RUN if [[ "$USING_XDEBUG" ]]; then \

@@ -44,7 +44,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: json, mbstring
+          extensions: json, mbstring, zip, unzip
 
       - name: Get Composer Cache Directory
         id: composercache

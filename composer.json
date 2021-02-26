@@ -8,7 +8,8 @@
     "email": "jasonbahl@mac.com"
   }],
   "config": {
-    "optimize-autoloader": true
+    "optimize-autoloader": true,
+    "process-timeout": 0
   },
   "autoload": {
     "psr-4": {
@@ -42,6 +43,9 @@
       "php ./vendor/bin/phpcbf src"
     ],
     "phpstan": ["phpstan analyze --ansi --memory-limit=1G"]
+  },
+  "require": {
+    "php": "^7"
   },
   "require-dev": {
     "lucatume/wp-browser": "^2.4",

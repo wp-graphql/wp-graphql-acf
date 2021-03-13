@@ -1059,6 +1059,12 @@ class Config {
 											return ! empty( $flex_field_layout_name ) ? $flex_field_layout_name : null;
 										},
 									],
+									'fieldName' => [
+										'type' => 'String',
+										'resolve' => function ($source) use ($layout) {
+											return !empty($layout['name']) ? $layout['name'] : null;
+										}
+									]
 								],
 							] );
 

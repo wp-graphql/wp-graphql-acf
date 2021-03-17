@@ -309,7 +309,7 @@ class Config {
 			if ( 'wysiwyg' === $acf_field['type'] ) {
 				$format = true;
 			}
-			
+
 			if ( 'select' === $acf_field['type'] ) {
 				$format = true;
 			}
@@ -474,7 +474,7 @@ class Config {
 						$field_config['type'] = [ 'list_of' => 'String' ];
 						$field_config['resolve'] = function( $root ) use ( $acf_field) {
 							$value = $this->get_acf_field_value( $root, $acf_field, true);
-							
+
 							return ! empty( $value ) && is_array( $value ) ? $value : [];
 						};
 					}else{
@@ -569,7 +569,7 @@ class Config {
 							}
 						}
 
-						return isset( $value ) ? $relationship : null;
+						return isset( $value ) ? $relationship : [];
 
 					},
 				];

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0d1c0770bd52413713b6ce542771fda1
+class ComposerStaticInit22bfbd1509018e9010b8ca40b9b6700b
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -21,6 +21,7 @@ class ComposerStaticInit0d1c0770bd52413713b6ce542771fda1
     );
 
     public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'WPGraphQL\\ACF\\ACF' => __DIR__ . '/../..' . '/src/class-acf.php',
         'WPGraphQL\\ACF\\ACF_Settings' => __DIR__ . '/../..' . '/src/class-acfsettings.php',
         'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/class-config.php',
@@ -29,9 +30,9 @@ class ComposerStaticInit0d1c0770bd52413713b6ce542771fda1
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0d1c0770bd52413713b6ce542771fda1::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0d1c0770bd52413713b6ce542771fda1::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit0d1c0770bd52413713b6ce542771fda1::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit22bfbd1509018e9010b8ca40b9b6700b::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit22bfbd1509018e9010b8ca40b9b6700b::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit22bfbd1509018e9010b8ca40b9b6700b::$classMap;
 
         }, null, ClassLoader::class);
     }

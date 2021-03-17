@@ -569,7 +569,7 @@ class Config {
 							}
 						}
 
-						return isset( $value ) ? $relationship : null;
+						return isset( $value ) ? $relationship : [];
 
 					},
 				];

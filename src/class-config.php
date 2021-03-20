@@ -1637,9 +1637,9 @@ class Config {
 		);
 
 		// Get a unique list of groups that match the register and edit user location rules
-		$user_field_groups = array_merge( $user_edit_field_groups, $user_register_field_groups );
-		$user_field_groups = array_intersect_key( $user_field_groups, array_unique( array_map( 'serialize', $field_groups ) ) );
-		$func_push_type_key( $user_field_groups, 'user' );
+		$field_groups = array_merge( $user_edit_field_groups, $user_register_field_groups );
+		$field_groups = array_intersect_key( $field_groups, array_unique( array_map( 'serialize', $field_groups ) ) );
+		$func_push_type_key( $field_groups, 'user' );
 
 		/**
 		 * Handle ACF Option Pages key

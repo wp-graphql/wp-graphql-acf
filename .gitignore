@@ -13,6 +13,7 @@ codeception.yml
 vendor/*
 !vendor/autoload.php
 !vendor/composer
+vendor/composer/platform_check.php
 vendor/composer/installed.json
 vendor/composer/*/
 composer.lock

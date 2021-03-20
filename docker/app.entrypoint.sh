@@ -35,13 +35,8 @@ if ! $( wp core is-installed --allow-root ); then
 fi
 
 # Install and activate WPGraphQL
-if [ ! -f "${PLUGINS_DIR}/wp-graphql/wp-graphql.php" ]; then
-    wp plugin install \
-        https://github.com/wp-graphql/wp-graphql/archive/${CORE_BRANCH-master}.zip \
-        --activate --allow-root
-else
-    wp plugin activate wp-graphql --allow-root
-fi
+wp plugin install wp-graphql --allow-root
+wp plugin activate wp-graphql --allow-root
 
 # Install and activate ACF Pro
 if [ ! -f "${PLUGINS_DIR}/advanced-custom-fields-pro/acf.php" ]; then

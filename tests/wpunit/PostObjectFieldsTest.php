@@ -1204,13 +1204,17 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 	public function testQueryFieldOnCustomPostType() {
 
 		register_post_type( 'acf_test', [
+			'show_ui' => true,
 			'show_in_graphql' => 'true',
 			'graphql_single_name' => 'acfTest',
 			'graphql_plural_name' => 'acfTests'
 		] );
 
+		$group_key = uniqid();
+
 		$this->register_acf_field_group([
-			'key' =>  $this->group_key . 'acf_test_group',
+			'key' =>  $group_key . 'acf_test_group',
+			'title'                 => 'ACF Test Fields',
 			'location'              => [
 				[
 					[
@@ -1220,11 +1224,14 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 					],
 				],
 			],
+			'graphql_field_name'    => 'acfTestFields',
 			'graphql_types_on' => ['post_type__acf_test']
 		]);
 
+
+
 		$this->register_acf_field([
-			'parent' => $this->group_key . 'acf_test_group',
+			'parent' => $group_key . 'acf_test_group',
 			'type' => 'text',
 			'name' => 'acf_text_field',
 		]);
@@ -1235,18 +1242,43 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			'post_title' => 'ACF Test',
 		]);
 
+		$query = '
+		{
+		  __type( name: "AcfTest_Acftestfields" ) {
+		    name
+		    description
+		    fields {
+		      name
+		    }
+		  }
+		  acfTest: __type( name: "AcfTest" ) {
+		    name
+		    description
+		    fields {
+		      name
+		    }
+		  }
+		}
+		';
+
+		$debug = graphql([
+			'query' => $query,
+		]);
+
+		codecept_debug( $debug );
+
 		$expected_text_1 = 'test value';
 
 		update_field( 'acf_text_field', $expected_text_1, $id );
 
 		$query = '
-		query GET_CUSTOM_POST_TYPE_WITH_ACF_FIELD( $testId: Int! ) {
-		  acfTestBy( acfTestId: $testId ) {
+		query GET_CUSTOM_POST_TYPE_WITH_ACF_FIELD( $testId: ID! ) {
+		  acfTest( id: $testId idType: DATABASE_ID ) {
 		    __typename
 		    id
 		    title
-		    postFields {
-		      acfTextField
+		    acfTestFields {
+		        fieldGroupName
 		    }
 		  }
 		}';
@@ -1261,7 +1293,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		codecept_debug( $actual );
 
 		$this->assertArrayNotHasKey( 'errors', $actual );
-		$this->assertEquals( $expected_text_1, $actual['data']['acfTestBy']['postFields']['acfTextField'] );
+		$this->assertEquals( 'acfTestFields', $actual['data']['acfTest']['acfTestFields']['fieldGroupName'] );
 
 
 	}

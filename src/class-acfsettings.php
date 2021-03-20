@@ -31,6 +31,8 @@ class ACF_Settings {
 		 */
 		add_action( 'acf/render_field_settings', [ $this, 'add_field_settings' ], 10, 1 );
 
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_graphql_acf_scripts' ], 10, 1 );
+
 	}
 
 	/**
@@ -61,7 +63,7 @@ class ACF_Settings {
 				'type'          => 'true_false',
 				'ui'            => 1,
 				'default_value' => 1,
-				'value'        => isset( $field['show_in_graphql'] ) ? (bool) $field['show_in_graphql'] : true,
+				'value'         => isset( $field['show_in_graphql'] ) ? (bool) $field['show_in_graphql'] : true,
 			],
 			true
 		);
@@ -117,11 +119,24 @@ class ACF_Settings {
 				'type'         => 'checkbox',
 				'prefix'       => 'acf_field_group',
 				'name'         => 'graphql_types_on',
-				'value'			=> ! empty( $field_group['graphql_types_on'] ) ? $field_group['graphql_types_on'] : null,
-				'toggle'		=> true,
-				'choices' 		=> $choices
+				'value'        => ! empty( $field_group['graphql_types_on'] ) ? $field_group['graphql_types_on'] : null,
+				'toggle'       => true,
+				'choices'      => $choices,
 			]
 		);
+	}
+
+	/**
+	 * This enqueues admin script.
+	 */
+	public function enqueue_graphql_acf_scripts( $hook ) {
+		global $post;
+
+		if ( $hook == 'post-new.php' || $hook == 'post.php' ) {
+			if ( 'acf-field-group' === $post->post_type ) {     
+				wp_enqueue_script( 'graphql-acf', plugins_url( 'src/js/main.js', dirname( __FILE__ ) ), array( 'jquery' ) );
+			}
+		}
 	}
 
 }

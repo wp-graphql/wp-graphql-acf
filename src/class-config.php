@@ -1126,6 +1126,9 @@ class Config {
 
 		if ( ! empty( $graphql_post_types ) && is_array( $graphql_post_types ) ) {
 
+			// Add ContentNode interface to GraphQL types.
+			$graphql_types['content_node'] = 'ContentNode Interface (' . __( 'All Post Types', 'wp-graphql-acf' ) . ')';
+
 			/**
 			 * Prepare type key prefix and label surfix
 			 */
@@ -1155,6 +1158,9 @@ class Config {
 		$graphql_taxonomies = \WPGraphQL::get_allowed_taxonomies();
 
 		if ( ! empty( $graphql_taxonomies ) && is_array( $graphql_taxonomies ) ) {
+
+			// Adds TermNode interface to GraphQL types.
+			$graphql_types['term_node'] = 'TermNode Interface (' . __( 'All Taxonomies', 'wp-graphql-acf' ) . ')';
 
 			/**
 			 * Prepare type key prefix and label surfix
@@ -1302,6 +1308,10 @@ class Config {
 				 */
 				$type_pieces = explode( '__', $graphql_type );
 				switch ( $type_pieces[0] ) {
+					case 'content_node':
+						$type_name             = 'ContentNode';
+						$config['description'] = $field_group['description'];
+						break;
 					case 'post_type':
 						/**
 						 * Get the Post Type name
@@ -1321,6 +1331,10 @@ class Config {
 						$config['description'] = $field_group['description'];
 						break;
 
+					case 'term_node':
+						$type_name             = 'TermNode';
+						$config['description'] = $default_description . sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was assigned to the term node', 'wp-graphql-acf' ), $field_group['title'] );
+						break;
 					case 'taxonomy':
 						/**
 						 * Get the Taxonomy name

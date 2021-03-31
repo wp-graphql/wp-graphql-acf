@@ -118,8 +118,8 @@ class ACF_Settings {
 				'instructions' => __( 'Select the Types in the WPGraphQl Schema to show the fields in this field group on', 'wp-graphql-acf' ),
 				'type'         => 'checkbox',
 				'prefix'       => 'acf_field_group',
-				'name'         => 'graphql_types_on',
-				'value'        => ! empty( $field_group['graphql_types_on'] ) ? $field_group['graphql_types_on'] : null,
+				'name'         => 'graphql_types',
+				'value'        => ! empty( $field_group['graphql_types'] ) ? $field_group['graphql_types'] : null,
 				'toggle'       => true,
 				'choices'      => $choices,
 			]
@@ -133,7 +133,7 @@ class ACF_Settings {
 		global $post;
 
 		if ( $hook == 'post-new.php' || $hook == 'post.php' ) {
-			if ( 'acf-field-group' === $post->post_type ) {     
+			if ( 'acf-field-group' === $post->post_type ) {
 				wp_enqueue_script( 'graphql-acf', plugins_url( 'src/js/main.js', dirname( __FILE__ ) ), array( 'jquery' ) );
 			}
 		}

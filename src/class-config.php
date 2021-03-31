@@ -16,6 +16,7 @@ use WPGraphQL\Model\MenuItem;
 use WPGraphQL\Model\Post;
 use WPGraphQL\Model\Term;
 use WPGraphQL\Model\User;
+use WPGraphQL\Utils\Utils;
 
 /**
  * Config class.
@@ -235,7 +236,7 @@ class Config {
 			if ( 'wysiwyg' === $acf_field['type'] ) {
 				$format = true;
 			}
-			
+
 			if ( 'select' === $acf_field['type'] ) {
 				$format = true;
 			}
@@ -400,7 +401,7 @@ class Config {
 						$field_config['type'] = [ 'list_of' => 'String' ];
 						$field_config['resolve'] = function( $root ) use ( $acf_field) {
 							$value = $this->get_acf_field_value( $root, $acf_field, true);
-							
+
 							return ! empty( $value ) && is_array( $value ) ? $value : [];
 						};
 					}else{
@@ -1115,98 +1116,84 @@ class Config {
 
 	/**
 	 * Returns all available GraphQL Types
+	 *
+	 * @return array
 	 */
 	public static function get_all_graphql_types() {
 		$graphql_types = array();
 
-		/**
-		 * Add post types exposed to GraphQL to GraphQL types
-		 */
-		$graphql_post_types = get_post_types( ['show_in_graphql' => true] );
-
-		if ( ! empty( $graphql_post_types ) && is_array( $graphql_post_types ) ) {
-
-			// Add ContentNode interface to GraphQL types.
-			$graphql_types['content_node'] = 'ContentNode Interface (' . __( 'All Post Types', 'wp-graphql-acf' ) . ')';
-
-			/**
-			 * Prepare type key prefix and label surfix
-			 */
-			$key_prefix = 'post_type__';
-			$label_surfix = ' (' . __( 'Post Type', 'wp-graphql-acf' ) . ')';
-
-			/**
-			 * Loop over the post types exposed to GraphQL
-			 */
-			foreach ( $graphql_post_types as $post_type ) {
-
-				/**
-				 * Get the post_type_object
-				 */
-				$post_type_object = get_post_type_object( $post_type );
-
-				$type_label = $post_type_object->labels->singular_name . $label_surfix;
-				$type_key = $key_prefix . $post_type;
-
-				$graphql_types[$type_key] = $type_label;
+		// Use GraphQL to get the Interface and the Types that implement them
+		$query = '
+		query GetPossibleTypes($name:String!){
+			__type(name:$name){
+				name
+				description
+				possibleTypes {
+					name
+					description
+				}
 			}
 		}
+		';
 
-		/**
-		 * Add taxonomies to GraphQL types
-		 */
-		$graphql_taxonomies = \WPGraphQL::get_allowed_taxonomies();
+		$interfaces = [
+			'ContentNode' => [
+				'label' => __( 'Post Type', 'wp-graphql-acf' ),
+				'plural_label' => __( 'All Post Types', 'wp-graphql-acf' ),
+			],
+			'TermNode' => [
+				'label' => __( 'Taxonomy', 'wp-graphql-acf' ),
+				'plural_label' => __( 'All Taxonomies', 'wp-graphql-acf' ),
+			]
+		];
 
-		if ( ! empty( $graphql_taxonomies ) && is_array( $graphql_taxonomies ) ) {
+		foreach ( $interfaces as $interface_name => $config ) {
 
-			// Adds TermNode interface to GraphQL types.
-			$graphql_types['term_node'] = 'TermNode Interface (' . __( 'All Taxonomies', 'wp-graphql-acf' ) . ')';
+			$interface_query = graphql([
+				'query' => $query,
+				'variables' => [
+					'name' => $interface_name
+				]
+			]);
 
-			/**
-			 * Prepare type key prefix and label surfix
-			 */
-			$key_prefix = 'taxonomy__';
-			$label_surfix = ' (' . __( 'Taxonomy', 'wp-graphql-acf' ) . ')';
+			$possible_types = $interface_query['data']['__type']['possibleTypes'];
+			asort( $possible_types );
 
-			/**
-			 * Loop over the taxonomies exposed to GraphQL
-			 */
-			foreach ( $graphql_taxonomies as $taxonomy ) {
-				/**
-				 * Get the Taxonomy object
-				 */
-				$tax_object = get_taxonomy( $taxonomy );
-				$type_label = $tax_object->labels->singular_name . $label_surfix;
-				$type_key = $key_prefix . $taxonomy;
+			if ( ! empty( $possible_types ) && is_array( $possible_types ) ) {
 
-				$graphql_types[$type_key] = $type_label;
+				// Intentionally not translating "ContentNode Interface" as this is part of the GraphQL Schema and should not be translated.
+				$graphql_types[ $interface_name ] = '<span data-interface="'. $interface_name .'">' . $interface_name . ' Interface (' . $config['plural_label'] . ')</span>';
+				$label = '<span data-implements="'. $interface_name .'"> (' . $config['label'] . ')</span>';
+				foreach ( $possible_types as $type ) {
+					$type_label = $type['name'] . $label;
+					$type_key = $type['name'];
+
+					$graphql_types[ $type_key ] = $type_label;
+				}
 			}
+
 		}
 
 		/**
 		 * Add comment to GraphQL types
 		 */
-		$graphql_types['comment'] = __( 'Comment', 'wp-graphql-acf' );
+		$graphql_types['Comment'] = __( 'Comment', 'wp-graphql-acf' );
 
 		/**
 		 * Add menu to GraphQL types
 		 */
-		$graphql_types['menu'] = __( 'Menu', 'wp-graphql-acf' );
+		$graphql_types['Menu'] = __( 'Menu', 'wp-graphql-acf' );
 
 		/**
 		 * Add menu items to GraphQL types
 		 */
-		$graphql_types['menu_item'] = __( 'Menu Item', 'wp-graphql-acf' );
-
-		/**
-		 * Add media items to GraphQL types
-		 */
-		$graphql_types['media_item'] = __( 'Media Item', 'wp-graphql-acf' );
+		$graphql_types['MenuItem'] = __( 'Menu Item', 'wp-graphql-acf' );
 
 		/**
 		 * Add users to GraphQL types
 		 */
-		$graphql_types['user'] = __( 'User', 'wp-graphql-acf' );
+		$graphql_types['User'] = __( 'User', 'wp-graphql-acf' );
+
 
 		/**
 		 * Add options pages to GraphQL types
@@ -1226,8 +1213,7 @@ class Config {
 				/**
 				 * Prepare type key prefix and label surfix
 				 */
-				$key_prefix = 'acf_options_page__';
-				$label_surfix = ' (' . __( 'ACF Options Page', 'wp-graphql-acf' ) . ')';
+				$label = '<span class="options-page"> (' . __( 'ACF Options Page', 'wp-graphql-acf' ) . ')</span>';
 
 				/**
 				 * Loop over the post types exposed to GraphQL
@@ -1243,10 +1229,10 @@ class Config {
 					$page_title = $options_page['page_title'];
 					$page_slug  = $options_page['menu_slug'];
 
-					$type_label = $page_title . $label_surfix;
-					$type_key = $key_prefix . $page_slug;
+					$type_label = $page_title . $label;
+					$type_key = $page_slug;
 
-					$graphql_types[$type_key] = $type_label;
+					$graphql_types[ Utils::format_type_name( $type_key ) ] = $type_label;
 				}
 			}
 		}
@@ -1278,7 +1264,7 @@ class Config {
 			/**
 			 * If there are no graphql types on for this field groups, move on to the next one.
 			 */
-			if ( empty( $field_group['graphql_types_on'] ) || ! is_array( $field_group['graphql_types_on'] ) ) {
+			if ( empty( $field_group['graphql_types'] ) || ! is_array( $field_group['graphql_types'] ) ) {
 				continue;
 			}
 
@@ -1301,7 +1287,7 @@ class Config {
 			/**
 			 * Loop over the GraphQL types for this field group on
 			 */
-			foreach ( $field_group['graphql_types_on'] as $graphql_type ) {
+			foreach ( $field_group['graphql_types'] as $graphql_type ) {
 
 				/**
 				 * Set type_name and description by graphql_type
@@ -1475,7 +1461,7 @@ class Config {
 	}
 
 	/**
-	 * Update field groups with graphql_types_on field
+	 * Update field groups with graphql_types field
 	 * Used when upgrading version from under 0.4.1 to above
 	 *
 	 * @since 0.4.1
@@ -1494,7 +1480,7 @@ class Config {
 		 * @param array $field_groups Field group to push the key
 		 * @param string $graphql_type_key GraphQL type key to push
 		 */
-		$func_push_type_key = function ( $field_groups, $graphql_type_key ) use ( &$graphql_field_groups ) {
+		$func_push_type_key = function ( array $field_groups, string $graphql_type_key ) use ( &$graphql_field_groups ) {
 
 			/**
 			 * If there are no field groups for this post type, move on to the next one.
@@ -1517,17 +1503,17 @@ class Config {
 				}
 
 				/**
-				 * Init graphql_types_on field
+				 * Init graphql_types field
 				 */
-				if ( ! isset( $graphql_field_groups[$field_group_id]['graphql_types_on'] ) ) {
-					$graphql_field_groups[$field_group_id]['graphql_types_on'] = array();
+				if ( ! isset( $graphql_field_groups[$field_group_id]['graphql_types'] ) ) {
+					$graphql_field_groups[$field_group_id]['graphql_types'] = array();
 				}
 
 				/**
 				 * Push the type key to the array
 				 */
-				if ( ! in_array( $graphql_type_key, $graphql_field_groups[$field_group_id]['graphql_types_on'] ) ) {
-					$graphql_field_groups[$field_group_id]['graphql_types_on'][] = $graphql_type_key;
+				if ( ! in_array( $graphql_type_key, $graphql_field_groups[$field_group_id]['graphql_types'] ) ) {
+					$graphql_field_groups[$field_group_id]['graphql_types'][] = $graphql_type_key;
 				}
 			}
 		};
@@ -1545,7 +1531,7 @@ class Config {
 			foreach ( $graphql_post_types as $post_type ) {
 				$field_groups = acf_get_field_groups( array( 'post_type' => $post_type ) );
 
-				$func_push_type_key( $field_groups, 'post_type__' . $post_type );
+				$func_push_type_key( $field_groups, $post_type );
 			}
 		}
 
@@ -1560,7 +1546,7 @@ class Config {
 			// Loop over the taxonomies exposed to GraphQL
 			foreach ( $graphql_taxonomies as $taxonomy ) {
 				$field_groups = acf_get_field_groups( array( 'taxonomy' => $taxonomy ) );
-				$func_push_type_key( $field_groups, 'taxonomy__' . $taxonomy );
+				$func_push_type_key( $field_groups, $taxonomy );
 			}
 		}
 
@@ -1608,7 +1594,7 @@ class Config {
 									case 'attachment':
 										$media_item_field_groups[] = $field_group;
 										break;
-									
+
 									default:
 										if ( in_array( $location['param'], $allowed_post_types, true ) ) {
 											$individual_post_groups[$location['param']][] = $field_group;
@@ -1666,7 +1652,7 @@ class Config {
 
 			// If there are no post types exposed to GraphQL, bail
 			if ( ! empty( $graphql_options_pages ) && is_array( $graphql_options_pages ) ) {
-				
+
 				// Loop over the post types exposed to GraphQL
 				foreach ( $graphql_options_pages as $options_page_key => $options_page ) {
 					if ( empty( $options_page['show_in_graphql'] ) ) {

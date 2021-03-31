@@ -1144,6 +1144,10 @@ class Config {
 			'TermNode' => [
 				'label' => __( 'Taxonomy', 'wp-graphql-acf' ),
 				'plural_label' => __( 'All Taxonomies', 'wp-graphql-acf' ),
+			],
+			'ContentTemplate' => [
+				'label' => __( 'Template Assigned to the Content', 'wp-graphql-acf' ),
+				'plural_label' => __( 'All Templates Assignable to Content', 'wp-graphql-acf' ),
 			]
 		];
 

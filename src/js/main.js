@@ -33,7 +33,7 @@ $j(document).ready(function () {
 
 				// Set the checked state of the Interface checkbox
 				if ( ! $j(this).is(":checked") && interfaceCheckbox.is(":checked") ) {
-					interfaceCheckbox.prop(":checked", false);
+					interfaceCheckbox.prop("checked", false);
 				}
 
 				// Set the state of the Implementing checkboxes

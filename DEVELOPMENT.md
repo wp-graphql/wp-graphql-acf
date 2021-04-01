@@ -17,7 +17,7 @@ The `app` docker image starts a running WordPress site with the local wp-graphql
 The `testing` docker image starts a running WordPress and runs the codeception test suites.
 
 1. Run `composer build-test` to build the `testing` docker image.
-1. Run `composer run-tests` to start the `testing` image and run the codeception tests.
+1. Run `composer run-test` to start the `testing` image and run the codeception tests.
 
 # Using XDebug
 
@@ -39,7 +39,7 @@ Use the environment variable USING_XDEBUG to run tests with xdebug configured to
 
 ```
 export USING_XDEBUG=1
-composer run-tests
+composer run-test
 ```
 
 Start the debugger in your IDE. Set breakpoints.

@@ -19,7 +19,7 @@ if [ -z "$1" ]; then
 	print_usage_instructions
 fi
 
-env_file=".env.dist";
+env_file=".env";
 
 subcommand=$1; shift
 case "$subcommand" in

@@ -19,6 +19,7 @@ RUN apt-get install zip unzip -y \
     && pecl install pcov
 
 ENV COVERAGE=0
+ENV SUITES=${SUITES:-zz}
 
 # Install composer
 ENV COMPOSER_ALLOW_SUPERUSER=1
@@ -29,8 +30,6 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
 
 # Add composer global binaries to PATH
 ENV PATH "$PATH:~/.composer/vendor/bin"
-
-
 
 # Configure php
 RUN echo "date.timezone = UTC" >> /usr/local/etc/php/php.ini

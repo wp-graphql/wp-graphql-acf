@@ -68,7 +68,7 @@ RUN echo "Installing XDebug 3 (in disabled state)" \
     ;
 
 # Set xdebug configuration off by default. See the entrypoint.sh.
-ENV USING_XDEBUG=0
+ENV USING_XDEBUG=${USING_XDEBUG}
 
 # Set up entrypoint
 WORKDIR    /var/www/html

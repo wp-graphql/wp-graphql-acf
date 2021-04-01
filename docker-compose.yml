@@ -19,7 +19,7 @@ services:
       ADMIN_EMAIL: admin@example.com
       ADMIN_USERNAME: admin
       ADMIN_PASSWORD: password
-      USING_XDEBUG: $USING_XDEBUG
+      USING_XDEBUG: ${USING_XDEBUG:-}
     ports:
       - '8091:80'
     networks:
@@ -46,11 +46,13 @@ services:
       - '.:/var/www/html/wp-content/plugins/wp-graphql-acf'
       - './.log/testing:/var/log/apache2'
       - './codeception.dist.yml:/var/www/html/wp-content/plugins/wp-graphql-acf/codeception.yml'
-    env_file: .env.dist
+    env_file:
+      - .env
     environment:
       DB_HOST: app_db
       WP_URL: 'http://localhost'
       WP_DOMAIN: 'localhost'
+      SUITES: ${SUITES:-}
     networks:
       testing:
 

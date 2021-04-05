@@ -115,7 +115,7 @@ function can_load_plugin() {
 
 /**
  * Compare the old version and run version migration code
- * 
+ *
  * @since 0.4.1
  */
 function run_version_upgrade() {

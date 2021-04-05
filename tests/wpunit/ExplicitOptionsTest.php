@@ -35,7 +35,7 @@ class ExplicitOptionsTest extends \Codeception\TestCase\WPTestCase {
 			'description'           => '',
 			'show_in_graphql'       => 1,
 			'graphql_field_name'    => 'postFields',
-			'graphql_types_on'      => [ 'post_type__post' ]
+			'graphql_types'      => [ 'Post' ]
 		];
 
 		acf_add_local_field_group( array_merge( $defaults, $config ) );
@@ -95,7 +95,7 @@ class ExplicitOptionsTest extends \Codeception\TestCase\WPTestCase {
 			[
 				'key'                => $group_key,
 				'graphql_field_name' => $group_graphql_name,
-				'graphql_types_on'   => [ 'post_type__post', 'post_type__' . $cpt_name ],
+				'graphql_types'   => [ 'Post', 'acfCpt' ],
 			]
 		);
 

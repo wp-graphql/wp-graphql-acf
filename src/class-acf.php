@@ -7,6 +7,8 @@
 
 namespace WPGraphQL\ACF;
 
+use GraphQL\Type\Definition\ResolveInfo;
+
 /**
  * Final class ACF
  */
@@ -127,6 +129,18 @@ final class ACF {
 	 */
 	private function filters() {
 
+		/**
+		 * This filters any field that returns the `ContentTemplate` type
+		 * to pass the source node down to the template for added context
+		 */
+		add_filter( 'graphql_resolve_field', function( $result, $source, $args, $context, ResolveInfo $info, $type_name, $field_key, $field, $field_resolver ) {
+			if ( isset( $info->returnType ) && strtolower( 'ContentTemplate' ) === strtolower( $info->returnType ) ) {
+				if ( is_array( $result ) && ! isset( $result['node'] ) && ! empty( $source ) ) {
+					$result['node'] = $source;
+				}
+			}
+			return $result;
+		}, 10, 9 );
 	}
 
 	/**

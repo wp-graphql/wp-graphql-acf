@@ -54,7 +54,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			'description'           => '',
 			'show_in_graphql'       => 1,
 			'graphql_field_name'    => 'postFields',
-			'graphql_types_on'		=> ['post_type__post']
+			'graphql_types'		    => ['Post']
 		];
 
 		acf_add_local_field_group( array_merge( $defaults, $config ));
@@ -1225,7 +1225,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 				],
 			],
 			'graphql_field_name'    => 'acfTestFields',
-			'graphql_types_on' => ['post_type__acf_test']
+			'graphql_types' => [ 'acfTest' ]
 		]);
 
 

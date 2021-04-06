@@ -41,9 +41,7 @@ fi
 
 # Install and activate WPGraphQL
 if [ ! -f "${PLUGINS_DIR}/wp-graphql/wp-graphql.php" ]; then
-    curl -L -O https://github.com/wp-graphql/wp-graphql/releases/download/${CORE_VERSION-v1.3.3}/wp-graphql.zip
-    wp plugin install wp-graphql.zip --activate --allow-root
-    rm -vf wp-graphql.zip
+    wp plugin install wp-graphql --activate --allow-root
 else
     wp plugin activate wp-graphql --allow-root
 fi

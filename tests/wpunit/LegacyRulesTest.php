@@ -246,6 +246,10 @@ class LegacyRulesTest extends \Codeception\TestCase\WPTestCase {
 
 	public function testFieldGroupAssignedToMenusWithoutGraphqlTypesFieldShowsInSchema() {
 
+		$location_name = 'test-location';
+		add_theme_support( 'nav_menus' );
+		register_nav_menu( $location_name, 'test menu...' );
+
 		/**
 		 * Register a field group to a specific post type
 		 */
@@ -287,6 +291,8 @@ class LegacyRulesTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertArrayNotHasKey( 'errors', $actual );
 
 		acf_remove_local_field_group( 'menuFieldTest' );
+		remove_theme_support( 'nav_menus' );
+		unregister_nav_menu( $location_name );
 
 	}
 

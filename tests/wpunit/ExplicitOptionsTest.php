@@ -1,19 +1,24 @@
 <?php
 class ExplicitOptionsTest extends \Codeception\TestCase\WPTestCase {
 
+	public $group_key;
+
 	public function setUp(): void {
+		$this->group_key = __CLASS__;
 		WPGraphQL::clear_schema();
 		parent::setUp();
 	}
 
 	public function tearDown(): void {
+		acf_remove_local_field_group( $this->group_key );
+		WPGraphQL::clear_schema();
 		parent::tearDown();
 	}
 
 	public function register_acf_field_group( $config = [] ) {
 
 		$defaults = [
-			'key'                   => 'group_key',
+			'key'                   => $this->group_key,
 			'title'                 => 'Post Object Fields',
 			'fields'                => [],
 			'location'              => [
@@ -238,6 +243,8 @@ class ExplicitOptionsTest extends \Codeception\TestCase\WPTestCase {
 
 		$this->assertArrayNotHasKey( 'errors', $actual );
 		$this->assertSame( $expected_text_3, $actual['data']['acfCptBy'][ $group_graphql_name ][ 'acfTextField' ] );
+
+		acf_remove_local_field_group( $group_key );
 
 	}
 

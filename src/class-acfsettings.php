@@ -31,6 +31,9 @@ class ACF_Settings {
 		 */
 		add_action( 'acf/render_field_settings', [ $this, 'add_field_settings' ], 10, 1 );
 
+		/**
+		 * Enqueue scripts to enhance the UI of the ACF Field Group Settings
+		 */
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_graphql_acf_scripts' ], 10, 1 );
 
 	}
@@ -40,7 +43,7 @@ class ACF_Settings {
 	 *
 	 * @param array $field The field to add the setting to.
 	 */
-	public function add_field_settings( $field ) {
+	public function add_field_settings( array $field ) {
 
 		$supported_fields = Config::get_supported_fields();
 
@@ -78,7 +81,7 @@ class ACF_Settings {
 	 *
 	 * @param array $field_group The field group to add settings to.
 	 */
-	public function add_field_group_settings( $field_group ) {
+	public function add_field_group_settings( array $field_group ) {
 
 		/**
 		 * Render a field in the Field Group settings to allow for a Field Group to be shown in GraphQL.
@@ -105,7 +108,7 @@ class ACF_Settings {
 				'type'         => 'text',
 				'prefix'       => 'acf_field_group',
 				'name'         => 'graphql_field_name',
-				'required'     => true,
+				'required'     => isset( $field_group['show_in_graphql'] ) ? (bool) $field_group['show_in_graphql'] : false,
 				'placeholder'  => ! empty( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null,
 				'value'        => ! empty( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null,
 			]

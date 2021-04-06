@@ -2,6 +2,34 @@ $j = jQuery.noConflict();
 
 $j(document).ready(function () {
 
+	function toggleFieldRequirement() {
+
+		$j('#acf_field_group-show_in_graphql').on('change', function () {
+			var graphqlFieldNameWrap = $j('.acf-field[data-name="graphql_field_name"]'),
+				graphqlLabel = graphqlFieldNameWrap.find('label'),
+				graphqlInput = $j('#acf_field_group-graphql_field_name');
+
+			if ($j(this).is(':checked')) {
+
+				// Add span.acf-required if necessary.
+				if (graphqlFieldNameWrap.find('.acf-required').length === 0) {
+					graphqlLabel.append('<span class="acf-required">*</span>');
+				}
+
+				// Toggle required attributes and visual features.
+				graphqlFieldNameWrap.addClass('is-required');
+				graphqlLabel.find('.acf-required').show();
+				graphqlInput.attr('required', true);
+			} else {
+				graphqlFieldNameWrap.removeClass('is-required');
+				graphqlLabel.find('.acf-required').hide();
+				graphqlInput.attr('required', false);
+			}
+
+		});
+
+	}
+
 	/**
 	 * Listen to state changes for checkboxes for Interfaces and the checkboxes for
 	 * Possible Types of the interfaces
@@ -49,5 +77,6 @@ $j(document).ready(function () {
 
 	// Initialize the functionality to track the state of the Interface checkboxes.
 	initInterfaceCheckboxes();
+	toggleFieldRequirement();
 
 });

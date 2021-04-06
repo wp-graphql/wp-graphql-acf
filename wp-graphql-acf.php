@@ -113,24 +113,149 @@ function can_load_plugin() {
 	return true;
 }
 
-/**
- * Compare the old version and run version migration code
- *
- * @since 0.4.1
- */
-function run_version_upgrade() {
-	/**
-	 * Get the old version string
-	 */
-	$prev_version = get_option( 'wp_graphql_acf_version' );
+//if( function_exists('acf_add_local_field_group') ):
+//
+//	acf_add_local_field_group(array(
+//		'key' => 'group_606b61869135f',
+//		'title' => 'Tag Fields',
+//		'fields' => array(
+//			array(
+//				'key' => 'field_606b618b48b6e',
+//				'label' => 'test',
+//				'name' => 'test',
+//				'type' => 'text',
+//				'instructions' => '',
+//				'required' => 0,
+//				'conditional_logic' => 0,
+//				'wrapper' => array(
+//					'width' => '',
+//					'class' => '',
+//					'id' => '',
+//				),
+//				'show_in_graphql' => 1,
+//				'default_value' => '',
+//				'placeholder' => '',
+//				'prepend' => '',
+//				'append' => '',
+//				'maxlength' => '',
+//			),
+//		),
+//		'location' => array(
+//			array(
+//				array(
+//					'param' => 'taxonomy',
+//					'operator' => '==',
+//					'value' => 'post_tag',
+//				),
+//			),
+//		),
+//		'menu_order' => 0,
+//		'position' => 'normal',
+//		'style' => 'default',
+//		'label_placement' => 'top',
+//		'instruction_placement' => 'label',
+//		'hide_on_screen' => '',
+//		'active' => true,
+//		'description' => '',
+//		'show_in_graphql' => 1,
+//		'graphql_field_name' => 'exampleTagFields',
+//	));
+//
+//	acf_add_local_field_group(array(
+//		'key' => 'group_606b6b8ad82b4',
+//		'title' => 'Comment Fields',
+//		'fields' => array(
+//			array(
+//				'key' => 'group_606b6b8ad82b4',
+//				'label' => 'test',
+//				'name' => 'test',
+//				'type' => 'text',
+//				'instructions' => '',
+//				'required' => 0,
+//				'conditional_logic' => 0,
+//				'wrapper' => array(
+//					'width' => '',
+//					'class' => '',
+//					'id' => '',
+//				),
+//				'show_in_graphql' => 1,
+//				'default_value' => '',
+//				'placeholder' => '',
+//				'prepend' => '',
+//				'append' => '',
+//				'maxlength' => '',
+//			),
+//		),
+//		'location' => array(
+//			array(
+//				array(
+//					'param' => 'comment',
+//					'operator' => '==',
+//					'value' => 'post',
+//				),
+//			),
+//		),
+//		'menu_order' => 0,
+//		'position' => 'normal',
+//		'style' => 'default',
+//		'label_placement' => 'top',
+//		'instruction_placement' => 'label',
+//		'hide_on_screen' => '',
+//		'active' => true,
+//		'description' => '',
+//		'show_in_graphql' => 1,
+//		'graphql_field_name' => 'exampleCommentFields',
+//	));
+//
+//	acf_add_local_field_group(array(
+//		'key' => 'group_606b6b8ad82b4_menu',
+//		'title' => 'Menu Fields',
+//		'fields' => array(
+//			array(
+//				'key' => 'group_606b6b8ad82b4_menu',
+//				'label' => 'test',
+//				'name' => 'test',
+//				'type' => 'text',
+//				'instructions' => '',
+//				'required' => 0,
+//				'conditional_logic' => 0,
+//				'wrapper' => array(
+//					'width' => '',
+//					'class' => '',
+//					'id' => '',
+//				),
+//				'show_in_graphql' => 1,
+//				'default_value' => '',
+//				'placeholder' => '',
+//				'prepend' => '',
+//				'append' => '',
+//				'maxlength' => '',
+//			),
+//		),
+//		'location' => array(
+//			array(
+//				array(
+//					'param' => 'nav_menu',
+//					'operator' => '==',
+//					'value' => 'any',
+//				),
+//			),
+//		),
+//		'menu_order' => 0,
+//		'position' => 'normal',
+//		'style' => 'default',
+//		'label_placement' => 'top',
+//		'instruction_placement' => 'label',
+//		'hide_on_screen' => '',
+//		'active' => true,
+//		'description' => '',
+//		'show_in_graphql' => 1,
+//		'graphql_field_name' => 'exampleMenuFields',
+//	));
+//
+//endif;
 
-	/**
-	 * If the old version is under 0.4.1, run migration code
-	 */
-	if ( empty( $prev_version ) || version_compare( $prev_version, '0.5.1', '<' ) ) {
-		\WPGraphQL\ACF\Config::auto_update_field_groups();
-	}
-
-	update_option( 'wp_graphql_acf_version', WPGRAPHQL_ACF_VERSION );
-}
-register_activation_hook( __FILE__, __NAMESPACE__ . '\run_version_upgrade' );
+add_filter( 'theme_page_templates', function( $templates ) {
+	$templates['test'] = 'Test Template';
+	return $templates;
+});

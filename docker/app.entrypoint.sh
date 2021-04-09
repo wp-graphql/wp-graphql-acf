@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$USING_XDEBUG" == "1"  ]; then
+    echo "Enabling XDebug 3"
+    mv /usr/local/etc/php/conf.d/disabled/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
+fi
+
 # Run WordPress docker entrypoint.
 . docker-entrypoint.sh 'apache2'
 
@@ -36,9 +41,15 @@ fi
 
 # Install and activate WPGraphQL
 if [ ! -f "${PLUGINS_DIR}/wp-graphql/wp-graphql.php" ]; then
-    wp plugin install \
-        https://github.com/wp-graphql/wp-graphql/archive/${CORE_BRANCH-master}.zip \
-        --activate --allow-root
+    # WPGRAPHQL_VERSION in format like v1.2.3
+    if [ -n "$WPGRAPHQL_VERSION" ]; then
+        echo "Installing wp-graphql version $WPGRAPHQL_VERSION"
+        curl -L -O https://github.com/wp-graphql/wp-graphql/releases/download/${WPGRAPHQL_VERSION}/wp-graphql.zip
+        wp plugin install wp-graphql.zip --activate --allow-root
+        rm -vf wp-graphql.zip
+    else
+        wp plugin install wp-graphql --activate --allow-root
+    fi
 else
     wp plugin activate wp-graphql --allow-root
 fi

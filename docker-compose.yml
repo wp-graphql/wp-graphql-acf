@@ -8,6 +8,8 @@ services:
     volumes:
       - '.:/var/www/html/wp-content/plugins/wp-graphql-acf'
       - './.log/app:/var/log/apache2'
+    env_file:
+      - .env
     environment:
       WP_URL: 'http://localhost:8091'
       WP_DOMAIN: 'localhost:8091'
@@ -19,9 +21,7 @@ services:
       ADMIN_EMAIL: admin@example.com
       ADMIN_USERNAME: admin
       ADMIN_PASSWORD: password
-      INCLUDE_WPGRAPHIQL: 1
-      IMPORT_WC_PRODUCTS: 1
-      STRIPE_GATEWAY: 1
+      USING_XDEBUG: ${USING_XDEBUG:-}
     ports:
       - '8091:80'
     networks:
@@ -48,13 +48,13 @@ services:
       - '.:/var/www/html/wp-content/plugins/wp-graphql-acf'
       - './.log/testing:/var/log/apache2'
       - './codeception.dist.yml:/var/www/html/wp-content/plugins/wp-graphql-acf/codeception.yml'
-    env_file: .env.dist
+    env_file:
+      - .env
     environment:
-      XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9000 remote_enable=1
       DB_HOST: app_db
       WP_URL: 'http://localhost'
       WP_DOMAIN: 'localhost'
-      STRIPE_GATEWAY: 1
+      SUITES: ${SUITES:-}
     networks:
       testing:
 

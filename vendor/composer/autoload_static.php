@@ -25,7 +25,7 @@ class ComposerStaticInit22bfbd1509018e9010b8ca40b9b6700b
         'WPGraphQL\\ACF\\ACF' => __DIR__ . '/../..' . '/src/class-acf.php',
         'WPGraphQL\\ACF\\ACF_Settings' => __DIR__ . '/../..' . '/src/class-acfsettings.php',
         'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/class-config.php',
-        'WPGraphQL\\ACF\\LegacyLoctionRules' => __DIR__ . '/../..' . '/src/legacy-location-rules.php',
+        'WPGraphQL\\ACF\\LocationRules' => __DIR__ . '/../..' . '/src/location-rules.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

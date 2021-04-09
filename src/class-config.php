@@ -7,6 +7,7 @@
 
 namespace WPGraphQL\ACF;
 
+use Exception;
 use GraphQL\Type\Definition\ResolveInfo;
 use WPGraphQL\AppContext;
 use WPGraphQL\Data\DataSource;
@@ -30,10 +31,10 @@ class Config {
 	protected $type_registry;
 
 	/**
-	 * Stores the legacy location rules for back compat
+	 * Stores the location rules for back compat
 	 * @var array
 	 */
-	protected $legacy_location_rules = [];
+	protected $location_rules = [];
 
 	/**
 	 * @var array <string> List of field names registered to the Schema
@@ -50,7 +51,7 @@ class Config {
 	 *
 	 * @param TypeRegistry $type_registry Instance of the WPGraphQL TypeRegistry
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function init( TypeRegistry $type_registry ) {
 
@@ -58,17 +59,16 @@ class Config {
 		 * Set the TypeRegistry
 		 */
 		$this->type_registry = $type_registry;
-
 		$this->register_initial_types();
 
 		/**
-		 * Gets the legacy location rules for backward compatibility.
+		 * Gets the location rules for backward compatibility.
 		 *
 		 * This allows for ACF Field Groups that were registered before the "graphql_types"
 		 * field was respected can still work with the old GraphQL Schema rules that mapped
 		 * from the ACF Location rules.
 		 */
-		$this->legacy_location_rules = $this->get_legacy_location_rules();
+		$this->location_rules = $this->get_location_rules();
 
 		/**
 		 * Add ACF Fields to GraphQL Types
@@ -121,12 +121,25 @@ class Config {
 	/**
 	 * Registers initial Types for use with ACF Fields
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	public function register_initial_types() {
 
+		$this->type_registry->register_interface_type(
+			'AcfFieldGroup',
+			[
+				'description' => __( 'A Field Group registered by ACF', 'wp-graphql-acf' ),
+				'fields' => [
+					'fieldGroupName' => [
+						'description' => __( 'The name of the ACF Field Group', 'wp-graphql-acf' ),
+						'type' => 'String',
+					],
+				]
+			]
+		);
+
 		$this->type_registry->register_object_type(
-			'ACF_Link',
+			'AcfLink',
 			[
 				'description' => __( 'ACF Link field', 'wp-graphql-acf' ),
 				'fields'      => [
@@ -151,33 +164,33 @@ class Config {
 
 
 	/**
-	 * Gets the legacy location rules
+	 * Gets the location rules
 	 * @return array
 	 */
-	protected function get_legacy_location_rules() {
+	protected function get_location_rules() {
 
 		$field_groups = acf_get_field_groups();
 		if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
 			return [];
 		}
 
-		$legacy = [];
+		$rules = [];
 
 		foreach ( $field_groups as $field_group ) {
 			if ( ! isset( $field_group['graphql_types'] ) ) {
-				$legacy[] = $field_group;
+				$rules[] = $field_group;
 			}
 		}
 
-		if ( empty( $legacy ) ) {
+		if ( empty( $rules ) ) {
 			return [];
 		}
 
-		// If there are field groups with no graphql_types field set, treat them as legacy
-		// and get the legacy rules
-		$legacy_rules = new LegacyLoctionRules();
-		$legacy_rules->determine_legacy_location_rules();
-		return $legacy_rules->get_rules();
+		// If there are field groups with no graphql_types field set, inherit the rules from
+		// ACF Location Rules
+		$rules = new LocationRules();
+		$rules->determine_location_rules();
+		return $rules->get_rules();
 	}
 
 	protected function add_options_pages_to_schema() {
@@ -753,7 +766,7 @@ class Config {
 				];
 				break;
 			case 'link':
-				$field_config['type'] = 'ACF_Link';
+				$field_config['type'] = 'AcfLink';
 				break;
 			case 'image':
 			case 'file':
@@ -897,9 +910,9 @@ class Config {
 					$field_type_name,
 					[
 						'description' => __( 'Field Group', 'wp-graphql-acf' ),
+						'interfaces' => [ 'AcfFieldGroup' ],
 						'fields'      => [
 							'fieldGroupName' => [
-								'type'    => 'String',
 								'resolve' => function( $source ) use ( $acf_field ) {
 									return ! empty( $acf_field['name'] ) ? $acf_field['name'] : null;
 								},
@@ -1044,9 +1057,9 @@ class Config {
 					$field_type_name,
 					[
 						'description' => __( 'Field Group', 'wp-graphql-acf' ),
+						'interfaces' => [ 'AcfFieldGroup' ],
 						'fields'      => [
 							'fieldGroupName' => [
-								'type'    => 'String',
 								'resolve' => function( $source ) use ( $acf_field ) {
 									return ! empty( $acf_field['name'] ) ? $acf_field['name'] : null;
 								},
@@ -1122,9 +1135,9 @@ class Config {
 
 							register_graphql_object_type( $flex_field_layout_name, [
 								'description' => __( 'Group within the flex field', 'wp-graphql-acf' ),
+								'interfaces' => [ 'AcfFieldGroup' ],
 								'fields'      => [
 									'fieldGroupName' => [
-										'type'    => 'String',
 										'resolve' => function( $source ) use ( $flex_field_layout_name ) {
 											return ! empty( $flex_field_layout_name ) ? $flex_field_layout_name : null;
 										},
@@ -1288,7 +1301,7 @@ class Config {
 				'plural_label' => __( 'All Taxonomies', 'wp-graphql-acf' ),
 			],
 			'ContentTemplate' => [
-				'label' => __( 'Template Assigned to the Content', 'wp-graphql-acf' ),
+				'label' => __( 'Page Template', 'wp-graphql-acf' ),
 				'plural_label' => __( 'All Templates Assignable to Content', 'wp-graphql-acf' ),
 			]
 		];
@@ -1402,6 +1415,7 @@ class Config {
 			return;
 		}
 
+
 		/**
 		 * Loop over all the field groups
 		 */
@@ -1410,11 +1424,10 @@ class Config {
 			$field_group_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : $field_group['title'];
 			$field_group_name = Utils::format_field_name( $field_group_name );
 
-
 			if ( ! isset( $field_group['graphql_types'] ) ) {
 				$field_group['graphql_types'] = [];
-				if ( isset( $this->get_legacy_location_rules()[ $field_group_name ] ) ) {
-					$field_group['graphql_types'] = $this->get_legacy_location_rules()[ $field_group_name ];
+				if ( isset( $this->get_location_rules()[ $field_group_name ] ) ) {
+					$field_group['graphql_types'] = $this->get_location_rules()[ $field_group_name ];
 				}
 			}
 
@@ -1451,8 +1464,6 @@ class Config {
 			$qualifier =  sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was set to Show in GraphQL.', 'wp-graphql-acf' ), $field_group['title'] );
 			$config['description'] = $field_group['description'] ? $field_group['description'] . ' | ' . $qualifier : $qualifier;
 
-
-
 			/**
 			 * Loop over the GraphQL types for this field group on
 			 */
@@ -1460,6 +1471,7 @@ class Config {
 				$this->register_graphql_field( $graphql_type, $field_name, $config );
 			}
 		}
+
 	}
 
 }

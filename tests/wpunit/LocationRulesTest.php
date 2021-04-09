@@ -1,5 +1,12 @@
 <?php
-class LegacyRulesTest extends \Codeception\TestCase\WPTestCase {
+
+/**
+ * Class LocationRulesTest
+ *
+ * These tests are intended to test ACF Field groups that are assigned locations
+ * but not explicitly assigned "graphql_types"
+ */
+class LocationRulesTest extends \Codeception\TestCase\WPTestCase {
 
 	public $group_key;
 	public $post_id;

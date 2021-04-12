@@ -18,7 +18,8 @@ use WPGraphQL\Utils\Utils;
  * This Class is a polyfill for ACF Field Groups that were registered without a `graphql_types`
  * field, and need to fall back to the old Location Rules.
  *
- * Any Field Group that has `graphql_types` set, will use the explicit `graphql_types` configuration.
+ * Any Field Group that has `graphql_types` set, will use the explicit `graphql_types`
+ * configuration.
  *
  * @package WPGraphQL\ACF
  */
@@ -117,7 +118,7 @@ class LocationRules {
 
 		$mapped_field_groups = isset( $this->mapped_field_groups ) && ! empty( $this->mapped_field_groups ) ? $this->mapped_field_groups : [];
 
-		if ( empty( $mapped_field_groups ) )  {
+		if ( empty( $mapped_field_groups ) ) {
 			return [];
 		}
 
@@ -133,7 +134,7 @@ class LocationRules {
 			if ( ! empty( $types ) ) {
 				foreach ( $types as $type ) {
 					if ( isset( $this->mapped_field_groups[ $field_group ] ) ) {
-						if( ( $key = array_search( $type, $mapped_field_groups[ $field_group ] ) ) !== false ) {
+						if ( ( $key = array_search( $type, $mapped_field_groups[ $field_group ] ) ) !== false ) {
 							unset( $mapped_field_groups[ $field_group ][ $key ] );
 						}
 					}
@@ -142,6 +143,241 @@ class LocationRules {
 		}
 
 		return $mapped_field_groups;
+
+	}
+
+	/**
+	 * Checks for conflicting rule types to avoid impossible states.
+	 *
+	 * If a field group is assigned to a rule such as "post_type == post" AND "taxonomy == Tag"
+	 * this would be an impossible state, as an object can't be a Post and a Tag.
+	 *
+	 * If we detect conflicting rules, the rule set is not applied at all.
+	 *
+	 * @param array $and_params     The parameters of the rule group
+	 * @param mixed $param          The current param being evaluated
+	 * @param array $allowed_params The allowed params that shouldn't conflict
+	 *
+	 * @return bool
+	 */
+	public function check_for_conflicts( array $and_params, $param, $allowed_params = [] ) {
+
+		if ( empty( $and_params ) ) {
+			return false;
+		}
+
+		$has_conflict = false;
+		$keys         = array_keys( $and_params, $param );
+
+		if ( isset( $keys[0] ) ) {
+			unset( $and_params[ $keys[0] ] );
+		}
+
+		if ( ! empty( $and_params ) ) {
+			foreach ( $and_params as $key => $and_param ) {
+				if ( false === array_search( $and_param, $allowed_params, true ) ) {
+					$has_conflict = true;
+				}
+			}
+		}
+
+		return $has_conflict;
+
+	}
+
+	/**
+	 * Checks for conflicting rule types to avoid impossible states.
+	 *
+	 * If a field group is assigned to a rule such as "post_type == post" AND "taxonomy == Tag"
+	 * this would be an impossible state, as an object can't be a Post and a Tag.
+	 *
+	 * If we detect conflicting rules, the rule set is not applied at all.
+	 *
+	 * @param array $and_params The parameters of the rule group
+	 * @param mixed $param      The current param being evaluated
+	 *
+	 * @return bool
+	 */
+	public function check_params_for_conflicts( array $and_params = [], $param ) {
+		switch ( $param ) {
+			case 'post_type':
+				$allowed_and_params = [
+					'post_status',
+					'post_format',
+					'post_category',
+					'post_taxonomy',
+					'post',
+				];
+				break;
+			case 'post_template':
+			case 'page_template':
+				$allowed_and_params = [
+					'page_type',
+					'page_parent',
+					'page',
+				];
+				break;
+			case 'post_status':
+				$allowed_and_params = [
+					'post_type',
+					'post_format',
+					'post_category',
+					'post_taxonomy',
+				];
+				break;
+			case 'post_format':
+			case 'post_category':
+			case 'post_taxonomy':
+				$allowed_and_params = [
+					'post_status',
+					'post_type',
+					'post_format',
+					'post_category',
+					'post_taxonomy',
+					'post',
+				];
+				break;
+			case 'post':
+				$allowed_and_params = [
+					'post_status',
+					'post_type',
+					'post_format',
+					'post_category',
+					'post_taxonomy',
+					'post',
+				];
+				break;
+			case 'page_type':
+				$allowed_and_params = [
+					'page_template',
+					'page_type',
+					'page_parent',
+					'page',
+				];
+				break;
+			case 'page_parent':
+			case 'page':
+				$allowed_and_params = [
+					'page_template',
+					'page_type',
+					'page_parent',
+					'page',
+				];
+				break;
+			case 'current_user':
+			case 'current_user_role':
+				// @todo:
+				// Right now, if you set current_user or current_user_role as the only rule,
+				// ACF adds the field group to every possible location in the Admin.
+				// This seems a bit heavy handed. 🤔
+				// We need to think through this a bit more, and how this rule
+				// Can be composed with other rules, etc.
+				$allowed_and_params = [];
+				break;
+			case 'user_form':
+			case 'user_role':
+				$allowed_and_params = [
+					'user_form',
+					'user_role',
+				];
+				break;
+			case 'taxonomy':
+			case 'attachment':
+			case 'comment':
+			case 'widget':
+			case 'nav_menu':
+			case 'nav_menu_item':
+			default:
+				$allowed_and_params = [];
+				break;
+
+		}
+
+		return $this->check_for_conflicts( $and_params, $param, $allowed_and_params );
+
+	}
+
+	/**
+	 * Determine how an ACF Location Rule should apply to the WPGraphQL Schema
+	 *
+	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
+	 */
+	public function determine_rules( string $field_group_name, string $param, string $operator, string $value ) {
+
+		// Depending on the param of the rule, there's different logic to
+		// map to the Schema
+		switch ( $param ) {
+			case 'post_type':
+				$this->determine_post_type_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'post_template':
+			case 'page_template':
+				$this->determine_post_template_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'post_status':
+				$this->determine_post_status_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'post_format':
+			case 'post_category':
+			case 'post_taxonomy':
+				$this->determine_post_taxonomy_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'post':
+				$this->determine_post_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'page_type':
+				$this->determine_page_type_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'page_parent':
+			case 'page':
+				// If page or page_parent is set, regardless of operator and value,
+				// we can add the field group to the Page type
+				$this->set_graphql_type( $field_group_name, 'Page' );
+				break;
+			case 'current_user':
+			case 'current_user_role':
+				// @todo:
+				// Right now, if you set current_user or current_user_role as the only rule,
+				// ACF adds the field group to every possible location in the Admin.
+				// This seems a bit heavy handed. 🤔
+				// We need to think through this a bit more, and how this rule
+				// Can be composed with other rules, etc.
+				break;
+			case 'user_form':
+			case 'user_role':
+				// If user_role or user_form params are set, we need to expose the field group
+				// to the User type
+				$this->set_graphql_type( $field_group_name, 'User' );
+				break;
+			case 'taxonomy':
+				$this->determine_taxonomy_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'attachment':
+				$this->determine_attachment_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'comment':
+				$this->determine_comment_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'widget':
+				// @todo: Widgets are not currently supported in WPGraphQL
+				break;
+			case 'nav_menu':
+				$this->determine_nav_menu_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'nav_menu_item':
+				$this->determine_nav_menu_item_item_rules( $field_group_name, $param, $operator, $value );
+				break;
+			default:
+				// If a built-in location rule could not be matched,
+				// Custom rules (from extensions, etc) can hook in here and apply their
+				// rules to the WPGraphQL Schema
+				do_action( 'graphql_acf_match_location_rule', $field_group_name, $param, $operator, $value, $this );
+				break;
+
+		}
 
 	}
 
@@ -163,100 +399,25 @@ class LocationRules {
 					foreach ( $field_group['location'] as $location_rule_group ) {
 						if ( ! empty( $location_rule_group ) ) {
 
-							$and_params = wp_list_pluck( $location_rule_group, 'param' );
-							$and_params = ! empty( $and_params ) ? array_values( $and_params ) : [];
-
 							foreach ( $location_rule_group as $group => $rule ) {
 
+								// Determine the and params for the rule group
+								$and_params = wp_list_pluck( $location_rule_group, 'param' );
+								$and_params = ! empty( $and_params ) ? array_values( $and_params ) : [];
+
 								$operator = isset( $rule['operator'] ) ? $rule['operator'] : '==';
-								$param = isset( $rule['param'] ) ? $rule['param'] : null;
-								$value = isset( $rule['value'] ) ? $rule['value'] : null;
+								$param    = isset( $rule['param'] ) ? $rule['param'] : null;
+								$value    = isset( $rule['value'] ) ? $rule['value'] : null;
 
 								if ( empty( $param ) || empty( $value ) ) {
 									continue;
 								}
 
-								// Depending on the param of the rule, there's different logic to
-								// map to the Schema
-								switch( $param ) {
-									case 'post_type':
-
-										$key = array_search( 'post_type', $and_params );
-										unset( $and_params[ $key ] );
-
-										$has_conflict = false;
-										$allowed_and_params = [
-											'post_status',
-											'post_format',
-											'post_category',
-											'post_taxonomy',
-											'post',
-										];
-
-										if ( ! empty( $and_params ) ) {
-											foreach ( $and_params as $key => $allowed ) {
-												if ( false === array_search( $allowed, $allowed_and_params ) ) {
-													$has_conflict = true;
-												}
-											}
-										}
-
-										if ( true === $has_conflict ) {
-											break;
-										}
-
-										$this->determine_post_type_rules( $field_group_name, $param, $operator, $value );
-										break;
-									case 'post_template':
-									case 'page_template':
-										$this->determine_post_template_rules( $field_group_name, $param, $operator, $value );
-										break;
-									case 'post_status':
-										$this->determine_post_status_rules( $field_group_name, $param, $operator, $value );
-										break;
-									case 'post_format':
-									case 'post_category':
-									case 'post_taxonomy':
-										$this->determine_post_taxonomy_rules( $field_group_name, $param, $operator, $value );
-										break;
-									case 'post':
-										$this->determine_post_rules( $field_group_name, $param, $operator, $value );
-										break;
-									case 'page_type':
-										$this->determine_page_type_rules( $field_group_name, $param, $operator, $value );
-										break;
-									case 'page_parent':
-									case 'page':
-										// If page or page_parent is set, regardless of operator and value,
-										// we can add the field group to the Page type
-										$this->set_graphql_type( $field_group_name, 'Page' );
-										break;
-									case 'current_user':
-									case 'current_user_role':
-										// @todo:
-										// Right now, if you set current_user or current_user_role as the only rule,
-										// ACF adds the field group to every possible location in the Admin.
-										// This seems a bit heavy handed. 🤔
-										// We need to think through this a bit more, and how this rule
-										// Can be composed with other rules, etc.
-										break;
-									case 'user_form':
-									case 'user_role':
-										// If user_role or user_form params are set, we need to expose the field group
-										// to the User type
-										$this->set_graphql_type( $field_group_name, 'User' );
-										break;
-									case 'taxonomy':
-										$this->determine_taxonomy_rules( $field_group_name, $param, $operator, $value );
-										break;
-									default:
-										// If a built-in location rule could not be matched,
-										// Custom rules (from extensions, etc) can hook in here and apply their
-										// rules to the WPGraphQL Schema
-										do_action( 'graphql_acf_match_location_rule', $field_group_name, $param, $operator, $value, $this );
-										break;
-
+								if ( true === $this->check_params_for_conflicts( $and_params, $param ) ) {
+									continue;
 								}
+
+								$this->determine_rules( $field_group_name, $param, $operator, $value );
 
 							}
 						}
@@ -264,18 +425,6 @@ class LocationRules {
 				}
 			}
 		}
-
-//		wp_send_json( [ 'goo', 'unset' => $this->unset_types, 'set' => $this->mapped_field_groups ] );
-
-//		$this->post_object_location_rules();
-//		$this->term_object_location_rules();
-//		$this->comment_location_rules();
-//		$this->menu_location_rules();
-//		$this->menu_item_location_rules();
-//		$this->media_location_rules();
-//		$this->individual_post_location_rules();
-//		$this->user_location_rules();
-//		$this->option_page_location_rules();
 
 	}
 
@@ -324,9 +473,9 @@ class LocationRules {
 	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
 	 *
 	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
-	 * @param string $param The parameter of the rule
-	 * @param string $operator The operator of the rule
-	 * @param string $value The value of the rule
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
 	 */
 	public function determine_post_type_rules( string $field_group_name, string $param, string $operator, string $value ) {
 		$allowed_post_types = get_post_types( [ 'show_in_graphql' => true ] );
@@ -344,7 +493,7 @@ class LocationRules {
 				foreach ( $allowed_post_types as $allowed_post_type ) {
 
 					$post_type_object = get_post_type_object( $allowed_post_type );
-					$graphql_name = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
+					$graphql_name     = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
 					if ( ! empty( $graphql_name ) ) {
 						$this->set_graphql_type( $field_group_name, $graphql_name );
 					}
@@ -352,7 +501,7 @@ class LocationRules {
 			} else {
 				if ( in_array( $value, $allowed_post_types, true ) ) {
 					$post_type_object = get_post_type_object( $value );
-					$graphql_name = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
+					$graphql_name     = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
 					if ( ! empty( $graphql_name ) ) {
 						$this->set_graphql_type( $field_group_name, $graphql_name );
 					}
@@ -368,7 +517,7 @@ class LocationRules {
 				// loop over and set all post types
 				foreach ( $allowed_post_types as $allowed_post_type ) {
 					$post_type_object = get_post_type_object( $allowed_post_type );
-					$graphql_name = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
+					$graphql_name     = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
 					if ( ! empty( $graphql_name ) ) {
 						$this->set_graphql_type( $field_group_name, $graphql_name );
 					}
@@ -376,7 +525,7 @@ class LocationRules {
 			}
 
 			$post_type_object = get_post_type_object( $value );
-			$graphql_name = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
+			$graphql_name     = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
 			if ( ! empty( $graphql_name ) ) {
 				$this->unset_graphql_type( $field_group_name, $graphql_name );
 			}
@@ -387,9 +536,9 @@ class LocationRules {
 	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
 	 *
 	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
-	 * @param string $param The parameter of the rule
-	 * @param string $operator The operator of the rule
-	 * @param string $value The value of the rule
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
 	 */
 	public function determine_post_template_rules( string $field_group_name, string $param, string $operator, string $value ) {
 
@@ -425,9 +574,9 @@ class LocationRules {
 	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
 	 *
 	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
-	 * @param string $param The parameter of the rule
-	 * @param string $operator The operator of the rule
-	 * @param string $value The value of the rule
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
 	 */
 	public function determine_post_status_rules( string $field_group_name, string $param, string $operator, string $value ) {
 		// @todo: Should post status affect the GraphQL Schema at all?
@@ -442,11 +591,11 @@ class LocationRules {
 
 		// If Post Status is used to qualify a field group location,
 		// It will be added to the Schema for any Post Type that is set to show in GraphQL
-		$allowed_post_types = get_post_types([ 'show_in_graphql' => true ]);
+		$allowed_post_types = get_post_types( [ 'show_in_graphql' => true ] );
 		foreach ( $allowed_post_types as $post_type ) {
 
 			$post_type_object = get_post_type_object( $post_type );
-			$graphql_name = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
+			$graphql_name     = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
 			if ( ! empty( $graphql_name ) ) {
 				$this->set_graphql_type( $field_group_name, $graphql_name );
 			}
@@ -458,13 +607,13 @@ class LocationRules {
 	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
 	 *
 	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
-	 * @param string $param The parameter of the rule
-	 * @param string $operator The operator of the rule
-	 * @param string $value The value of the rule
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
 	 */
 	public function determine_post_format_rules( string $field_group_name, string $param, string $operator, string $value ) {
 
-		$post_format_taxonomy = get_taxonomy( 'post_format' );
+		$post_format_taxonomy   = get_taxonomy( 'post_format' );
 		$post_format_post_types = $post_format_taxonomy->object_type;
 
 		if ( ! is_array( $post_format_post_types ) || empty( $post_format_post_types ) ) {
@@ -474,11 +623,11 @@ class LocationRules {
 		// If Post Format is used to qualify a field group location,
 		// It will be added to the Schema for any Post Type that supports post formats
 		// And shows in GraphQL
-		$allowed_post_types = get_post_types(['show_in_graphql' => true ]);
+		$allowed_post_types = get_post_types( [ 'show_in_graphql' => true ] );
 		foreach ( $allowed_post_types as $post_type ) {
 			if ( in_array( $post_type, $post_format_post_types, true ) ) {
 				$post_type_object = get_post_type_object( $value );
-				$graphql_name = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
+				$graphql_name     = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
 				if ( ! empty( $graphql_name ) ) {
 					$this->set_graphql_type( $field_group_name, $graphql_name );
 				}
@@ -491,9 +640,9 @@ class LocationRules {
 	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
 	 *
 	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
-	 * @param string $param The parameter of the rule
-	 * @param string $operator The operator of the rule
-	 * @param string $value The value of the rule
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
 	 */
 	public function determine_post_taxonomy_rules( string $field_group_name, string $param, string $operator, string $value ) {
 
@@ -507,9 +656,9 @@ class LocationRules {
 	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
 	 *
 	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
-	 * @param string $param The parameter of the rule
-	 * @param string $operator The operator of the rule
-	 * @param string $value The value of the rule
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
 	 */
 	public function determine_post_rules( string $field_group_name, string $param, string $operator, string $value ) {
 
@@ -547,7 +696,7 @@ class LocationRules {
 			foreach ( $allowed_post_types as $allowed_post_type ) {
 
 				$post_type_object = get_post_type_object( $allowed_post_type );
-				$graphql_name = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
+				$graphql_name     = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
 				if ( ! empty( $graphql_name ) ) {
 					$this->set_graphql_type( $field_group_name, $graphql_name );
 				}
@@ -560,9 +709,9 @@ class LocationRules {
 	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
 	 *
 	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
-	 * @param string $param The parameter of the rule
-	 * @param string $operator The operator of the rule
-	 * @param string $value The value of the rule
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
 	 */
 	public function determine_page_type_rules( string $field_group_name, string $param, string $operator, string $value ) {
 
@@ -576,7 +725,10 @@ class LocationRules {
 		// then the field group should be shown on all hierarchical post types
 		if ( in_array( $value, [ 'top_level', 'parent', 'child' ], true ) ) {
 
-			$hierarchical_post_types = get_post_types( [ 'show_in_graphql' => true, 'hierarchical' => true ] );
+			$hierarchical_post_types = get_post_types( [
+				'show_in_graphql' => true,
+				'hierarchical'    => true
+			] );
 
 			if ( empty( $hierarchical_post_types ) ) {
 				return;
@@ -586,7 +738,7 @@ class LocationRules {
 			foreach ( $hierarchical_post_types as $allowed_post_type ) {
 
 				$post_type_object = get_post_type_object( $allowed_post_type );
-				$graphql_name = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
+				$graphql_name     = isset( $post_type_object->graphql_single_name ) ? $post_type_object->graphql_single_name : null;
 				if ( ! empty( $graphql_name ) ) {
 					$this->set_graphql_type( $field_group_name, $graphql_name );
 				}
@@ -599,9 +751,9 @@ class LocationRules {
 	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
 	 *
 	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
-	 * @param string $param The parameter of the rule
-	 * @param string $operator The operator of the rule
-	 * @param string $value The value of the rule
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
 	 */
 	public function determine_taxonomy_rules( string $field_group_name, string $param, string $operator, string $value ) {
 
@@ -619,7 +771,7 @@ class LocationRules {
 				// loop over and set all post types
 				foreach ( $allowed_taxonomies as $allowed_taxonomy ) {
 
-					$tax_object = get_taxonomy( $allowed_taxonomy );
+					$tax_object   = get_taxonomy( $allowed_taxonomy );
 					$graphql_name = isset( $tax_object->graphql_single_name ) ? $tax_object->graphql_single_name : null;
 					if ( ! empty( $graphql_name ) ) {
 						$this->set_graphql_type( $field_group_name, $graphql_name );
@@ -628,7 +780,7 @@ class LocationRules {
 
 			} else {
 				if ( in_array( $value, $allowed_taxonomies, true ) ) {
-					$tax_object = get_taxonomy( $value );
+					$tax_object   = get_taxonomy( $value );
 					$graphql_name = isset( $tax_object->graphql_single_name ) ? $tax_object->graphql_single_name : null;
 					if ( ! empty( $graphql_name ) ) {
 						$this->set_graphql_type( $field_group_name, $graphql_name );
@@ -646,14 +798,14 @@ class LocationRules {
 				// loop over and set all post types
 				foreach ( $allowed_taxonomies as $allowed_taxonomy ) {
 
-					$tax_object = get_taxonomy( $allowed_taxonomy );
+					$tax_object   = get_taxonomy( $allowed_taxonomy );
 					$graphql_name = isset( $tax_object->graphql_single_name ) ? $tax_object->graphql_single_name : null;
 					if ( ! empty( $graphql_name ) ) {
 						$this->set_graphql_type( $field_group_name, $graphql_name );
 					}
 				}
 
-				$tax_object = get_taxonomy( $value );
+				$tax_object   = get_taxonomy( $value );
 				$graphql_name = isset( $tax_object->graphql_single_name ) ? $tax_object->graphql_single_name : null;
 				if ( ! empty( $graphql_name ) ) {
 					$this->unset_graphql_type( $field_group_name, $graphql_name );
@@ -664,31 +816,113 @@ class LocationRules {
 
 	}
 
-	public function determine_individual_post_rules() {
+	/**
+	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
+	 *
+	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
+	 */
+	public function determine_attachment_rules( string $field_group_name, string $param, string $operator, string $value ) {
+
+		if ( '==' === $operator ) {
+			$this->set_graphql_type( $field_group_name, 'MediaItem' );
+		}
+
+		if ( '!=' === $operator && 'all' === $value ) {
+			$this->unset_graphql_type( $field_group_name, 'MediaItem' );
+		}
 
 	}
 
-	public function determine_page_rules() {
+	/**
+	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
+	 *
+	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
+	 */
+	public function determine_comment_rules( string $field_group_name, string $param, string $operator, string $value ) {
+
+		if ( '==' === $operator ) {
+			$this->set_graphql_type( $field_group_name, 'Comment' );
+		}
+
+		if ( '!=' === $operator ) {
+
+			// If not equal to all, unset from all comments
+			if ( 'all' === $value ) {
+				$this->unset_graphql_type( $field_group_name, 'Comment' );
+
+				// If not equal to just a specific post type/comment relationship,
+				// show the field group on the Comment Type
+			} else {
+				$this->set_graphql_type( $field_group_name, 'Comment' );
+			}
+
+		}
 
 	}
 
-	public function determine_user_rules() {
+	/**
+	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
+	 *
+	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
+	 */
+	public function determine_nav_menu_rules( string $field_group_name, string $param, string $operator, string $value ) {
+
+		if ( '==' === $operator ) {
+			$this->set_graphql_type( $field_group_name, 'Menu' );
+		}
+
+		if ( '!=' === $operator ) {
+
+			// If not equal to all, unset from all Menu
+			if ( 'all' === $value ) {
+				$this->unset_graphql_type( $field_group_name, 'Menu' );
+
+				// If not equal to just a Menu,
+				// show the field group on all Menus
+			} else {
+				$this->set_graphql_type( $field_group_name, 'Menu' );
+			}
+
+		}
 
 	}
 
-	public function determine_attachment_rules() {
+	/**
+	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
+	 *
+	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
+	 */
+	public function determine_nav_menu_item_item_rules( string $field_group_name, string $param, string $operator, string $value ) {
 
-	}
+		if ( '==' === $operator ) {
+			$this->set_graphql_type( $field_group_name, 'MenuItem' );
+		}
 
-	public function determine_comment_rules() {
+		if ( '!=' === $operator ) {
 
-	}
+			// If not equal to all, unset from all MenuItem
+			if ( 'all' === $value ) {
+				$this->unset_graphql_type( $field_group_name, 'MenuItem' );
 
-	public function determine_menu_rules() {
+				// If not equal to one Menu / location,
+				// show the field group on all MenuItems
+			} else {
+				$this->set_graphql_type( $field_group_name, 'MenuItem' );
+			}
 
-	}
-
-	public function determine_menu_item_rules() {
+		}
 
 	}
 
@@ -700,539 +934,101 @@ class LocationRules {
 
 	}
 
-	/**
-	 * Determine the Schema location for post object location rules
-	 *
-	 * @return void
-	 */
-	public function post_object_location_rules() {
-
-		/**
-		 * Get a list of post types that have been registered to show in graphql
-		 */
-		$graphql_post_types = get_post_types( [ 'show_in_graphql' => true, 'show_ui' => true ] );
-
-		/**
-		 * If there are no post types exposed to GraphQL, bail
-		 */
-		if ( empty( $graphql_post_types ) || ! is_array( $graphql_post_types ) ) {
-			return;
-		}
-
-		/**
-		 * Loop over the post types exposed to GraphQL
-		 */
-		foreach ( $graphql_post_types as $post_type ) {
-
-			/**
-			 * Get the field groups associated with the post type
-			 */
-			$field_groups = acf_filter_field_groups( $this->acf_field_groups, [ 'post_type' => $post_type ] );
-
-			/**
-			 * If there are no field groups for this post type, move on to the next one.
-			 */
-			if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
-				continue;
-			}
-
-			/**
-			 * Get the post_type_object
-			 */
-			$post_type_object = get_post_type_object( $post_type );
-
-			/**
-			 * Loop over the field groups for this post type
-			 */
-			foreach ( $field_groups as $field_group ) {
-				$field_group_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : $field_group['title'];
-				$this->set_graphql_type( $field_group_name, $post_type_object->graphql_single_name );
-			}
-
-		}
-
-	}
-
-	/**
-	 * Determine the Schema location for term object location rules
-	 *
-	 * @return void
-	 */
-	public function term_object_location_rules() {
-
-		/**
-		 * Get a list of taxonomies that have been registered to show in graphql
-		 */
-		$graphql_taxonomies = get_taxonomies([ 'show_in_graphql' => true, 'show_ui' => true, ]);
-
-		/**
-		 * If there are no taxonomies exposed to GraphQL, bail
-		 */
-		if ( empty( $graphql_taxonomies ) || ! is_array( $graphql_taxonomies ) ) {
-			return;
-		}
-
-		/**
-		 * Loop over the taxonomies exposed to GraphQL
-		 */
-		foreach ( $graphql_taxonomies as $taxonomy ) {
-
-			/**
-			 * Get the field groups associated with the taxonomy
-			 */
-			$field_groups = acf_filter_field_groups( $this->acf_field_groups, [ 'taxonomy' => $taxonomy ] );
-
-			/**
-			 * If there are no field groups for this taxonomy, move on to the next one.
-			 */
-			if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
-				continue;
-			}
-
-			/**
-			 * Get the Taxonomy object
-			 */
-			$tax_object = get_taxonomy( $taxonomy );
-
-			if ( empty( $tax_object ) || ! isset( $tax_object->graphql_single_name ) ) {
-				return;
-			}
-
-			/**
-			 * Loop over the field groups for this post type
-			 */
-			foreach ( $field_groups as $field_group ) {
-				$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
-				$this->set_graphql_type( $field_name, $tax_object->graphql_single_name );
-			}
-		}
-
-	}
-
-	/**
-	 * Determine the Schema location for comment location rules
-	 *
-	 * @return void
-	 */
-	public function comment_location_rules() {
-
-		$comment_field_groups = [];
-
-		/**
-		 * Get the field groups associated with the taxonomy
-		 */
-		$field_groups = $this->acf_field_groups;
-
-		foreach ( $field_groups as $field_group ) {
-
-			$comment_field_groups = [];
-
-			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
-				foreach ( $field_group['location'] as $locations ) {
-					if ( ! empty( $locations ) && is_array( $locations ) ) {
-						foreach ( $locations as $location ) {
-							if ( 'comment' === $location['param'] && '!=' === $location['operator'] ) {
-								continue;
-							}
-							if ( 'comment' === $location['param'] && '==' === $location['operator'] ) {
-								$comment_field_groups[] = $field_group;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		if ( empty( $comment_field_groups ) ) {
-			return;
-		}
-
-		/**
-		 * Loop over the field groups for this post type
-		 */
-		foreach ( $comment_field_groups as $field_group ) {
-			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
-			$this->set_graphql_type( $field_name, 'Comment' );
-		}
-
-	}
-
-	/**
-	 * Determine the Schema location for menu location rules
-	 *
-	 * @return void
-	 */
-	public function menu_location_rules() {
-
-		$menu_field_groups = [];
-
-		/**
-		 * Get the field groups associated with the taxonomy
-		 */
-		$field_groups = $this->acf_field_groups;
-
-		foreach ( $field_groups as $field_group ) {
-
-
-			$menu_field_groups = [];
-
-			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
-				foreach ( $field_group['location'] as $locations ) {
-					if ( ! empty( $locations ) && is_array( $locations ) ) {
-						foreach ( $locations as $location ) {
-							if ( 'nav_menu' === $location['param'] && '!=' === $location['operator'] ) {
-								continue;
-							}
-							if ( 'nav_menu' === $location['param'] && '==' === $location['operator'] ) {
-								$menu_field_groups[] = $field_group;
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		if ( empty( $menu_field_groups ) ) {
-			return;
-		}
-
-		/**
-		 * Loop over the field groups for this post type
-		 */
-		foreach ( $menu_field_groups as $field_group ) {
-
-			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
-			$this->set_graphql_type( $field_name, 'Menu' );
-
-		}
-
-	}
-
-	/**
-	 * Determine the Schema location for Menu Item location rules
-	 *
-	 * @return void
-	 */
-	public function menu_item_location_rules() {
-
-		$menu_item_field_groups = [];
-
-		/**
-		 * Get the field groups associated with the taxonomy
-		 */
-		$field_groups = $this->acf_field_groups;
-		foreach ( $field_groups as $field_group ) {
-
-			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
-				foreach ( $field_group['location'] as $locations ) {
-					if ( ! empty( $locations ) && is_array( $locations ) ) {
-						foreach ( $locations as $location ) {
-							if ( 'nav_menu_item' === $location['param'] && '!=' === $location['operator'] ) {
-								continue;
-							}
-							if ( 'nav_menu_item' === $location['param'] && '==' === $location['operator'] ) {
-								$menu_item_field_groups[] = $field_group;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		if ( empty( $menu_item_field_groups ) ) {
-			return;
-		}
-
-		/**
-		 * Loop over the field groups for this post type
-		 */
-		foreach ( $menu_item_field_groups as $field_group ) {
-
-			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : $field_group['title'];
-			$this->set_graphql_type( $field_name, 'MenuItem' );
-
-		}
-
-	}
-
-	/**
-	 * Determine the Schema location for Media location rules
-	 *
-	 * @return void
-	 */
-	public function media_location_rules() {
-
-		$media_item_field_groups = [];
-
-		/**
-		 * Get the field groups associated with the taxonomy
-		 */
-		$field_groups = $this->acf_field_groups;
-
-		foreach ( $field_groups as $field_group ) {
-
-			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
-				foreach ( $field_group['location'] as $locations ) {
-					if ( ! empty( $locations ) && is_array( $locations ) ) {
-						foreach ( $locations as $location ) {
-							if ( 'attachment' === $location['param'] && '!=' === $location['operator'] ) {
-								continue;
-							}
-							if ( 'attachment' === $location['param'] && '==' === $location['operator'] ) {
-								$media_item_field_groups[] = $field_group;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		if ( empty( $media_item_field_groups ) ) {
-			return;
-		}
-
-		/**
-		 * Loop over the field groups for this post type
-		 */
-		foreach ( $media_item_field_groups as $field_group ) {
-
-			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
-			$this->set_graphql_type( $field_name, 'MediaItem' );
-
-		}
-
-	}
-
-	/**
-	 * Determine the Schema location for Individual Post location rules
-	 *
-	 * @return void
-	 */
-	public function individual_post_location_rules() {
-
-		$post_field_groups = [];
-
-		/**
-		 * Get the field groups associated with the taxonomy
-		 */
-		$field_groups = $this->acf_field_groups;
-
-		$allowed_post_types = get_post_types( [
-			'show_ui'         => true,
-			'show_in_graphql' => true
-		] );
-
-		/**
-		 * Remove the `attachment` post_type, as it's treated special and we don't
-		 * want to add field groups in the same way we do for other post types
-		 */
-		unset( $allowed_post_types['attachment'] );
-
-
-		foreach ( $field_groups as $field_group ) {
-
-			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
-				foreach ( $field_group['location'] as $locations ) {
-					if ( ! empty( $locations ) && is_array( $locations ) ) {
-						foreach ( $locations as $location ) {
-
-							/**
-							 * If the operator is not equal to, we don't need to do anything,
-							 * so we can just continue
-							 */
-							if ( '!=' === $location['operator'] ) {
-								continue;
-							}
-
-							/**
-							 * If the param (the post_type) is in the array of allowed_post_types
-							 */
-							if ( in_array( $location['param'], $allowed_post_types, true ) && '==' === $location['operator'] ) {
-
-								$post_field_groups[] = [
-									'type'        => $location['param'],
-									'field_group' => $field_group,
-									'post_id'     => $location['value']
-								];
-							}
-						}
-					}
-				}
-			}
-		}
-
-
-		/**
-		 * If no field groups are assigned to a specific post, we don't need to modify the Schema
-		 */
-		if ( empty( $post_field_groups ) ) {
-			return;
-		}
-
-		/**
-		 * Loop over the field groups assigned to a specific post
-		 * and register them to the Schema
-		 */
-		foreach ( $post_field_groups as $key => $group ) {
-
-			if ( empty( $group['field_group'] ) || ! is_array( $group['field_group'] ) ) {
-				continue;
-			}
-
-			$post_object = get_post( (int) $group['post_id'] );
-
-			$allowed_post_types = get_post_types( [ 'show_in_graphql' => true ] );
-			if ( ! $post_object instanceof \WP_Post || ! in_array( $post_object->post_type, $allowed_post_types, true ) ) {
-				continue;
-			}
-
-			$field_group      = $group['field_group'];
-			$post_type_object = get_post_type_object( $post_object->post_type );
-
-			$field_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
-			$this->set_graphql_type( $field_name, $post_type_object->graphql_single_name );
-
-		}
-
-	}
-
-	/**
-	 * Determine the Schema location for User location rules
-	 *
-	 * @return void
-	 */
-	public function user_location_rules() {
-
-		/**
-		 * Get the field groups associated with the User edit form
-		 */
-		$user_edit_field_groups = acf_filter_field_groups( $this->acf_field_groups, [
-			'user_form' => 'edit',
-		] );
-
-		/**
-		 * Get the field groups associated with the User register form
-		 */
-		$user_register_field_groups = acf_filter_field_groups( $this->acf_field_groups, [
-			'user_form' => 'register',
-		] );
-
-		$user_register_field_groups = ! empty( $user_register_field_groups ) ? $user_register_field_groups : [];
-		$user_edit_field_groups = ! empty( $user_edit_field_groups ) ? $user_edit_field_groups : [];
-
-		/**
-		 * Get a unique list of groups that match the register and edit user location rules
-		 */
-		$field_groups = array_merge( $user_edit_field_groups, $user_register_field_groups );
-		$field_groups = array_intersect_key( $field_groups, array_unique( array_map( 'serialize', $field_groups ) ) );
-
-		if ( empty( $field_groups ) ) {
-			return;
-		}
-
-		foreach ( $field_groups as $field_group ) {
-
-			$field_name          = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
-			$this->set_graphql_type( $field_name, 'User' );
-		}
-
-	}
-
-	/**
-	 * Determine the Schema location for Option Page location rules
-	 *
-	 * @return void
-	 */
-	public function option_page_location_rules() {
-
-
-		global $acf_options_page;
-
-		if ( ! isset( $acf_options_page ) ) {
-			return ;
-		}
-
-		/**
-		 * Get a list of post types that have been registered to show in graphql
-		 */
-		$graphql_options_pages = acf_get_options_pages();
-
-		/**
-		 * If there are no post types exposed to GraphQL, bail
-		 */
-		if ( empty( $graphql_options_pages ) || ! is_array( $graphql_options_pages ) ) {
-			return;
-		}
-
-		/**
-		 * Loop over the post types exposed to GraphQL
-		 */
-		foreach ( $graphql_options_pages as $options_page_key => $options_page ) {
-			if ( empty( $options_page['show_in_graphql'] ) ) {
-				continue;
-			}
-
-			/**
-			 * Get options page properties.
-			 */
-			$page_title = $options_page['page_title'];
-			$page_slug  = $options_page['menu_slug'];
-
-			/**
-			 * Get the field groups associated with the options page
-			 */
-			$field_groups = acf_get_field_groups(
-				[
-					'options_page' => $options_page['menu_slug'],
-				]
-			);
-
-			/**
-			 * If there are no field groups for this options page, move on to the next one.
-			 */
-			if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
-				continue;
-			}
-
-			/**
-			 * Loop over the field groups for this options page.
-			 */
-			$options_page_fields = array();
-			foreach ( $field_groups as $field_group ) {
-				$field_name            = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
-				$options_page_fields[] = $field_name;
-
-			}
-
-			/**
-			 * Continue if no options to show in GraphQL
-			 */
-			if ( empty( $options_page_fields ) ) {
-				continue;
-			}
-
-			/**
-			 * Create field and type names. Use explicit graphql_field_name
-			 * if available and fallback to generating from title if not available.
-			 */
-			if ( ! empty( $options_page['graphql_field_name'] ) ) {
-				$field_name = $options_page['graphql_field_name'];
-				$type_name  = ucfirst( $options_page['graphql_field_name'] );
-			} else {
-				$field_name = Config::camel_case( $page_title );
-				$type_name  = ucfirst( Config::camel_case( $page_title ) );
-			}
-
-			/**
-			 * Register option page fields to the option page type.
-			 */
-			foreach ( $options_page_fields as $name => $config ) {
-				$this->set_graphql_type( $field_name, $type_name );
-			}
-
-		}
-
-	}
+//
+//	/**
+//	 * Determine the Schema location for Option Page location rules
+//	 *
+//	 * @return void
+//	 */
+//	public function option_page_location_rules() {
+//
+//
+//		global $acf_options_page;
+//
+//		if ( ! isset( $acf_options_page ) ) {
+//			return;
+//		}
+//
+//		/**
+//		 * Get a list of post types that have been registered to show in graphql
+//		 */
+//		$graphql_options_pages = acf_get_options_pages();
+//
+//		/**
+//		 * If there are no post types exposed to GraphQL, bail
+//		 */
+//		if ( empty( $graphql_options_pages ) || ! is_array( $graphql_options_pages ) ) {
+//			return;
+//		}
+//
+//		/**
+//		 * Loop over the post types exposed to GraphQL
+//		 */
+//		foreach ( $graphql_options_pages as $options_page_key => $options_page ) {
+//			if ( empty( $options_page['show_in_graphql'] ) ) {
+//				continue;
+//			}
+//
+//			/**
+//			 * Get options page properties.
+//			 */
+//			$page_title = $options_page['page_title'];
+//			$page_slug  = $options_page['menu_slug'];
+//
+//			/**
+//			 * Get the field groups associated with the options page
+//			 */
+//			$field_groups = acf_get_field_groups(
+//				[
+//					'options_page' => $options_page['menu_slug'],
+//				]
+//			);
+//
+//			/**
+//			 * If there are no field groups for this options page, move on to the next one.
+//			 */
+//			if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
+//				continue;
+//			}
+//
+//			/**
+//			 * Loop over the field groups for this options page.
+//			 */
+//			$options_page_fields = array();
+//			foreach ( $field_groups as $field_group ) {
+//				$field_name            = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
+//				$options_page_fields[] = $field_name;
+//
+//			}
+//
+//			/**
+//			 * Continue if no options to show in GraphQL
+//			 */
+//			if ( empty( $options_page_fields ) ) {
+//				continue;
+//			}
+//
+//			/**
+//			 * Create field and type names. Use explicit graphql_field_name
+//			 * if available and fallback to generating from title if not available.
+//			 */
+//			if ( ! empty( $options_page['graphql_field_name'] ) ) {
+//				$field_name = $options_page['graphql_field_name'];
+//				$type_name  = ucfirst( $options_page['graphql_field_name'] );
+//			} else {
+//				$field_name = Config::camel_case( $page_title );
+//				$type_name  = ucfirst( Config::camel_case( $page_title ) );
+//			}
+//
+//			/**
+//			 * Register option page fields to the option page type.
+//			 */
+//			foreach ( $options_page_fields as $name => $config ) {
+//				$this->set_graphql_type( $field_name, $type_name );
+//			}
+//
+//		}
+//
+//	}
 
 }

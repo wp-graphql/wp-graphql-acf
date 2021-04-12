@@ -11,9 +11,9 @@ $j(document).ready(function () {
 		var showInGraphQLCheckbox = $j('#acf_field_group-show_in_graphql');
 		var graphqlFields = $j('#wpgraphql-acf-meta-box .acf-field');
 
-		graphqlFields.each( function( i, el ) {
-			if ( $j( this ).attr('data-name') !== 'show_in_graphql' ) {
-				if ( ! showInGraphQLCheckbox.is(':checked') ) {
+		graphqlFields.each(function (i, el) {
+			if ($j(this).attr('data-name') !== 'show_in_graphql') {
+				if (!showInGraphQLCheckbox.is(':checked')) {
 					$j(this).hide();
 				} else {
 					$j(this).show();
@@ -21,7 +21,7 @@ $j(document).ready(function () {
 			}
 		});
 
-		showInGraphQLCheckbox.on('change', function() {
+		showInGraphQLCheckbox.on('change', function () {
 			setGraphqlFieldVisibility();
 		})
 
@@ -62,7 +62,7 @@ $j(document).ready(function () {
 	function initInterfaceCheckboxes() {
 
 		// Find all the checkboxes for Interface types
-		$j('span[data-interface]').each( function( i, el) {
+		$j('span[data-interface]').each(function (i, el) {
 
 			// Get the interface name
 			let interfaceName = $j(el).data('interface');
@@ -74,10 +74,10 @@ $j(document).ready(function () {
 			let possibleTypesCheckboxes = $j('span[data-implements="' + interfaceName + '"]').siblings('input[type="checkbox"]');
 
 			// Prepend some space before to nest the Types beneath the Interface
-			possibleTypesCheckboxes.before( "&nbsp;&nbsp;" );
+			possibleTypesCheckboxes.before("&nbsp;&nbsp;");
 
 			// Listen for changes on the Interface checkbox
-			interfaceCheckbox.change(function() {
+			interfaceCheckbox.change(function () {
 				possibleTypesCheckboxes.prop('checked', $j(this).is(":checked"));
 			})
 
@@ -85,7 +85,7 @@ $j(document).ready(function () {
 			possibleTypesCheckboxes.change(function () {
 
 				// Set the checked state of the Interface checkbox
-				if ( ! $j(this).is(":checked") && interfaceCheckbox.is(":checked") ) {
+				if (!$j(this).is(":checked") && interfaceCheckbox.is(":checked")) {
 					interfaceCheckbox.prop("checked", false);
 				}
 
@@ -106,7 +106,7 @@ $j(document).ready(function () {
 	 * @param str
 	 * @returns {string}
 	 */
-	function lcfirst( str ) {
+	function lcfirst(str) {
 		str += ''
 		const f = str.charAt(0)
 			.toLowerCase()
@@ -119,8 +119,8 @@ $j(document).ready(function () {
 	 * @param str
 	 * @returns {string}
 	 */
-	function ucwords (str) {
-		return str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+	function ucwords(str) {
+		return str.toLowerCase().replace(/\b[a-z]/g, function (letter) {
 			return letter.toUpperCase();
 		})
 	}
@@ -130,14 +130,13 @@ $j(document).ready(function () {
 	 *
 	 * See: https://github.com/wp-graphql/wp-graphql/blob/cc0b383259383898c3a1bebe65adf1140290b37e/src/Utils/Utils.php#L85-L100
 	 */
-	function formatFieldName( fieldName ) {
+	function formatFieldName(fieldName) {
 
-		fieldName.replace( '[^a-zA-Z0-9 -]', '_' );
-		fieldName = lcfirst( fieldName );
-		fieldName = lcfirst( fieldName.split( '_' ).join( ' ' ) );
-		fieldName = lcfirst( fieldName.split( '-' ).join( ' ' ) );
-		fieldName = ucwords( fieldName );
-		fieldName = lcfirst( fieldName.split( ' ' ).join( '' ) );
+		fieldName.replace('[^a-zA-Z0-9 -]', '-');
+		fieldName = lcfirst(fieldName);
+		fieldName = lcfirst(fieldName.split('-').join(' '));
+		fieldName = ucwords(fieldName);
+		fieldName = lcfirst(fieldName.split(' ').join(''));
 		return fieldName;
 
 	}
@@ -149,84 +148,119 @@ $j(document).ready(function () {
 	function setGraphqlFieldName() {
 		var graphqlFieldNameField = $j('#acf_field_group-graphql_field_name');
 		var fieldGroupTitle = $j('#titlediv #title');
-		if ( '' === graphqlFieldNameField.val() ) {
-			graphqlFieldNameField.val( formatFieldName( fieldGroupTitle.val() ) );
+		if ('' === graphqlFieldNameField.val()) {
+			graphqlFieldNameField.val(formatFieldName(fieldGroupTitle.val()));
 		}
-		fieldGroupTitle.on('change', function() {
+		fieldGroupTitle.on('change', function () {
 			setGraphqlFieldName();
 		});
 	}
 
+
+	/**
+	 * Determine whether users should be able to interact with the checkboxes
+	 * to manually set the GraphQL Types for the ACF Field Group
+	 */
+	function graphqlMapTypesFromLocations() {
+		var checkboxes = $j('.acf-field[data-name="graphql_types"] .acf-checkbox-list input[type="checkbox"]');
+		var manualMapTypes = $j('#acf_field_group-map_graphql_types_from_location_rules');
+
+		if (manualMapTypes.not(':checked')) {
+			getGraphqlTypesFromLocationRules();
+		}
+
+		checkboxes.each(function (i, el) {
+			if (manualMapTypes.is(':checked')) {
+				$j(this).removeAttr("disabled");
+			} else {
+				$j(this).attr("disabled", true);
+			}
+		});
+		manualMapTypes.on('change', function () {
+			graphqlMapTypesFromLocations();
+		});
+	}
+
+	function getGraphqlTypesFromLocationRules() {
+
+		var form = $j('#post :input');
+		var serialized = form.serialize();
+		var checkboxes = $j('.acf-field[data-name="graphql_types"] .acf-checkbox-list input[type="checkbox"]');
+		var manualMapTypes = $j('#acf_field_group-map_graphql_types_from_location_rules');
+
+		// If Manual Type selection is checked,
+		// Don't attempt to get GraphQL Types from the location rules
+		if (manualMapTypes.is(':checked')) {
+			return;
+		}
+
+		$j.post(ajaxurl, {
+			action: 'get_acf_field_group_graphql_types',
+			data: serialized
+		}, function (res) {
+			var types = res && res['graphql_types'] ? res['graphql_types'] : [];
+
+			checkboxes.each(function (i, el) {
+				var checkbox = $j(this);
+				var value = $j(this).val();
+				checkbox.prop('checked', false);
+				if (types && types.length) {
+					if (-1 !== $j.inArray(value, types)) {
+						checkbox.prop('checked', true);
+						checkbox.trigger("change");
+					}
+				}
+			})
+
+		});
+
+	};
 
 	// Initialize the functionality to track the state of the Interface checkboxes.
 	initInterfaceCheckboxes();
 	toggleFieldRequirement();
 	setGraphqlFieldVisibility();
 	setGraphqlFieldName();
-
-});
-
-(function($, undefined){
+	graphqlMapTypesFromLocations();
 
 	var GraphqlLocationManager = new acf.Model({
 		id: 'graphqlLocationManager',
 		wait: 'ready',
 		events: {
-			'click .add-location-rule':			'onClickAddRule',
-			'click .add-location-group':		'onClickAddGroup',
-			'click .remove-location-rule':		'onClickRemoveRule',
-			'change .refresh-location-rule':	'onChangeRemoveRule',
+			'click .add-location-rule': 'onClickAddRule',
+			'click .add-location-group': 'onClickAddGroup',
+			'click .remove-location-rule': 'onClickRemoveRule',
+			'change .refresh-location-rule': 'onChangeRemoveRule',
 			'change .rule-groups .operator select': 'onChangeRemoveRule',
 			'change .rule-groups .value select': 'onChangeRemoveRule',
 		},
-		initialize: function(){
-			this.$el = $('#acf-field-group-locations');
-			console.log( 'graphql-location-manager-initialized');
+		initialize: function () {
+			this.$el = $j('#acf-field-group-locations');
 			this.getGraphqlTypes();
 		},
 
-		onClickAddRule: function( e, $el ){
-			console.log( 'onClickAddRule...' );
+		onClickAddRule: function (e, $el) {
 			this.getGraphqlTypes();
 		},
 
-		onClickRemoveRule: function( e, $el ){
-			console.log( 'onClickRemoveRule...' );
+		onClickRemoveRule: function (e, $el) {
 			this.getGraphqlTypes();
 		},
 
-		onChangeRemoveRule: function( e, $el ){
-			console.log( 'onChangeRemoveRule...' );
-			setTimeout( function() {
+		onChangeRemoveRule: function (e, $el) {
+			setTimeout(function () {
 				GraphqlLocationManager.getGraphqlTypes();
-			}, 1000);
+			}, 500);
 
 		},
 
-		onClickAddGroup: function( e, $el ){
-			console.log( 'onClickAddGroup...' );
+		onClickAddGroup: function (e, $el) {
 			this.getGraphqlTypes();
 		},
 
-		getGraphqlTypes: function(){
-			this.getGraphqlTypesFromLocationRules();
+		getGraphqlTypes: function () {
+			getGraphqlTypesFromLocationRules();
 		},
-		getGraphqlTypesFromLocationRules: function() {
-
-			var form = $('#post :input');
-			var serialized = form.serialize();
-			$.post( ajaxurl, { action: 'get_acf_field_group_graphql_types', data: serialized }, function(res) {
-				console.log(res);
-			});
-
-			// var locationRules = $('#post :input[name^="acf_field_group[location]"]');
-			// console.log(locationRules);
-			// locationRules.on('change', function() {
-			// 	console.log( 'rule changed...' );
-			// 	GraphqlLocationManager.getGraphqlTypes();
-			// });
-
-		}
 	})
 
-})(jQuery);
+});

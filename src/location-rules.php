@@ -227,6 +227,7 @@ class LocationRules {
 				break;
 			case 'post_format':
 			case 'post_category':
+			case 'post':
 			case 'post_taxonomy':
 				$allowed_and_params = [
 					'post_status',
@@ -237,26 +238,9 @@ class LocationRules {
 					'post',
 				];
 				break;
-			case 'post':
-				$allowed_and_params = [
-					'post_status',
-					'post_type',
-					'post_format',
-					'post_category',
-					'post_taxonomy',
-					'post',
-				];
-				break;
-			case 'page_type':
-				$allowed_and_params = [
-					'page_template',
-					'page_type',
-					'page_parent',
-					'page',
-				];
-				break;
-			case 'page_parent':
 			case 'page':
+			case 'page_parent':
+			case 'page_type':
 				$allowed_and_params = [
 					'page_template',
 					'page_type',
@@ -287,6 +271,7 @@ class LocationRules {
 			case 'widget':
 			case 'nav_menu':
 			case 'nav_menu_item':
+			case 'options_page':
 			default:
 				$allowed_and_params = [];
 				break;
@@ -369,6 +354,9 @@ class LocationRules {
 				break;
 			case 'nav_menu_item':
 				$this->determine_nav_menu_item_item_rules( $field_group_name, $param, $operator, $value );
+				break;
+			case 'options_page':
+				$this->determine_options_rules( $field_group_name, $param, $operator, $value );
 				break;
 			default:
 				// If a built-in location rule could not be matched,
@@ -926,109 +914,64 @@ class LocationRules {
 
 	}
 
-	public function determine_block_rules() {
+	/**
+	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
+	 *
+	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
+	 */
+	public function determine_block_rules( string $field_group_name, string $param, string $operator, string $value ) {
 		// @todo: ACF Blocks are not formally supported by WPGraphQL / WPGraphQL for ACF. More to come in the future!
 	}
 
-	public function determine_options_rules() {
+	/**
+	 * Determines how the ACF Rules should apply to the WPGraphQL Schema
+	 *
+	 * @param string $field_group_name The name of the ACF Field Group the rule applies to
+	 * @param string $param            The parameter of the rule
+	 * @param string $operator         The operator of the rule
+	 * @param string $value            The value of the rule
+	 */
+	public function determine_options_rules( string $field_group_name, string $param, string $operator, string $value ) {
+
+		if ( '==' === $operator ) {
+			$options_page = acf_get_options_page( $value );
+
+			if ( ! isset( $options_page['show_in_graphql'] ) || false === (bool) $options_page['show_in_graphql'] ) {
+				return;
+			}
+			$type_name = isset( $options_page['graphql_field_name'] ) ? Utils::format_type_name( $options_page['graphql_field_name'] ) : Utils::format_type_name( $options_page['menu_slug'] );
+			$this->set_graphql_type( $field_group_name, $type_name );
+		}
+
+		if ( '!=' === $operator ) {
+
+			$options_pages = acf_get_options_pages();
+
+			if ( empty( $options_pages ) || ! is_array( $options_pages ) ) {
+				return;
+			}
+
+			// Show all options pages
+			foreach ( $options_pages as $options_page ) {
+				if ( ! isset( $options_page['show_in_graphql'] ) || false === (bool) $options_page['show_in_graphql'] ) {
+					continue;
+				}
+				$type_name = isset( $options_page['graphql_field_name'] ) ? Utils::format_type_name( $options_page['graphql_field_name'] ) : Utils::format_type_name( $options_page['menu_slug'] );
+				$this->set_graphql_type( $field_group_name, $type_name );
+			}
+
+			// Get the options page to unset
+			$options_page = acf_get_options_page( $value );
+			if ( ! isset( $options_page['show_in_graphql'] ) || false === $options_page['show_in_graphql'] ) {
+				return;
+			}
+			$type_name = isset( $options_page['graphql_field_name'] ) ? Utils::format_type_name( $options_page['graphql_field_name'] ) : Utils::format_type_name( $options_page['menu_slug'] );
+			$this->unset_graphql_type( $field_group_name, $type_name );
+		}
 
 	}
-
-//
-//	/**
-//	 * Determine the Schema location for Option Page location rules
-//	 *
-//	 * @return void
-//	 */
-//	public function option_page_location_rules() {
-//
-//
-//		global $acf_options_page;
-//
-//		if ( ! isset( $acf_options_page ) ) {
-//			return;
-//		}
-//
-//		/**
-//		 * Get a list of post types that have been registered to show in graphql
-//		 */
-//		$graphql_options_pages = acf_get_options_pages();
-//
-//		/**
-//		 * If there are no post types exposed to GraphQL, bail
-//		 */
-//		if ( empty( $graphql_options_pages ) || ! is_array( $graphql_options_pages ) ) {
-//			return;
-//		}
-//
-//		/**
-//		 * Loop over the post types exposed to GraphQL
-//		 */
-//		foreach ( $graphql_options_pages as $options_page_key => $options_page ) {
-//			if ( empty( $options_page['show_in_graphql'] ) ) {
-//				continue;
-//			}
-//
-//			/**
-//			 * Get options page properties.
-//			 */
-//			$page_title = $options_page['page_title'];
-//			$page_slug  = $options_page['menu_slug'];
-//
-//			/**
-//			 * Get the field groups associated with the options page
-//			 */
-//			$field_groups = acf_get_field_groups(
-//				[
-//					'options_page' => $options_page['menu_slug'],
-//				]
-//			);
-//
-//			/**
-//			 * If there are no field groups for this options page, move on to the next one.
-//			 */
-//			if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
-//				continue;
-//			}
-//
-//			/**
-//			 * Loop over the field groups for this options page.
-//			 */
-//			$options_page_fields = array();
-//			foreach ( $field_groups as $field_group ) {
-//				$field_name            = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : Config::camel_case( $field_group['title'] );
-//				$options_page_fields[] = $field_name;
-//
-//			}
-//
-//			/**
-//			 * Continue if no options to show in GraphQL
-//			 */
-//			if ( empty( $options_page_fields ) ) {
-//				continue;
-//			}
-//
-//			/**
-//			 * Create field and type names. Use explicit graphql_field_name
-//			 * if available and fallback to generating from title if not available.
-//			 */
-//			if ( ! empty( $options_page['graphql_field_name'] ) ) {
-//				$field_name = $options_page['graphql_field_name'];
-//				$type_name  = ucfirst( $options_page['graphql_field_name'] );
-//			} else {
-//				$field_name = Config::camel_case( $page_title );
-//				$type_name  = ucfirst( Config::camel_case( $page_title ) );
-//			}
-//
-//			/**
-//			 * Register option page fields to the option page type.
-//			 */
-//			foreach ( $options_page_fields as $name => $config ) {
-//				$this->set_graphql_type( $field_name, $type_name );
-//			}
-//
-//		}
-//
-//	}
 
 }

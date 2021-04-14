@@ -176,8 +176,10 @@ class Config {
 
 		$rules = [];
 
+		// Each field group that doesn't have GraphQL Types explicitly set should get the location
+		// rules interpreted.
 		foreach ( $field_groups as $field_group ) {
-			if ( ! isset( $field_group['graphql_types'] ) ) {
+			if ( ! isset( $field_group['graphql_types'] ) || ! is_array( $field_group['graphql_types'] ) ) {
 				$rules[] = $field_group;
 			}
 		}
@@ -213,11 +215,13 @@ class Config {
 			return;
 		}
 
+		$options_pages_to_register = [];
+
 		/**
 		 * Loop over the post types exposed to GraphQL
 		 */
 		foreach ( $graphql_options_pages as $options_page_key => $options_page ) {
-			if ( ! isset( $options_page['show_in_graphql'] ) || false === $options_page['show_in_graphql'] ) {
+			if ( ! isset( $options_page['show_in_graphql'] ) || false === (bool) $options_page['show_in_graphql'] ) {
 				continue;
 			}
 
@@ -228,38 +232,57 @@ class Config {
 			$page_slug  = $options_page['menu_slug'];
 			$type_name = isset( $options_page['graphql_field_name'] ) ? Utils::format_type_name( $options_page['graphql_field_name'] ) : Utils::format_type_name( $options_page['menu_slug'] );
 
-			register_graphql_object_type( $type_name, [
-				'description' => sprintf( __( '%s options.', 'wp-graphql-acf' ), $options_page['page_title'] ),
-				'fields' => [
-					'pageTitle' => [
-						'type'    => 'String',
-						'resolve' => function( $source ) use ( $page_title ) {
-							return ! empty( $page_title ) ? $page_title : null;
-						},
+			$options_pages_to_register[ $type_name ] = [
+				'title' => $page_title,
+				'slug' => $page_slug,
+				'type_name' => $type_name,
+				'options_page' => $options_page,
+			];
+
+		}
+
+		if ( is_array( $options_pages_to_register ) && ! empty( $options_pages_to_register ) ) {
+
+			foreach ( $options_pages_to_register as $page_to_register ) {
+
+				$page_title = $page_to_register['title'];
+				$page_slug  = $page_to_register['slug'];
+				$type_name = isset( $page_to_register['type_name'] ) ? Utils::format_type_name( $page_to_register['type_name'] ) : Utils::format_type_name( $page_to_register['slug'] );
+				$options_page = $page_to_register['options_page'];
+
+				$this->type_registry->register_object_type( $type_name, [
+					'description' => sprintf( __( '%s options.', 'wp-graphql-acf' ), $page_title ),
+					'fields' => [
+						'pageTitle' => [
+							'type'    => 'String',
+							'resolve' => function( $source ) use ( $page_title ) {
+								return ! empty( $page_title ) ? $page_title : null;
+							},
+						],
+						'pageSlug' => [
+							'type'    => 'String',
+							'resolve' => function( $source ) use ( $page_slug ) {
+								return ! empty( $page_slug ) ? $page_slug : null;
+							},
+						],
 					],
-					'pageSlug' => [
-						'type'    => 'String',
-						'resolve' => function( $source ) use ( $page_slug ) {
-							return ! empty( $page_slug ) ? $page_slug : null;
-						},
-					],
-				],
-			] );
+				] );
 
-			$field_name = Utils::format_field_name( $type_name );
+				$field_name = Utils::format_field_name( $type_name );
 
-			register_graphql_field(
-				'RootQuery',
-				$field_name,
-				[
-					'type' => $type_name,
-					'description' => sprintf( __( '%s options.', 'wp-graphql-acf' ), $options_page['page_title'] ),
-					'resolve' => function() use ( $options_page ) {
-						return ! empty( $options_page ) ? $options_page : null;
-					}
-				]
-			);
+				$this->type_registry->register_field(
+					'RootQuery',
+					$field_name,
+					[
+						'type' => $type_name,
+						'description' => sprintf( __( '%s options.', 'wp-graphql-acf' ), $page_title ),
+						'resolve' => function() use ( $options_page ) {
+							return ! empty( $options_page ) ? $options_page : null;
+						}
+					]
+				);
 
+			}
 		}
 
 	}
@@ -595,10 +618,8 @@ class Config {
 			case 'radio':
 				$field_config['type'] = 'String';
 				break;
-			case 'range':
-				$field_config['type'] = 'Float';
-				break;
 			case 'number':
+			case 'range':
 				$field_config['type'] = 'Float';
 				break;
 			case 'true_false':
@@ -901,12 +922,12 @@ class Config {
 					$field_type_name = $type_name . '_' . Utils::format_type_name( $acf_field['name'] );
 				}
 
-				if ( $this->type_registry->get_type( $field_type_name ) ) {
+				if ( null !== $this->type_registry->get_type( strtolower( $field_type_name ) ) ) {
 					$field_config['type'] = $field_type_name;
 					break;
 				}
 
-				register_graphql_object_type(
+				$this->type_registry->register_object_type(
 					$field_type_name,
 					[
 						'description' => __( 'Field Group', 'wp-graphql-acf' ),
@@ -920,7 +941,6 @@ class Config {
 						],
 					]
 				);
-
 
 				$this->add_field_group_fields( $acf_field, $field_type_name );
 
@@ -1036,7 +1056,7 @@ class Config {
                     ];
                 }
 
-				register_graphql_object_type(
+				$this->type_registry->register_object_type(
 					$field_type_name,
 					[
 						'description' => __( 'Google Map field', 'wp-graphql-acf' ),
@@ -1053,7 +1073,7 @@ class Config {
 					break;
 				}
 
-				register_graphql_object_type(
+				$this->type_registry->register_object_type(
 					$field_type_name,
 					[
 						'description' => __( 'Field Group', 'wp-graphql-acf' ),
@@ -1133,7 +1153,7 @@ class Config {
 						} else {
 
 
-							register_graphql_object_type( $flex_field_layout_name, [
+							$this->type_registry->register_object_type( $flex_field_layout_name, [
 								'description' => __( 'Group within the flex field', 'wp-graphql-acf' ),
 								'interfaces' => [ 'AcfFieldGroup' ],
 								'fields'      => [
@@ -1154,7 +1174,7 @@ class Config {
 						}
 					}
 
-					register_graphql_union_type( $field_type_name, [
+					$this->type_registry->register_union_type( $field_type_name, [
 						'typeNames'       => $union_types,
 						'resolveType' => function( $value ) use ( $union_types ) {
 							return isset( $union_types[ $value['acf_fc_layout'] ] ) ? $this->type_registry->get_type( $union_types[ $value['acf_fc_layout'] ] ) : null;
@@ -1379,7 +1399,7 @@ class Config {
 				 * Loop over the post types exposed to GraphQL
 				 */
 				foreach ( $graphql_options_pages as $options_page_key => $options_page ) {
-					if ( empty( $options_page['show_in_graphql'] ) ) {
+					if ( ! isset( $options_page['show_in_graphql'] ) || false === (bool) $options_page['show_in_graphql'] ) {
 						continue;
 					}
 
@@ -1389,7 +1409,6 @@ class Config {
 					$page_title = $options_page['page_title'];
 					$type_label = $page_title . $label;
 					$type_name = isset( $options_page['graphql_field_name'] ) ? Utils::format_type_name( $options_page['graphql_field_name'] ) : Utils::format_type_name( $options_page['menu_slug'] );
-
 
 					$graphql_types[ $type_name ] = $type_label;
 				}
@@ -1415,7 +1434,6 @@ class Config {
 			return;
 		}
 
-
 		/**
 		 * Loop over all the field groups
 		 */
@@ -1424,10 +1442,15 @@ class Config {
 			$field_group_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : $field_group['title'];
 			$field_group_name = Utils::format_field_name( $field_group_name );
 
-			if ( ! isset( $field_group['graphql_types'] ) ) {
-				$field_group['graphql_types'] = [];
-				if ( isset( $this->get_location_rules()[ $field_group_name ] ) ) {
-					$field_group['graphql_types'] = $this->get_location_rules()[ $field_group_name ];
+			$manually_set_graphql_types = isset( $field_group['map_graphql_types_from_location_rules'] ) ? (bool) $field_group['map_graphql_types_from_location_rules'] : false;
+
+			if ( false === $manually_set_graphql_types ) {
+				if ( ! isset( $field_group['graphql_types'] ) || empty( $field_group['graphql_types'] ) ) {
+					$field_group['graphql_types'] = [];
+					$location_rules               = $this->get_location_rules();
+					if ( isset( $location_rules[ $field_group_name ] ) ) {
+						$field_group['graphql_types'] = $location_rules[ $field_group_name ];
+					}
 				}
 			}
 

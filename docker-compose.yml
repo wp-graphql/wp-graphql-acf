@@ -22,6 +22,7 @@ services:
       ADMIN_USERNAME: admin
       ADMIN_PASSWORD: password
       USING_XDEBUG: ${USING_XDEBUG:-}
+      WPGRAPHQL_VERSION: ${WPGRAPHQL_VERSION:-}
     ports:
       - '8091:80'
     networks:

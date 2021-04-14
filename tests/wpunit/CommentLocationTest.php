@@ -115,6 +115,17 @@ class CommentLocationTest extends \Codeception\TestCase\WPTestCase {
 
 	public function testAcfTextField() {
 
+		// There was a bug in some versions of WPGraphQL where databaseId wasn't exposed on comments
+		// this is a polyfill as we're not really interested in testing comments, just the ACF fields on comments
+		add_filter( 'graphql_allowed_fields_on_restricted_type', function( $fields, $model_name ) {
+
+			if ( 'CommentObject' === $model_name && ! isset( $fields['databaseId' ] ) ) {
+				$fields[] = 'databaseId';
+			}
+
+			return $fields;
+		}, 10, 2 );
+
 		$this->register_acf_field([
 			'name' => 'comment_text_field_test',
 			'type' => 'text',
@@ -130,7 +141,6 @@ class CommentLocationTest extends \Codeception\TestCase\WPTestCase {
 		query getComment( $id: ID! ) {
 			comment( id: $id ) {
 				__typename
-				databaseId
 				commentTestFields {
 					fieldGroupName
 					commentTextFieldTest
@@ -149,7 +159,6 @@ class CommentLocationTest extends \Codeception\TestCase\WPTestCase {
 		codecept_debug( $actual );
 
 		$this->assertArrayNotHasKey( 'errors', $actual );
-		$this->assertSame( $this->comment_id, $actual['data']['comment']['databaseId'] );
 		$this->assertSame( $expected_text, $actual['data']['comment']['commentTestFields']['commentTextFieldTest'] );
 
 	}

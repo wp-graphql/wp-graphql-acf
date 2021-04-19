@@ -169,6 +169,32 @@ class Config {
 	}
 
 	/**
+	 * Add attribute to the ACF screen data.
+	 *
+	 * When ACF checks the location rules we need a way to know it's from this
+	 * file.
+	 */
+	public function add_wp_graphql_acf_to_acf_screen($screen, $field_group) {
+		$screen['wp-graphql-acf'] = true;
+		return $screen;
+	}
+
+	/**
+	 * Get ACF field groups.
+	 *
+	 * Get the field groups associated with the post type
+	 */
+	protected function get_acf_field_groups($args = array()) {
+		add_filter('acf/location/screen', array( $this, 'add_wp_graphql_acf_to_acf_screen' ), 10, 2);
+
+		$field_groups = acf_get_field_groups($args);
+
+		remove_filter('acf/location/screen', array( $this, 'add_wp_graphql_acf_to_acf_screen' ), 10);
+
+		return $field_groups;
+	}
+
+	/**
 	 * Add ACF Fields to Post Object Types.
 	 *
 	 * This gets the Post Types that are configured to show_in_graphql and iterates
@@ -196,7 +222,7 @@ class Config {
 			/**
 			 * Get the field groups associated with the post type
 			 */
-			$field_groups = acf_get_field_groups(
+			$field_groups = $this->get_acf_field_groups(
 				[
 					'post_type' => $post_type,
 				]
@@ -1214,7 +1240,7 @@ class Config {
 			/**
 			 * Get the field groups associated with the taxonomy
 			 */
-			$field_groups = acf_get_field_groups(
+			$field_groups = $this->get_acf_field_groups(
 				[
 					'taxonomy' => $taxonomy,
 				]
@@ -1273,7 +1299,7 @@ class Config {
 		/**
 		 * Get the field groups associated with the taxonomy
 		 */
-		$field_groups = acf_get_field_groups();
+		$field_groups = $this->get_acf_field_groups();
 
 		foreach ( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
@@ -1334,7 +1360,7 @@ class Config {
 		/**
 		 * Get the field groups associated with the taxonomy
 		 */
-		$field_groups = acf_get_field_groups();
+		$field_groups = $this->get_acf_field_groups();
 
 		foreach ( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
@@ -1396,7 +1422,7 @@ class Config {
 		/**
 		 * Get the field groups associated with the taxonomy
 		 */
-		$field_groups = acf_get_field_groups();
+		$field_groups = $this->get_acf_field_groups();
 		foreach ( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
 				foreach ( $field_group['location'] as $locations ) {
@@ -1455,7 +1481,7 @@ class Config {
 		/**
 		 * Get the field groups associated with the taxonomy
 		 */
-		$field_groups = acf_get_field_groups();
+		$field_groups = $this->get_acf_field_groups();
 
 		foreach ( $field_groups as $field_group ) {
 			if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
@@ -1510,7 +1536,7 @@ class Config {
 		/**
 		 * Get the field groups associated with the taxonomy
 		 */
-		$field_groups = acf_get_field_groups();
+		$field_groups = $this->get_acf_field_groups();
 
 		$allowed_post_types = get_post_types( [
 			'show_ui'         => true,
@@ -1613,14 +1639,14 @@ class Config {
 		/**
 		 * Get the field groups associated with the User edit form
 		 */
-		$user_edit_field_groups = acf_get_field_groups( [
+		$user_edit_field_groups = $this->get_acf_field_groups( [
 			'user_form' => 'edit',
 		] );
 
 		/**
 		 * Get the field groups associated with the User register form
 		 */
-		$user_register_field_groups = acf_get_field_groups( [
+		$user_register_field_groups = $this->get_acf_field_groups( [
 			'user_form' => 'register',
 		] );
 
@@ -1693,7 +1719,7 @@ class Config {
 			/**
 			 * Get the field groups associated with the options page
 			 */
-			$field_groups = acf_get_field_groups(
+			$field_groups = $this->get_acf_field_groups(
 				[
 					'options_page' => $options_page['menu_slug'],
 				]

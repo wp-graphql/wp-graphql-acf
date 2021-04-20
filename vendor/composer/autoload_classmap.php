@@ -10,4 +10,5 @@ return array(
     'WPGraphQL\\ACF\\ACF' => $baseDir . '/src/class-acf.php',
     'WPGraphQL\\ACF\\ACF_Settings' => $baseDir . '/src/class-acfsettings.php',
     'WPGraphQL\\ACF\\Config' => $baseDir . '/src/class-config.php',
+    'WPGraphQL\\ACF\\LocationRules' => $baseDir . '/src/location-rules.php',
 );

@@ -40,15 +40,27 @@ if ! $( wp core is-installed --allow-root ); then
 fi
 
 # Install and activate WPGraphQL
+
+echo "wpgraphql version... ${WPGRAPHQL_VERSION}"
+echo "${PLUGINS_DIR}"
+
 if [ ! -f "${PLUGINS_DIR}/wp-graphql/wp-graphql.php" ]; then
     # WPGRAPHQL_VERSION in format like v1.2.3
-    if [ -n "$WPGRAPHQL_VERSION" ]; then
-        echo "Installing wp-graphql version $WPGRAPHQL_VERSION"
-        curl -L -O https://github.com/wp-graphql/wp-graphql/releases/download/${WPGRAPHQL_VERSION}/wp-graphql.zip
-        wp plugin install wp-graphql.zip --activate --allow-root
-        rm -vf wp-graphql.zip
-    else
+    echo ${WPGRAPHQL_VERSION}
+    if [[ -z ${WPGRAPHQL_VERSION} ]]; then
+        echo "installing latest WPGraphQL from WordPress.org"
         wp plugin install wp-graphql --activate --allow-root
+    else
+    	echo "Installing WPGraphQL from Github"
+        git clone https://github.com/wp-graphql/wp-graphql.git "${PLUGINS_DIR}/wp-graphql"
+        cd "${PLUGINS_DIR}/wp-graphql"
+        echo "checking out WPGraphQL tag/${WPGRAPHQL_VERSION}"
+        git checkout tags/${WPGRAPHQL_VERSION} -b master
+        composer install --no-dev
+        cd ${WP_ROOT_FOLDER}
+        echo "activating WPGraphQL"
+        wp plugin activate wp-graphql --allow-root
+        wp plugin list --allow-root
     fi
 else
     wp plugin activate wp-graphql --allow-root

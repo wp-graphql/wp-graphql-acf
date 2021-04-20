@@ -69,6 +69,7 @@ case "$subcommand" in
                         -e COVERAGE=${COVERAGE-} \
                         -e USING_XDEBUG=${USING_XDEBUG-} \
                         -e DEBUG=${DEBUG-} \
+                        -e WPGRAPHQL_VERSION=${WPGRAPHQL_VERSION-} \
                         testing --scale app=0
                     ;;
                 \? ) print_usage_instructions;;

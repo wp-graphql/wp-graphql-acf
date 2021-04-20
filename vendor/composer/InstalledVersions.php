@@ -30,7 +30,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'e35e895bf7d35b7bcc5f4eacc287e9f22de91a02',
+    'reference' => 'd0ca31f6391c80cd370d4da71aa185658ee3c5b9',
     'name' => 'wp-graphql/wp-graphql-acf',
   ),
   'versions' => 
@@ -42,7 +42,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'e35e895bf7d35b7bcc5f4eacc287e9f22de91a02',
+      'reference' => 'd0ca31f6391c80cd370d4da71aa185658ee3c5b9',
     ),
   ),
 );

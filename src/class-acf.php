@@ -149,8 +149,8 @@ final class ACF {
 	 */
 	private function init() {
 
-		$config = new Config();
-		add_action( 'graphql_register_types', [ $config, 'init' ], 10, 1 );
+		$registry = new Registry();
+		add_action( 'graphql_register_types', [ $registry, 'init' ], 10, 1 );
 
 		$acf_settings = new ACF_Settings();
 		$acf_settings->init();

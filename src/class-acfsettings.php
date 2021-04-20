@@ -40,6 +40,39 @@ class ACF_Settings {
 		 */
 		add_action( 'wp_ajax_get_acf_field_group_graphql_types', [ $this, 'ajax_callback' ] );
 
+		add_filter( 'manage_acf-field-group_posts_columns', [ $this, 'admin_table_columns' ], 15, 1 );
+		add_action( 'manage_acf-field-group_posts_custom_column', [ $this, 'admin_table_columns_html' ], 15, 2 );
+
+	}
+
+	public function admin_table_columns_html( $column_name, $post_id ) {
+
+		$field_group = acf_get_field_group( $post_id );
+		$location_rules = new LocationRules( [ $field_group ] );
+		$location_rules->determine_location_rules();
+		$rules = $location_rules->get_rules();
+
+		$group_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : $field_group['title'];
+		$group_name = $location_rules->format_field_name( $group_name );
+
+		switch( $column_name ) {
+			case 'graphql_types':
+				echo isset( $rules[ $group_name ] ) ? implode( ', ', $rules[ $group_name ] ) : '';
+				break;
+			case 'graphql_field_name':
+				echo isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : '';
+				break;
+			default:
+				break;
+		}
+
+	}
+
+	public function admin_table_columns( $columns ) {
+		$columns['graphql_types'] = __( 'GraphQL Schema Location', 'wp-graphql-acf' );
+		$columns['graphql_field_name'] = __( 'GraphQL Field Name', 'wp-graphql-acf' );
+		return $columns;
+
 	}
 
 	/**

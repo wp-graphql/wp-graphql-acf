@@ -411,11 +411,13 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      imageField {
-		        mediaItemId
-		        thumbnail: sourceUrl(size: THUMBNAIL)
-				medium: sourceUrl(size: MEDIUM)
-				full: sourceUrl(size: LARGE)
-				sourceUrl
+		        node {
+			      mediaItemId
+			      thumbnail: sourceUrl(size: THUMBNAIL)
+				  medium: sourceUrl(size: MEDIUM)
+				  full: sourceUrl(size: LARGE)
+				  sourceUrl
+				}
 		      }
 		    }
 		  }
@@ -437,7 +439,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			'medium' => wp_get_attachment_image_src( $img_id, 'medium' )[0],
 			'full' => wp_get_attachment_image_src( $img_id, 'full' )[0],
 			'sourceUrl' => wp_get_attachment_image_src( $img_id, 'full' )[0]
-		], $actual['data']['postBy']['postFields']['imageField'] );
+		], $actual['data']['postBy']['postFields']['imageField']['node'] );
 
 	}
 
@@ -464,8 +466,10 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      fileField {
-		        mediaItemId
-				sourceUrl
+		        node {
+			      mediaItemId
+				  sourceUrl
+				}
 		      }
 		    }
 		  }
@@ -484,7 +488,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertEquals( [
 			'mediaItemId' => $img_id,
 			'sourceUrl' => wp_get_attachment_image_src( $img_id, 'full' )[0]
-		], $actual['data']['postBy']['postFields']['fileField'] );
+		], $actual['data']['postBy']['postFields']['fileField']['node'] );
 
 	}
 
@@ -603,8 +607,10 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      galleryField {
-		        mediaItemId
-		        sourceUrl
+		        nodes {
+		          mediaItemId
+		          sourceUrl
+		        }
 		      }
 		    }
 		  }
@@ -622,14 +628,14 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertArrayNotHasKey( 'errors', $actual );
 		$this->assertSame( [
 			[
-				'mediaItemId' => $img_id_1,
-				'sourceUrl' => wp_get_attachment_image_src( $img_id_1, 'full' )[0]
-			],
-			[
 				'mediaItemId' => $img_id_2,
 				'sourceUrl' => wp_get_attachment_image_src( $img_id_2, 'full' )[0]
+			],
+			[
+				'mediaItemId' => $img_id_1,
+				'sourceUrl' => wp_get_attachment_image_src( $img_id_1, 'full' )[0]
 			]
-		], $actual['data']['postBy']['postFields']['galleryField'] );
+		], $actual['data']['postBy']['postFields']['galleryField']['nodes'] );
 
 
 	}
@@ -911,12 +917,14 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      postObjectField {
-		        __typename
-		        ...on Post {
-		          postId
-		        }
-		        ...on Page {
-		          pageId
+		        node {
+		          __typename
+		          ...on Post {
+		            postId
+		          }
+		          ...on Page {
+		            pageId
+		          }
 		        }
 		      }
 		    }
@@ -936,7 +944,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertSame( [
 			'__typename' => 'Post',
 			'postId' => $post_id,
-		], $actual['data']['postBy']['postFields']['postObjectField'] );
+		], $actual['data']['postBy']['postFields']['postObjectField']['node'] );
 
 	}
 
@@ -962,12 +970,14 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      postObjectField {
-		        __typename
-		        ...on Post {
-		          postId
-		        }
-		        ...on Page {
-		          pageId
+		        node {
+		          __typename
+		          ...on Post {
+		            postId
+		          }
+		          ...on Page {
+		            pageId
+		          }
 		        }
 		      }
 		    }
@@ -987,7 +997,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertSame( [
 			'__typename' => 'Page',
 			'pageId' => $page_id,
-		], $actual['data']['postBy']['postFields']['postObjectField'] );
+		], $actual['data']['postBy']['postFields']['postObjectField']['node'] );
 
 	}
 
@@ -1017,9 +1027,11 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      pageLinkField {
-		        __typename
-		        ...on Post {
-		          postId
+		        node {
+		          __typename
+		          ...on Post {
+		            postId
+		          }
 		        }
 		      }
 		    }
@@ -1039,7 +1051,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertSame( [
 			'__typename' => 'Post',
 			'postId' => $id,
-		], $actual['data']['postBy']['postFields']['pageLinkField'] );
+		], $actual['data']['postBy']['postFields']['pageLinkField']['node'] );
 
 	}
 
@@ -1253,7 +1265,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 		$query = '
 		{
-		  __type( name: "AcfTest_Acftestfields" ) {
+		  __type( name: "AcfTestFields" ) {
 		    name
 		    description
 		    fields {
@@ -1331,11 +1343,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			'post_title' => 'Test Page',
 		]);
 
-		$filename      = ( $this->test_image );
-		$img_id = $this->factory()->attachment->create_upload_object( $filename );
-
-
-		update_field( 'relationship_field', [ $post_id, $page_id, $img_id ], $this->post_id );
+		update_field( 'relationship_field', [ $post_id, $page_id ], $this->post_id );
 
 		$query = '
 		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
@@ -1344,15 +1352,14 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      relationshipField {
-		        __typename
-		        ...on Post {
-		          postId
-		        }
-		        ...on Page {
-		          pageId
-		        }
-		        ...on MediaItem {
-		          mediaItemId
+		        nodes {
+		          __typename
+		          ...on Post {
+		            postId
+		          }
+		          ...on Page {
+		            pageId
+		          }
 		        }
 		      }
 		    }
@@ -1378,11 +1385,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 				'__typename' => 'Page',
 				'pageId' => $page_id,
 			],
-			[
-				'__typename' => 'MediaItem',
-				'mediaItemId' => $img_id,
-			]
-		], $actual['data']['postBy']['postFields']['relationshipField'] );
+		], $actual['data']['postBy']['postFields']['relationshipField']['nodes'] );
 
 	}
 

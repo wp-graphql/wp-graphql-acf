@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit22bfbd1509018e9010b8ca40b9b6700b
+class ComposerStaticInit25bca2cfacbb71bc0509958a96747af9
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -25,15 +25,32 @@ class ComposerStaticInit22bfbd1509018e9010b8ca40b9b6700b
         'WPGraphQL\\ACF\\ACF' => __DIR__ . '/../..' . '/src/class-acf.php',
         'WPGraphQL\\ACF\\ACF_Settings' => __DIR__ . '/../..' . '/src/class-acfsettings.php',
         'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/class-config.php',
+        'WPGraphQL\\ACF\\Fields\\AcfField' => __DIR__ . '/../..' . '/src/Fields/AcfField.php',
+        'WPGraphQL\\ACF\\Fields\\File' => __DIR__ . '/../..' . '/src/Fields/File.php',
+        'WPGraphQL\\ACF\\Fields\\FlexibleContent' => __DIR__ . '/../..' . '/src/Fields/FlexibleContent.php',
+        'WPGraphQL\\ACF\\Fields\\Gallery' => __DIR__ . '/../..' . '/src/Fields/Gallery.php',
+        'WPGraphQL\\ACF\\Fields\\Group' => __DIR__ . '/../..' . '/src/Fields/Group.php',
+        'WPGraphQL\\ACF\\Fields\\Image' => __DIR__ . '/../..' . '/src/Fields/Image.php',
+        'WPGraphQL\\ACF\\Fields\\PageLink' => __DIR__ . '/../..' . '/src/Fields/PageLink.php',
+        'WPGraphQL\\ACF\\Fields\\PostObject' => __DIR__ . '/../..' . '/src/Fields/PostObject.php',
+        'WPGraphQL\\ACF\\Fields\\Relationship' => __DIR__ . '/../..' . '/src/Fields/Relationship.php',
+        'WPGraphQL\\ACF\\Fields\\Repeater' => __DIR__ . '/../..' . '/src/Fields/Repeater.php',
+        'WPGraphQL\\ACF\\Fields\\Select' => __DIR__ . '/../..' . '/src/Fields/Select.php',
+        'WPGraphQL\\ACF\\Fields\\Taxonomy' => __DIR__ . '/../..' . '/src/Fields/Taxonomy.php',
+        'WPGraphQL\\ACF\\Fields\\User' => __DIR__ . '/../..' . '/src/Fields/User.php',
         'WPGraphQL\\ACF\\LocationRules' => __DIR__ . '/../..' . '/src/location-rules.php',
+        'WPGraphQL\\ACF\\Registry' => __DIR__ . '/../..' . '/src/Registry.php',
+        'WPGraphQL\\ACF\\Types\\InterfaceType\\AcfFieldGroupInterface' => __DIR__ . '/../..' . '/src/Types/InterfaceType/AcfFieldGroupInterface.php',
+        'WPGraphQL\\ACF\\Types\\ObjectType\\AcfGoogleMap' => __DIR__ . '/../..' . '/src/Types/ObjectType/AcfGoogleMap.php',
+        'WPGraphQL\\ACF\\Types\\ObjectType\\AcfLink' => __DIR__ . '/../..' . '/src/Types/ObjectType/AcfLink.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit22bfbd1509018e9010b8ca40b9b6700b::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit22bfbd1509018e9010b8ca40b9b6700b::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit22bfbd1509018e9010b8ca40b9b6700b::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit25bca2cfacbb71bc0509958a96747af9::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit25bca2cfacbb71bc0509958a96747af9::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit25bca2cfacbb71bc0509958a96747af9::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -9,7 +9,7 @@ return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'WPGraphQL\\ACF\\ACF' => $baseDir . '/src/class-acf.php',
     'WPGraphQL\\ACF\\ACF_Settings' => $baseDir . '/src/class-acfsettings.php',
-    'WPGraphQL\\ACF\\Config' => $baseDir . '/src/class-config.php',
+    'WPGraphQL\\ACF\\Config' => $baseDir . '/src/deprecated-class-config.php',
     'WPGraphQL\\ACF\\Fields\\AcfField' => $baseDir . '/src/Fields/AcfField.php',
     'WPGraphQL\\ACF\\Fields\\File' => $baseDir . '/src/Fields/File.php',
     'WPGraphQL\\ACF\\Fields\\FlexibleContent' => $baseDir . '/src/Fields/FlexibleContent.php',

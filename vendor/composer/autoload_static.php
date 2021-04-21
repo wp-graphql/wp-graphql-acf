@@ -24,7 +24,7 @@ class ComposerStaticInit25bca2cfacbb71bc0509958a96747af9
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'WPGraphQL\\ACF\\ACF' => __DIR__ . '/../..' . '/src/class-acf.php',
         'WPGraphQL\\ACF\\ACF_Settings' => __DIR__ . '/../..' . '/src/class-acfsettings.php',
-        'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/class-config.php',
+        'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/deprecated-class-config.php',
         'WPGraphQL\\ACF\\Fields\\AcfField' => __DIR__ . '/../..' . '/src/Fields/AcfField.php',
         'WPGraphQL\\ACF\\Fields\\File' => __DIR__ . '/../..' . '/src/Fields/File.php',
         'WPGraphQL\\ACF\\Fields\\FlexibleContent' => __DIR__ . '/../..' . '/src/Fields/FlexibleContent.php',

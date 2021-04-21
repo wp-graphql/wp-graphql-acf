@@ -895,10 +895,10 @@ class Config {
 				break;
 			case 'group':
 
-				$field_type_name = ucfirst( Utils::format_type_name( $acf_field['name'] ) );
-
-				if ( $this->type_registry->get_type( strtolower( $field_type_name ) ) ) {
+				$field_type_name = $type_name . '_' . ucfirst( self::camel_case( $acf_field['name'] ) );
+				if ( null !== $this->type_registry->get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
+					break;
 				} else {
 
 					if ( isset( $acf_field['parent'] ) && ! empty( $acf_field['parent'] ) ) {

@@ -76,6 +76,7 @@ $j(document).ready(function () {
 
 		showInGraphQLCheckbox.on('change', function () {
 			setGraphqlFieldVisibility();
+			getGraphqlTypesFromLocationRules();
 		})
 
 	}
@@ -236,6 +237,7 @@ $j(document).ready(function () {
 
 	function getGraphqlTypesFromLocationRules() {
 
+		var showInGraphQLCheckbox = $j('#acf_field_group-show_in_graphql');
 		var form = $j('#post');
 		var formInputs = $j('#post :input');
 		var serialized = formInputs.serialize();
@@ -248,7 +250,9 @@ $j(document).ready(function () {
 			return;
 		}
 
-		console.log( form.attr('data-request-pending') );
+		if ( ! showInGraphQLCheckbox.is(':checked') ) {
+			return;
+		}
 
 		if ( 'pending' !== form.attr('data-request-pending') ) {
 

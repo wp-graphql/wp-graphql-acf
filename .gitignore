@@ -17,3 +17,4 @@ vendor/composer/installed.json
 vendor/composer/*/
 composer.lock
 .log
+local

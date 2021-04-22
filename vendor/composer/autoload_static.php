@@ -22,8 +22,8 @@ class ComposerStaticInit25bca2cfacbb71bc0509958a96747af9
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'WPGraphQL\\ACF\\ACF' => __DIR__ . '/../..' . '/src/class-acf.php',
-        'WPGraphQL\\ACF\\ACF_Settings' => __DIR__ . '/../..' . '/src/class-acfsettings.php',
+        'WPGraphQL\\ACF\\Acf' => __DIR__ . '/../..' . '/src/Acf.php',
+        'WPGraphQL\\ACF\\AcfSettings' => __DIR__ . '/../..' . '/src/AcfSettings.php',
         'WPGraphQL\\ACF\\Config' => __DIR__ . '/../..' . '/src/deprecated-class-config.php',
         'WPGraphQL\\ACF\\Fields\\AcfField' => __DIR__ . '/../..' . '/src/Fields/AcfField.php',
         'WPGraphQL\\ACF\\Fields\\File' => __DIR__ . '/../..' . '/src/Fields/File.php',
@@ -38,9 +38,10 @@ class ComposerStaticInit25bca2cfacbb71bc0509958a96747af9
         'WPGraphQL\\ACF\\Fields\\Select' => __DIR__ . '/../..' . '/src/Fields/Select.php',
         'WPGraphQL\\ACF\\Fields\\Taxonomy' => __DIR__ . '/../..' . '/src/Fields/Taxonomy.php',
         'WPGraphQL\\ACF\\Fields\\User' => __DIR__ . '/../..' . '/src/Fields/User.php',
-        'WPGraphQL\\ACF\\LocationRules' => __DIR__ . '/../..' . '/src/location-rules.php',
+        'WPGraphQL\\ACF\\LocationRules' => __DIR__ . '/../..' . '/src/LocationRules.php',
         'WPGraphQL\\ACF\\Registry' => __DIR__ . '/../..' . '/src/Registry.php',
         'WPGraphQL\\ACF\\Types\\InterfaceType\\AcfFieldGroupInterface' => __DIR__ . '/../..' . '/src/Types/InterfaceType/AcfFieldGroupInterface.php',
+        'WPGraphQL\\ACF\\Types\\ObjectType\\AcfFieldGroupConfig' => __DIR__ . '/../..' . '/src/Types/ObjectType/AcfFieldGroupConfig.php',
         'WPGraphQL\\ACF\\Types\\ObjectType\\AcfGoogleMap' => __DIR__ . '/../..' . '/src/Types/ObjectType/AcfGoogleMap.php',
         'WPGraphQL\\ACF\\Types\\ObjectType\\AcfLink' => __DIR__ . '/../..' . '/src/Types/ObjectType/AcfLink.php',
     );

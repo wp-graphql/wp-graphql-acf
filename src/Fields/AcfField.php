@@ -322,6 +322,8 @@ class AcfField {
 
 	/**
 	 * Registers a field to the WPGraphQL Schema
+	 *
+	 * @return void
 	 */
 	public function register_field() {
 

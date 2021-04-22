@@ -6,6 +6,7 @@ use Exception;
 use GraphQLRelay\Relay;
 use WPGraphQL\ACF\Fields\AcfField;
 use WPGraphQL\ACF\Types\InterfaceType\AcfFieldGroupInterface;
+use WPGraphQL\ACF\Types\ObjectType\AcfFieldGroupConfig;
 use WPGraphQL\ACF\Types\ObjectType\AcfGoogleMap;
 use WPGraphQL\ACF\Types\ObjectType\AcfLink;
 use WPGraphQL\Registry\TypeRegistry;
@@ -142,7 +143,10 @@ class Registry {
 	}
 
 	/**
+	 * Register ACF Options pages to the GraphQL Schema.
 	 *
+	 * @return void
+	 * @throws Exception
 	 */
 	public function register_options_pages() {
 
@@ -205,6 +209,8 @@ class Registry {
 	/**
 	 * Register initial types to the Schema
 	 *
+	 * @return void
+	 *
 	 * @throws Exception
 	 */
 	public function register_initial_types() {
@@ -215,7 +221,12 @@ class Registry {
 		// Object Types
 		AcfLink::register_type();
 		AcfGoogleMap::register_type();
+		AcfFieldGroupConfig::register_type();
 
+		/**
+		 * Registers a RootQuery entry for fetching
+		 * an individual FieldGroup by ID
+		 */
 		$this->type_registry->register_field( 'RootQuery', 'acfFieldGroup', [
 			'description' => __( 'ACF Field Group', 'wp-graphql-acf' ),
 			'type'        => 'AcfFieldGroup',
@@ -229,9 +240,13 @@ class Registry {
 				$id_parts    = Relay::fromGlobalId( $args['id'] );
 				$field_group = isset( $id_parts['id'] ) ? acf_get_field_group( $id_parts['id'] ) : null;
 
+				if ( empty( $field_group ) ) {
+					return null;
+				}
+
 				return [
 					'fieldGroupName'    => isset( $field_group['title'] ) ? $field_group['title'] : null,
-					'_fieldGroupConfig' => ! empty( $field_group ) ? $field_group : null,
+					'_fieldGroupConfig' => $field_group,
 				];
 
 			}
@@ -240,24 +255,28 @@ class Registry {
 	}
 
 	/**
-	 * Map user generated field groups to the Schema
+	 * Map ACF field groups to the Schema
+	 *
+	 * @return void
+	 * @throws Exception
 	 */
 	public function map_acf_field_groups_to_types() {
-
 		foreach ( $this->acf_field_groups as $field_group ) {
 			$this->add_acf_field_group_to_graphql( $field_group );
 		}
-
 	}
 
 	/**
-	 * @param $field_group
+	 * Adds an ACF Field Group to the GraphQL Schema by determining the GraphQL Types the
+	 * field group should show on.
+	 *
+	 * @param array $field_group The ACF Field Group config to add to the Schema
 	 *
 	 * @return mixed|string|null
 	 *
 	 * @throws Exception
 	 */
-	public function add_acf_field_group_to_graphql( $field_group ) {
+	public function add_acf_field_group_to_graphql( array $field_group ) {
 
 		if ( ! $this->should_field_group_show_in_graphql( $field_group ) ) {
 			return null;
@@ -266,6 +285,7 @@ class Registry {
 		$type_name      = $this->get_field_group_type_name( $field_group );
 		$interface_name = 'With' . $type_name;
 
+		// Check if a GraphQL Type already exists for the Type
 		if ( null === $this->type_registry->get_type( $type_name ) ) {
 
 			$this->type_registry->register_object_type( $type_name, [
@@ -284,7 +304,7 @@ class Registry {
 					],
 					'fieldGroupName' => [
 						'resolve' => function() use ( $type_name ) {
-							return isset( $type_name ) ? lcfirst( $type_name ) : null;
+							return lcfirst( $type_name );
 						}
 					]
 				],
@@ -340,11 +360,15 @@ class Registry {
 	}
 
 	/**
-	 * @param $field_group
+	 * Get the GraphQL Types a Field Group should be registered to show on
 	 *
-	 * @return array|mixed
+	 * @param array $field_group The ACF Field Group config to determine the Types for
+	 *
+	 * @return array
+	 *
+	 * @return array
 	 */
-	public function get_graphql_types_for_field_group( $field_group ) {
+	public function get_graphql_types_for_field_group( array $field_group ) {
 
 		$graphql_types = isset( $field_group['graphql_types'] ) ? $field_group['graphql_types'] : [];
 
@@ -445,6 +469,8 @@ class Registry {
 	 * Map Fields to the Field Groups in the Schema
 	 *
 	 * @param array $field_group
+	 *
+	 * @return void
 	 */
 	public function map_acf_fields_to_field_group( array $field_group ) {
 
@@ -492,6 +518,8 @@ class Registry {
 	/**
 	 * @param array $field The ACF Field config
 	 * @param array $field_group The ACF Field Group Config
+	 *
+	 * @return void
 	 */
 	public function register_graphql_field( array $field, array $field_group ) {
 

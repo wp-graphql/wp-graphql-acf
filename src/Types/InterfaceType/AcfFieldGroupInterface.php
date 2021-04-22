@@ -4,29 +4,24 @@ namespace WPGraphQL\ACF\Types\InterfaceType;
 use Exception;
 use WPGraphQL\ACF\Registry;
 
+/**
+ * Class AcfFieldGroupInterface
+ *
+ * @package WPGraphQL\ACF\Types\InterfaceType
+ */
 class AcfFieldGroupInterface {
 
 	/**
+	 * Register the AcfFieldGroup Interface Type which is shared by all
+	 * Field Groups registered by ACF.
+	 *
 	 * @param Registry $registry
+	 *
+	 * @return void
 	 *
 	 * @throws Exception
 	 */
 	public static function register_type( Registry $registry ) {
-
-		register_graphql_object_type( 'AcfFieldGroupConfig', [
-			'description' => __( 'Configuration settings of an ACF Field Group.', 'wp-graphql' ),
-			'fields' => [
-				'databaseId' => [
-					'type' => 'Int',
-					'resolve' => function( $field_group ) {
-						return $field_group['ID'];
-					}
-				],
-				'key' => [
-					'type' => 'String',
-				],
-			],
-		] );
 
 		register_graphql_interface_type('AcfFieldGroup',
 			[

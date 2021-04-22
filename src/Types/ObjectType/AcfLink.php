@@ -1,10 +1,18 @@
 <?php
 namespace WPGraphQL\ACF\Types\ObjectType;
 
+/**
+ * Class AcfLink
+ *
+ * @package WPGraphQL\ACF\Types\ObjectType
+ */
 class AcfLink {
 
 	/**
-	 * Register the AcfLink Type to the Schema
+	 * Register the AcfLink Type to the Schema for use with the
+	 * ACF `link` field type
+	 *
+	 * @return void
 	 */
 	public static function register_type() {
 		register_graphql_object_type( 'AcfLink', [

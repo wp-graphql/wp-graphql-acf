@@ -1,8 +1,19 @@
 <?php
 namespace WPGraphQL\ACF\Types\ObjectType;
 
+/**
+ * Class AcfGoogleMap
+ *
+ * @package WPGraphQL\ACF\Types\ObjectType
+ */
 class AcfGoogleMap {
 
+	/**
+	 * Registers the AcfGoogleMap Type to the GraphQL Schema for
+	 * use by the `google_map` ACF Field Type
+	 *
+	 * @return void
+	 */
 	public static function register_type() {
 
 		register_graphql_object_type( 'AcfGoogleMap', [

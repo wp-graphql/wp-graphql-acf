@@ -7,8 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'WPGraphQL\\ACF\\ACF' => $baseDir . '/src/class-acf.php',
-    'WPGraphQL\\ACF\\ACF_Settings' => $baseDir . '/src/class-acfsettings.php',
+    'WPGraphQL\\ACF\\Acf' => $baseDir . '/src/Acf.php',
+    'WPGraphQL\\ACF\\AcfSettings' => $baseDir . '/src/AcfSettings.php',
     'WPGraphQL\\ACF\\Config' => $baseDir . '/src/deprecated-class-config.php',
     'WPGraphQL\\ACF\\Fields\\AcfField' => $baseDir . '/src/Fields/AcfField.php',
     'WPGraphQL\\ACF\\Fields\\File' => $baseDir . '/src/Fields/File.php',
@@ -23,9 +23,10 @@ return array(
     'WPGraphQL\\ACF\\Fields\\Select' => $baseDir . '/src/Fields/Select.php',
     'WPGraphQL\\ACF\\Fields\\Taxonomy' => $baseDir . '/src/Fields/Taxonomy.php',
     'WPGraphQL\\ACF\\Fields\\User' => $baseDir . '/src/Fields/User.php',
-    'WPGraphQL\\ACF\\LocationRules' => $baseDir . '/src/location-rules.php',
+    'WPGraphQL\\ACF\\LocationRules' => $baseDir . '/src/LocationRules.php',
     'WPGraphQL\\ACF\\Registry' => $baseDir . '/src/Registry.php',
     'WPGraphQL\\ACF\\Types\\InterfaceType\\AcfFieldGroupInterface' => $baseDir . '/src/Types/InterfaceType/AcfFieldGroupInterface.php',
+    'WPGraphQL\\ACF\\Types\\ObjectType\\AcfFieldGroupConfig' => $baseDir . '/src/Types/ObjectType/AcfFieldGroupConfig.php',
     'WPGraphQL\\ACF\\Types\\ObjectType\\AcfGoogleMap' => $baseDir . '/src/Types/ObjectType/AcfGoogleMap.php',
     'WPGraphQL\\ACF\\Types\\ObjectType\\AcfLink' => $baseDir . '/src/Types/ObjectType/AcfLink.php',
 );

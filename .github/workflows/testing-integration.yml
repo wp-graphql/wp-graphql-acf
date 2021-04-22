@@ -1,0 +1,112 @@
+name: Testing Integration
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+    branches:
+      - develop
+      - master
+    paths:
+      - '**.php'
+      - '!docs/**'
+
+jobs:
+  continuous_integration:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [ '7.3', '7.4' ]
+        wordpress: [ '5.6', '5.5.3', '5.4.2' ]
+        include:
+          - php: '7.4'
+            wordpress: '5.6'
+            coverage: 1
+          - php: '7.4'
+            wordpress: '5.6'
+            WPGRAPHQL_VERSION: 'v1.3.5'
+          - php: '7.4'
+            wordpress: '5.6'
+            WPGRAPHQL_VERSION: 'v1.2.6'
+          - php: '7.4'
+            wordpress: '5.6'
+            WPGRAPHQL_VERSION: 'v1.1.8'
+          - php: '7.4'
+            wordpress: '5.6'
+            WPGRAPHQL_VERSION: 'v1.0.5'
+          - php: '7.4'
+            wordpress: '5.6'
+            WPGRAPHQL_VERSION: 'v0.15.5'
+          - php: '7.4'
+            wordpress: '5.6'
+            WPGRAPHQL_VERSION: 'v0.14.0'
+          - php: '7.4'
+            wordpress: '5.6'
+            WPGRAPHQL_VERSION: 'v0.13.3'
+          - php: '7.4'
+            wordpress: '5.6'
+            WPGRAPHQL_VERSION: 'v0.12.3'
+          - php: '7.4'
+            wordpress: '5.6'
+            WPGRAPHQL_VERSION: 'v0.11.0'
+          - php: '7.4'
+            wordpress: '5.6'
+            WPGRAPHQL_VERSION: 'v0.11.0'
+          - php: '7.4'
+            wordpress: '5.5.3'
+          - php: '7.4'
+            wordpress: '5.4.2'
+          - php: '7.3'
+            wordpress: '5.6'
+          - php: '7.3'
+            wordpress: '5.5.3'
+          - php: '7.3'
+            wordpress: '5.4.2'
+      fail-fast: false
+    name: WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: json, mbstring, zip, unzip
+
+      - name: Get Composer Cache Directory
+        id: composercache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.composercache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Build "testing" Docker Image
+        env:
+          PHP_VERSION: ${{ matrix.php }}
+          WP_VERSION: ${{ matrix.wordpress }}
+        run: composer build-test
+
+      - name: Run Tests w/ Docker.
+        env:
+          COVERAGE: ${{ matrix.coverage }}
+          USING_XDEBUG: ${{ matrix.coverage }}
+          DEBUG: ${{ matrix.debug }}
+          SKIP_TESTS_CLEANUP: ${{ matrix.coverage }}
+        run: composer run-test
+
+      - name: Push Codecoverage to Coveralls.io
+        if: ${{ matrix.coverage == 1 }}
+        env:
+          COVERALLS_RUN_LOCALLY: 1
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: vendor/bin/php-coveralls -v

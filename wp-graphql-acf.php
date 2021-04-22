@@ -7,9 +7,9 @@
  * Author URI:        https://www.wpgraphql.com
  * Text Domain:       wp-graphql-acf
  * Domain Path:       /languages
- * Version:           0.4.1
+ * Version:           0.5.0
  * Requires PHP:      7.0
- * GitHub Plugin URI: https://github.com/afragen/github-updater
+ * GitHub Plugin URI: https://github.com/wp-graphql/wp-graphql-acf
  *
  * @package         WPGraphQL_ACF
  */
@@ -26,6 +26,7 @@ require_once( __DIR__ . '/vendor/autoload.php' );
  * Define constants
  */
 const WPGRAPHQL_REQUIRED_MIN_VERSION = '0.4.0';
+const WPGRAPHQL_ACF_VERSION = '0.5.0';
 
 /**
  * Initialize the plugin
@@ -111,3 +112,5 @@ function can_load_plugin() {
 
 	return true;
 }
+
+

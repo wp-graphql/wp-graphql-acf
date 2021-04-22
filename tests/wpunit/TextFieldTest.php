@@ -1,11 +1,11 @@
 <?php
 class TextFieldTest extends \Codeception\TestCase\WPTestCase {
 
-	public function setUp() {
+	public function setUp(): void {
 
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 
 	}
 

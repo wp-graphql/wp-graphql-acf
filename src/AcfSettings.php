@@ -101,7 +101,7 @@ class AcfSettings {
 
 			$all_rules = $rules->get_rules();
 			if ( isset( $all_rules[ $group_name ] ) ) {
-				wp_send_json( [ 'graphql_types' => $all_rules[ $group_name ] ] );
+				wp_send_json( [ 'graphql_types' => array_values( $all_rules[ $group_name ] ) ] );
 			}
 			wp_send_json( [ 'graphql_types' => null ] );
 		}

@@ -273,9 +273,9 @@ $j(document).ready(function () {
 					if (types && types.length) {
 						if (-1 !== $j.inArray(value, types)) {
 							checkbox.prop('checked', true);
-							checkbox.trigger("change");
 						}
 					}
+					checkbox.trigger("change");
 				})
 
 				// Signal that the request is finished

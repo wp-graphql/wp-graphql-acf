@@ -116,33 +116,41 @@ class LocationRules {
 	 */
 	public function get_rules() {
 
-		$mapped_field_groups = isset( $this->mapped_field_groups ) && ! empty( $this->mapped_field_groups ) ? $this->mapped_field_groups : [];
-
-		if ( empty( $mapped_field_groups ) ) {
+		if ( empty( $this->mapped_field_groups ) ) {
 			return [];
 		}
 
 
 		if ( empty( $this->unset_types ) ) {
-			return $mapped_field_groups;
+			return $this->mapped_field_groups;
 		}
 
 		/**
 		 * Remove any Types that were flagged to unset
 		 */
 		foreach ( $this->unset_types as $field_group => $types ) {
-			if ( ! empty( $types ) ) {
-				foreach ( $types as $type ) {
-					if ( isset( $this->mapped_field_groups[ $field_group ] ) ) {
-						if ( ( $key = array_search( $type, $mapped_field_groups[ $field_group ] ) ) !== false ) {
-							unset( $mapped_field_groups[ $field_group ][ $key ] );
-						}
-					}
+
+			// If there are no mapped field groups for the rule being unset, return the mapped groups as is
+			if ( ! isset( $this->mapped_field_groups[ $field_group ] ) ) {
+				return $this->mapped_field_groups;
+			}
+
+			// If the types to unset are empty or not an array, return the mapped field groups as is
+			if ( empty( $types ) || ! is_array( $types ) ) {
+				return $this->mapped_field_groups;
+			}
+
+			// Loop over the types to unset, find the key of the type in the array, then unset it
+			foreach ( $types as $type ) {
+				if ( ( $key = array_search( $type, $this->mapped_field_groups[ $field_group ] ) ) !== false ) {
+					unset( $this->mapped_field_groups[ $field_group ][ $key ] );
 				}
 			}
+
 		}
 
-		return $mapped_field_groups;
+		// Return the mapped field groups, with the unset fields (if any) removed
+		return $this->mapped_field_groups;
 
 	}
 

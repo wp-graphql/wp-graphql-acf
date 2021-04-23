@@ -671,4 +671,99 @@ class LocationRulesTest extends \Codeception\TestCase\WPTestCase {
 
 	}
 
+	/**
+	 * @see: https://github.com/wp-graphql/wp-graphql-acf/issues/251
+	 * @throws Exception
+	 */
+	public function testOnlyFieldGroupsSetToShowInGraphqlAreInTheSchema() {
+
+		$post_id = $this->factory()->post->create([ 'post_status' => 'publish' ]);
+
+		/**
+		 * Register a field group to a specific post type
+		 */
+		$this->register_acf_field_group([
+			'key' => 'doNotShowInGraphQL',
+			'location'              => [
+				[
+					[
+						'param'    => 'post_type',
+						'operator' => '==',
+						'value'    => 'post',
+					],
+				],
+			],
+			'show_in_graphql'       => false,
+			'graphql_field_name'    => 'doNotShowInGraphQL',
+			'graphql_types'         => [ 'Post' ]
+		]);
+
+		$this->register_acf_field_group([
+			'key' => 'showInGraphqlTest',
+			'location'              => [
+				[
+					[
+						'param'    => 'post_type',
+						'operator' => '==',
+						'value'    => 'post',
+					],
+				],
+			],
+			'show_in_graphql'       => true,
+			'graphql_field_name'    => 'showInGraphqlTest',
+			'graphql_types'         => [ 'Post' ]
+		]);
+
+		$query = '
+		query GetPost($id:ID!) {
+		  post(id:$id idType:DATABASE_ID) {
+		    databaseId
+		    doNotShowInGraphQL {
+		      __typename
+		    }
+		  }
+		}
+		';
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'id' => $post_id,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		// doNotShowInGraphQL should not be in the Schema, so this should be an error
+		$this->assertArrayHasKey( 'errors', $actual );
+
+		$query = '
+		query GetPost($id:ID!) {
+		  post(id:$id idType:DATABASE_ID) {
+		    databaseId
+		    showInGraphqlTest {
+		      __typename
+		    }
+		  }
+		}
+		';
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'id' => $post_id,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		// showInGraphqlTest should be queryable against the Post type in the Schema
+		$this->assertSame( $post_id, $actual['data']['post']['databaseId'] );
+		$this->assertSame( 'Post_Showingraphqltest', $actual['data']['post']['showInGraphqlTest']['__typename'] );
+
+		acf_remove_local_field_group( 'doNotShowInGraphQL' );
+		acf_remove_local_field_group( 'showInGraphqlTest' );
+
+	}
+
 }

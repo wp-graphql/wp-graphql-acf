@@ -2,6 +2,59 @@ $j = jQuery.noConflict();
 
 $j(document).ready(function () {
 
+	var GraphqlLocationManager = new acf.Model({
+		id: 'graphqlLocationManager',
+		wait: 'ready',
+		events: {
+			'click .add-location-rule': 'onClickAddRule',
+			'click .add-location-group': 'onClickAddGroup',
+			'click .remove-location-rule': 'onClickRemoveRule',
+			'change .refresh-location-rule': 'onChangeRemoveRule',
+			'change .rule-groups .operator select': 'onChangeRemoveRule',
+			'change .rule-groups .value select': 'onChangeRemoveRule',
+		},
+		requestPending: false,
+		initialize: function () {
+			this.$el = $j('#acf-field-group-locations');
+			this.getGraphqlTypes();
+		},
+
+		onClickAddRule: function (e, $el) {
+			this.getGraphqlTypes();
+		},
+
+		onClickRemoveRule: function (e, $el) {
+			this.getGraphqlTypes();
+		},
+
+		onChangeRemoveRule: function (e, $el) {
+			setTimeout(function () {
+				GraphqlLocationManager.getGraphqlTypes();
+			}, 500);
+
+		},
+
+		onClickAddGroup: function (e, $el) {
+			this.getGraphqlTypes();
+		},
+
+		isRequestPending: function() {
+			return this.requestPending;
+		},
+
+		startRequest: function () {
+			this.requestPending = true;
+		},
+
+		finishRequest: function() {
+			this.requestPending = false;
+		},
+
+		getGraphqlTypes: function () {
+			getGraphqlTypesFromLocationRules();
+		},
+	});
+
 	/**
 	 * Set the visibility of the GraphQL Fields based on the `show_in_graphql`
 	 * field state.
@@ -23,6 +76,7 @@ $j(document).ready(function () {
 
 		showInGraphQLCheckbox.on('change', function () {
 			setGraphqlFieldVisibility();
+			getGraphqlTypesFromLocationRules();
 		})
 
 	}
@@ -183,8 +237,10 @@ $j(document).ready(function () {
 
 	function getGraphqlTypesFromLocationRules() {
 
-		var form = $j('#post :input');
-		var serialized = form.serialize();
+		var showInGraphQLCheckbox = $j('#acf_field_group-show_in_graphql');
+		var form = $j('#post');
+		var formInputs = $j('#post :input');
+		var serialized = formInputs.serialize();
 		var checkboxes = $j('.acf-field[data-name="graphql_types"] .acf-checkbox-list input[type="checkbox"]');
 		var manualMapTypes = $j('#acf_field_group-map_graphql_types_from_location_rules');
 
@@ -194,25 +250,39 @@ $j(document).ready(function () {
 			return;
 		}
 
-		$j.post(ajaxurl, {
-			action: 'get_acf_field_group_graphql_types',
-			data: serialized
-		}, function (res) {
-			var types = res && res['graphql_types'] ? res['graphql_types'] : [];
+		if ( ! showInGraphQLCheckbox.is(':checked') ) {
+			return;
+		}
 
-			checkboxes.each(function (i, el) {
-				var checkbox = $j(this);
-				var value = $j(this).val();
-				checkbox.prop('checked', false);
-				if (types && types.length) {
-					if (-1 !== $j.inArray(value, types)) {
-						checkbox.prop('checked', true);
-						checkbox.trigger("change");
+		if ( 'pending' !== form.attr('data-request-pending') ) {
+
+			// Start the request
+			form.attr('data-request-pending', 'pending' );
+
+			// Make the request
+			$j.post(ajaxurl, {
+				action: 'get_acf_field_group_graphql_types',
+				data: serialized
+			}, function (res) {
+				var types = res && res['graphql_types'] ? res['graphql_types'] : [];
+
+				checkboxes.each(function (i, el) {
+					var checkbox = $j(this);
+					var value = $j(this).val();
+					checkbox.prop('checked', false);
+					if (types && types.length) {
+						if (-1 !== $j.inArray(value, types)) {
+							checkbox.prop('checked', true);
+						}
 					}
-				}
-			})
+					checkbox.trigger("change");
+				})
 
-		});
+				// Signal that the request is finished
+				form.removeAttr('data-request-pending');
+
+			});
+		}
 
 	};
 
@@ -222,45 +292,5 @@ $j(document).ready(function () {
 	setGraphqlFieldVisibility();
 	setGraphqlFieldName();
 	graphqlMapTypesFromLocations();
-
-	var GraphqlLocationManager = new acf.Model({
-		id: 'graphqlLocationManager',
-		wait: 'ready',
-		events: {
-			'click .add-location-rule': 'onClickAddRule',
-			'click .add-location-group': 'onClickAddGroup',
-			'click .remove-location-rule': 'onClickRemoveRule',
-			'change .refresh-location-rule': 'onChangeRemoveRule',
-			'change .rule-groups .operator select': 'onChangeRemoveRule',
-			'change .rule-groups .value select': 'onChangeRemoveRule',
-		},
-		initialize: function () {
-			this.$el = $j('#acf-field-group-locations');
-			this.getGraphqlTypes();
-		},
-
-		onClickAddRule: function (e, $el) {
-			this.getGraphqlTypes();
-		},
-
-		onClickRemoveRule: function (e, $el) {
-			this.getGraphqlTypes();
-		},
-
-		onChangeRemoveRule: function (e, $el) {
-			setTimeout(function () {
-				GraphqlLocationManager.getGraphqlTypes();
-			}, 500);
-
-		},
-
-		onClickAddGroup: function (e, $el) {
-			this.getGraphqlTypes();
-		},
-
-		getGraphqlTypes: function () {
-			getGraphqlTypesFromLocationRules();
-		},
-	})
 
 });

@@ -200,7 +200,7 @@ class Config {
 		global $acf_options_page;
 
 		if ( ! isset( $acf_options_page ) ) {
-			return ;
+			return;
 		}
 
 		/**
@@ -1458,7 +1458,7 @@ class Config {
 			 * to graphql
 			 */
 			if ( ! $this->should_field_group_show_in_graphql( $field_group ) ) {
-				return;
+				continue;
 			}
 
 			$graphql_types = array_unique( $field_group['graphql_types'] );

@@ -652,8 +652,6 @@ class LocationRulesTest extends \Codeception\TestCase\WPTestCase {
 
 		update_field( 'settingsFieldTextField', $expected, 'option' );
 
-		update_option( 'option_text', $expected, false );
-
 		acf_add_options_page(array(
 			'page_title' 	=> 'Theme General Settings',
 			'menu_title'	=> 'Theme Settings',

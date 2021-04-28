@@ -67,6 +67,33 @@ class LocationRulesTest extends \Codeception\TestCase\WPTestCase {
 
 	}
 
+	public function register_acf_field( $config = [] ) {
+
+		$defaults = [
+			'parent'            => $this->group_key,
+			'key'               => 'field_5d7812fd123',
+			'label'             => 'Text',
+			'name'              => 'text',
+			'type'              => 'text',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => '',
+				'class' => '',
+				'id'    => '',
+			),
+			'show_in_graphql'   => 1,
+			'default_value'     => '',
+			'placeholder'       => '',
+			'prepend'           => '',
+			'append'            => '',
+			'maxlength'         => '',
+		];
+
+		acf_add_local_field( array_merge( $defaults, $config ) );
+	}
+
 	public function testFieldGroupAssignedToPostTypeWithoutGraphqlTypesFieldShowsInSchema() {
 
 		/**
@@ -615,6 +642,16 @@ class LocationRulesTest extends \Codeception\TestCase\WPTestCase {
 			'graphql_field_name'    => 'settingsFieldsTest',
 		]);
 
+		$this->register_acf_field([
+			'parent' => 'settingsFieldsTest',
+			'name' => 'text',
+			'key' => 'settingsFieldTextField'
+		]);
+
+		$expected = 'this is a test value for the settings field';
+
+		update_field( 'settingsFieldTextField', $expected, 'option' );
+
 		acf_add_options_page(array(
 			'page_title' 	=> 'Theme General Settings',
 			'menu_title'	=> 'Theme Settings',
@@ -649,11 +686,13 @@ class LocationRulesTest extends \Codeception\TestCase\WPTestCase {
 		  themeGeneralSettings {
 		    settingsFieldsTest {
 		      __typename
+		      text
 		    }
 		  }
 		  themeFooterSettings {
 		    settingsFieldsTest {
 		      __typename
+		      text
 		    }
 		  }
 		}
@@ -666,6 +705,7 @@ class LocationRulesTest extends \Codeception\TestCase\WPTestCase {
 		codecept_debug( $actual );
 
 		$this->assertArrayNotHasKey( 'errors', $actual );
+		$this->assertSame( $expected, $actual['data']['themeGeneralSettings']['settingsFieldsTest']['text'] );
 
 		acf_remove_local_field_group( 'settingsFieldsTest' );
 

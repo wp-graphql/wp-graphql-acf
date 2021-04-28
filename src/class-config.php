@@ -270,6 +270,7 @@ class Config {
 
 				$field_name = Utils::format_field_name( $type_name );
 
+				$options_page['type'] = 'options_page';
 				$this->type_registry->register_field(
 					'RootQuery',
 					$field_name,

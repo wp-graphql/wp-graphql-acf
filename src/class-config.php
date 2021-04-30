@@ -5,6 +5,8 @@
  * @package wp-graphql-acf
  */
 
+// @HOMETAP: Edited to support ACF Component Fields. See lines 515, 1097. Last tested with WPGraphQL ACF v0.5.2.
+
 namespace WPGraphQL\ACF;
 
 use Exception;
@@ -512,6 +514,7 @@ class Config {
 			'color_picker',
 			'group',
 			'repeater',
+			'component_field',
 			'flexible_content'
 		];
 
@@ -1062,6 +1065,38 @@ class Config {
 				$field_config['type'] = $field_type_name;
 				break;
 			case 'repeater':
+				$field_type_name = $type_name . '_' . self::camel_case( $acf_field['name'] );
+
+				if ( $this->type_registry->get_type( $field_type_name ) ) {
+					$field_config['type'] = $field_type_name;
+					break;
+				}
+
+				$this->type_registry->register_object_type(
+					$field_type_name,
+					[
+						'description' => __( 'Field Group', 'wp-graphql-acf' ),
+						'interfaces' => [ 'AcfFieldGroup' ],
+						'fields'      => [
+							'fieldGroupName' => [
+								'resolve' => function( $source ) use ( $acf_field ) {
+									return ! empty( $acf_field['name'] ) ? $acf_field['name'] : null;
+								},
+							],
+						],
+						'resolve'     => function( $source ) use ( $acf_field ) {
+							$repeater = $this->get_acf_field_value( $source, $acf_field );
+
+							return ! empty( $repeater ) ? $repeater : [];
+						},
+					]
+				);
+
+				$this->add_field_group_fields( $acf_field, $field_type_name );
+
+				$field_config['type'] = [ 'list_of' => $field_type_name ];
+				break;
+			case 'component_field':
 				$field_type_name = $type_name . '_' . self::camel_case( $acf_field['name'] );
 
 				if ( $this->type_registry->get_type( $field_type_name ) ) {

@@ -1,13 +1,13 @@
 <?php
 /**
- * Plugin Name:       Hometap Mod - WPGraphQL for Advanced Custom Fields
+ * Plugin Name:       Hometap Edition - WPGraphQL for Advanced Custom Fields
  * Plugin URI:        https://wpgraphql.com/acf
  * Description:       Adds Advanced Custom Fields to the WPGraphQL Schema
  * Author:            WPGraphQL, Jason Bahl
  * Author URI:        https://www.wpgraphql.com
  * Text Domain:       wp-graphql-acf
  * Domain Path:       /languages
- * Version:           0.5.0
+ * Version:           0.5.2
  * Requires PHP:      7.0
  * GitHub Plugin URI: https://github.com/HomeTapDev/wp-graphql-acf/
  *
@@ -26,7 +26,7 @@ require_once( __DIR__ . '/vendor/autoload.php' );
  * Define constants
  */
 const WPGRAPHQL_REQUIRED_MIN_VERSION = '0.4.0';
-const WPGRAPHQL_ACF_VERSION = '0.5.0';
+const WPGRAPHQL_ACF_VERSION = '0.5.2';
 
 /**
  * Initialize the plugin

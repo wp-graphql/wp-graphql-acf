@@ -1,12 +1,14 @@
 {
-  "name": "wp-graphql/wp-graphql-acf",
-  "description": "Advanced Custom Fields bindings for wp-graphql",
+  "name": "wp-graphql/ht-wp-graphql-acf",
+  "description": "Hometap Edition - ACF bindings for wp-graphql",
   "type": "wordpress-plugin",
   "license": "GPL-3.0+",
-  "authors": [{
-    "name": "jasonbahl",
-    "email": "jasonbahl@mac.com"
-  }],
+  "authors": [
+    {
+      "name": "jasonbahl",
+      "email": "jasonbahl@mac.com"
+    }
+  ],
   "config": {
     "optimize-autoloader": true,
     "process-timeout": 0
@@ -42,7 +44,9 @@
     "fix-cs": [
       "php ./vendor/bin/phpcbf src"
     ],
-    "phpstan": ["phpstan analyze --ansi --memory-limit=1G"]
+    "phpstan": [
+      "phpstan analyze --ansi --memory-limit=1G"
+    ]
   },
   "require": {
     "php": "^7"

@@ -1,10 +1,10 @@
-=== WPGraphQL for Advanced Custom Fields ===
+=== Hometap Edition - WPGraphQL for ACFs ===
 Contributors: WPGraphQL, jasonbahl
 Donate link: https://wpgraphql.com/acf
 Tags: WPGraphQL, GraphQL, API, Advanced Custom Fields, ACF
 Requires at least: 5.0
 Tested up to: 5.1.1
-Stable tag: 0.5.0
+Stable tag: 0.5.2
 License: GPL-3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 

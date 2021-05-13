@@ -1389,6 +1389,88 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 	}
 
+	public function test_relationship_field_with_draft_post_doesnt_cause_error() {
+
+		$this->register_acf_field([
+			'type' => 'relationship',
+			'name' => 'relationship_field',
+			'post_type'          => [
+				'post',
+				'page',
+				'attachment'
+			],
+		]);
+
+		$page_id = $this->factory()->post->create([
+			'post_type' => 'page',
+			'post_status' => 'draft',
+			'post_title' => 'Test Page',
+		]);
+
+		// Set the value of the field to a draft post
+		update_field( 'relationship_field', [ $page_id ], $this->post_id );
+
+		$query = '
+		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+		  postBy( postId: $postId ) {
+		    id
+		    title
+		    postFields {
+		      relationshipField {
+		        nodes {
+		          __typename
+		          ...on Post {
+		            postId
+		          }
+		          ...on Page {
+		            pageId
+		          }
+		        }
+		      }
+		    }
+		  }
+		}';
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+
+		// Since the related post is a draft, we shouldn't get any node returned, and should
+		// also get no errors
+		$this->assertSame( [], $actual['data']['postBy']['postFields']['relationshipField']['nodes'] );
+
+		// Update the relationship to have one published Post ID and one Draft Page ID
+		update_field( 'relationship_field', [ $this->post_id, $page_id ], $this->post_id );
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+
+		// Since the related post is published, but the related page is draft, we should
+		// get the post returned, but the draft page should not be in the response
+		$this->assertSame( [
+			[
+				'__typename' => 'Post',
+				'postId' => $this->post_id,
+			],
+		], $actual['data']['postBy']['postFields']['relationshipField']['nodes'] );
+
+	}
+
 	public function test_flex_field_preview() {
 		// @todo: test that previewing flex fields work
 	}

@@ -42,6 +42,7 @@ class Taxonomy extends AcfField {
 				$resolver = new TermObjectConnectionResolver( $root, $args, $context, $info );
 				return $resolver
 					->set_query_arg( 'include', $value )
+					->set_query_arg( 'orderby', 'include' )
 					->get_connection();
 			}
 		];

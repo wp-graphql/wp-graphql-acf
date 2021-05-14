@@ -35,6 +35,7 @@ class PostObject extends AcfField {
 				$resolver = new PostObjectConnectionResolver( $root, $args, $context, $info, 'any' );
 				return $resolver
 					->set_query_arg( 'post__in', $value )
+					->set_query_arg( 'orderby', 'post__in' )
 					->get_connection();
 			}
 		];

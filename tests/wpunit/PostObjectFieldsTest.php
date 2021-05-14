@@ -628,13 +628,37 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertArrayNotHasKey( 'errors', $actual );
 		$this->assertSame( [
 			[
+				'mediaItemId' => $img_id_1,
+				'sourceUrl' => wp_get_attachment_image_src( $img_id_1, 'full' )[0]
+			],
+			[
+				'mediaItemId' => $img_id_2,
+				'sourceUrl' => wp_get_attachment_image_src( $img_id_2, 'full' )[0]
+			],
+		], $actual['data']['postBy']['postFields']['galleryField']['nodes'] );
+
+		$img_ids = [ $img_id_2, $img_id_1 ];
+		update_field( 'gallery_field', $img_ids, $this->post_id );
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+		$this->assertSame( [
+			[
 				'mediaItemId' => $img_id_2,
 				'sourceUrl' => wp_get_attachment_image_src( $img_id_2, 'full' )[0]
 			],
 			[
 				'mediaItemId' => $img_id_1,
 				'sourceUrl' => wp_get_attachment_image_src( $img_id_1, 'full' )[0]
-			]
+			],
 		], $actual['data']['postBy']['postFields']['galleryField']['nodes'] );
 
 
@@ -1468,6 +1492,221 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 				'postId' => $this->post_id,
 			],
 		], $actual['data']['postBy']['postFields']['relationshipField']['nodes'] );
+
+	}
+
+	public function test_taxonomy_field_in_repeater_returns_terms() {
+
+		$this->register_acf_field([
+			'type' => 'repeater',
+			'name' => 'repeater_field',
+			'post_type'          => [
+				'post',
+			],
+			'sub_fields' => [
+				[
+					'key' => 'field_609d76ed7dc3e',
+					'label' => 'category',
+					'name' => 'category',
+					'type' => 'taxonomy',
+					'instructions' => '',
+					'required' => 0,
+					'conditional_logic' => 0,
+					'wrapper' => [
+						'width' => '',
+						'class' => '',
+						'id' => '',
+					],
+					'show_in_graphql' => 1,
+					'taxonomy' => 'category',
+					'field_type' => 'checkbox',
+					'add_term' => 1,
+					'save_terms' => 0,
+					'load_terms' => 0,
+					'return_format' => 'id',
+					'multiple' => 0,
+					'allow_null' => 0,
+				],
+			],
+		]);
+
+		$category_1 = $this->factory()->category->create([
+			'name' => 'test one'
+		]);
+		$category_2 = $this->factory()->category->create([
+			'name' => 'test two',
+			'parent' => $category_1,
+		]);
+
+		update_field( 'repeater_field', [
+			[
+				'field_609d76ed7dc3e' => [ $category_1 ]
+			],
+			[
+				'field_609d76ed7dc3e' => [ $category_2, $category_1 ]
+			],
+			[
+				'field_609d76ed7dc3e' => [ $category_2 ]
+			]
+		], $this->post_id );
+
+		codecept_debug( get_post_custom( $this->post_id ) );
+
+		$query = '
+		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+		  postBy( postId: $postId ) {
+		    id
+		    title
+		    postFields {
+		      repeaterField {
+		        category {
+		          nodes {
+		            __typename
+		            databaseId
+		          }
+		        }
+		      }
+		    }
+		  }
+		}';
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			]
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+
+		// First repeater has just the parent category
+		$this->assertSame( [
+			[
+				'__typename' => 'Category',
+				'databaseId' => $category_1,
+			],
+		], $actual['data']['postBy']['postFields']['repeaterField'][0]['category']['nodes'] );
+
+		// Next repeater has parent and child category, ordered with the child first, parent 2nd
+		$this->assertSame( [
+			[
+				'__typename' => 'Category',
+				'databaseId' => $category_2,
+			],
+			[
+				'__typename' => 'Category',
+				'databaseId' => $category_1,
+			],
+		], $actual['data']['postBy']['postFields']['repeaterField'][1]['category']['nodes'] );
+
+		// Next repeater has just child category
+		$this->assertSame( [
+			[
+				'__typename' => 'Category',
+				'databaseId' => $category_2,
+			],
+		], $actual['data']['postBy']['postFields']['repeaterField'][2]['category']['nodes'] );
+
+
+	}
+
+	public function test_repeater_field_with_no_values_returns_empty_array() {
+
+		$this->register_acf_field([
+			'type' => 'repeater',
+			'name' => 'repeater_field',
+			'post_type'          => [
+				'post',
+			],
+			'sub_fields' => [
+				[
+					'key' => 'field_609d76ed7dc3e',
+					'label' => 'text',
+					'name' => 'text',
+					'type' => 'text',
+					'instructions' => '',
+					'required' => 0,
+					'conditional_logic' => 0,
+					'wrapper' => [
+						'width' => '',
+						'class' => '',
+						'id' => '',
+					],
+					'show_in_graphql' => 1,
+					'add_term' => 1,
+					'save_terms' => 0,
+					'load_terms' => 0,
+					'multiple' => 0,
+					'allow_null' => 0,
+				],
+			],
+		]);
+
+		$query = '
+		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+		  postBy( postId: $postId ) {
+		    id
+		    title
+		    postFields {
+		      repeaterField {
+		        text
+		      }
+		    }
+		  }
+		}';
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			]
+		]);
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+
+		$this->assertEmpty( $actual['data']['postBy']['postFields']['repeaterField'] );
+
+		update_field( 'repeater_field', [
+			[
+				'field_609d76ed7dc3e' => 'text one'
+			],
+			[
+				'field_609d76ed7dc3e' => 'text two'
+			],
+			[
+				'field_609d76ed7dc3e' => 'text three'
+			]
+		], $this->post_id );
+
+		$query = '
+		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+		  postBy( postId: $postId ) {
+		    id
+		    title
+		    postFields {
+		      repeaterField {
+		        text
+		      }
+		    }
+		  }
+		}';
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			]
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+
+		$this->assertSame( 'text one', $actual['data']['postBy']['postFields']['repeaterField'][0]['text'] );
+		$this->assertSame( 'text two', $actual['data']['postBy']['postFields']['repeaterField'][1]['text'] );
+		$this->assertSame( 'text three', $actual['data']['postBy']['postFields']['repeaterField'][2]['text'] );
 
 	}
 

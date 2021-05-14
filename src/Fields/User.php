@@ -40,6 +40,7 @@ class User extends AcfField  {
 				$resolver = new UserConnectionResolver( $root, $args, $context, $info );
 				return $resolver
 					->set_query_arg( 'include', $value )
+					->set_query_arg( 'orderby', 'include' )
 					->get_connection();
 			}
 		];

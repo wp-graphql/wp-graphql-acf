@@ -2,6 +2,8 @@
 namespace WPGraphQL\ACF\Fields;
 
 use Exception;
+use GraphQL\Type\Definition\ResolveInfo;
+use WPGraphQL\AppContext;
 use WPGraphQL\Utils\Utils;
 
 /**
@@ -120,6 +122,11 @@ class FlexibleContent extends AcfField {
 		}
 
 		return [ 'list_of' => $layout_interface_name ];
+	}
+
+	public function resolve( $node, array $args, AppContext $context, ResolveInfo $info ) {
+		$value = parent::resolve( $node, $args, $context, $info );
+		return ! empty( $value ) && is_array( $value ) ? $value : [];
 	}
 
 }

@@ -1,6 +1,15 @@
 <?php
+
 namespace WPGraphQL\ACF\Fields;
 
+use GraphQL\Type\Definition\ResolveInfo;
+use WPGraphQL\AppContext;
+
+/**
+ * Class Select
+ *
+ * @package WPGraphQL\ACF\Fields
+ */
 class Select extends AcfField {
 
 	/**
@@ -13,24 +22,26 @@ class Select extends AcfField {
 		if ( isset( $this->field_config['multiple'] ) && true === (bool) $this->field_config['multiple'] ) {
 			return [ 'list_of' => 'String' ];
 		}
+
 		return 'String';
 	}
 
 	/**
-	 * Return the value different based on single or mulitple selection allowed
+	 * Return the value different based on single or multiple selection allowed
 	 *
-	 * @param $node
-	 * @param $args
-	 * @param $context
-	 * @param $info
+	 * @param mixed       $node    The node the field belongs to
+	 * @param array       $args    The field arguments
+	 * @param AppContext  $context The AppContext passed down the resolve tree
+	 * @param ResolveInfo $info    The ResolveInfo passed down the resolve tree
 	 *
 	 * @return array|mixed|null
 	 */
-	public function resolve( $node, $args, $context, $info ) {
+	public function resolve( $node, array $args, AppContext $context, ResolveInfo $info ) {
 		$value = parent::resolve( $node, $args, $context, $info );
 		if ( isset( $this->field_config['multiple'] ) && true === (bool) $this->field_config['multiple'] ) {
-			return ! empty( $value ) && is_array( $value ) ? $value : [];
+			return ! empty( $value ) && is_array( $value ) ? $value : null;
 		}
+
 		return $value;
 	}
 

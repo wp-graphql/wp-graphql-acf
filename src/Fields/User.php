@@ -22,6 +22,8 @@ class User extends AcfField  {
 
 		$type_name = $this->get_parent_type();
 		$type_registry = $this->registry->get_type_registry();
+		$connection_name = $this->registry->get_connection_name( $type_name, 'User', $this->field_name );
+
 		$connection_config = [
 			'fromType' => $type_name,
 			'toType' => 'User',
@@ -45,8 +47,10 @@ class User extends AcfField  {
 			}
 		];
 
+
 		if ( ! isset( $this->field_config['multiple'] ) || true !== (bool) $this->field_config['multiple'] ) {
-			$connection_config['connectionTypeName'] = ucfirst( $type_name ) . 'ToSingleUserConnection';
+			$connection_name = ucfirst( $type_name ) . 'ToSingleUserConnection';
+			$connection_config['connectionTypeName'] = $connection_name;
 			$connection_config['oneToOne'] = true;
 			$connection_config['resolve'] = function( $root, $args, AppContext $context, $info ) {
 				$value = $this->resolve( $root, $args, $context, $info );
@@ -61,6 +65,11 @@ class User extends AcfField  {
 					->set_query_arg( 'include', absint( $value ) )
 					->get_connection();
 			};
+		}
+
+		// If the connection already exists, don't register it again
+		if ( null !== $type_registry->get_type( $connection_name ) ) {
+			return $connection_name;
 		}
 
 		$type_registry->register_connection( $connection_config );

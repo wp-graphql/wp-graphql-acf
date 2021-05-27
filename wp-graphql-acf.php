@@ -116,4 +116,3 @@ function can_load_plugin() {
 
 	return true;
 }
-

@@ -72,6 +72,16 @@ class AcfField {
 		$this->should_format = false;
 		$this->field_name    = isset( $this->field_config['graphql_field_name'] ) ? Utils::format_field_name( $this->field_config['graphql_field_name'] ) : Utils::format_field_name( $this->field_config['name'] );
 		$this->field_type    = $this->field_config['type'];
+		return $this;
+	}
+
+	/**
+	 * Get the field name for the GraphQL Field mapped to the schema
+	 *
+	 * @return string
+	 */
+	public function get_field_name() {
+		return $this->field_name;
 	}
 
 	/**
@@ -107,8 +117,8 @@ class AcfField {
 			case $node instanceof Comment:
 				$id = 'comment_' . absint( $node->databaseId );
 				break;
-			case is_array( $node ) && isset ( $node['node']['post_id'] ) && 'options' === $node['node']['post_id']:
-				$id = $node['node']['post_id'];
+			case is_array( $node ) && isset ( $node['post_id'] ) && 'options' === $node['post_id']:
+				$id = $node['post_id'];
 				break;
 			default:
 				$id = 0;
@@ -249,7 +259,7 @@ class AcfField {
 			/**
 			 * Check if cloned field and retrieve the key accordingly.
 			 */
-			if ( ! empty( $acf_field['_clone'] ) ) {
+			if ( ! empty( $this->field_config['_clone'] ) ) {
 				$key = $this->field_config['__key'];
 			} else {
 				$key = $this->field_config['key'];
@@ -317,28 +327,31 @@ class AcfField {
 			}
 		}
 
+		if ( in_array( $this->field_type, [ 'number', 'range' ], true ) ) {
+			return (float) $value ?: null;
+		}
+
 		return $value;
 	}
 
 	/**
 	 * Registers a field to the WPGraphQL Schema
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public function register_field() {
-
-		$type_name          = $this->registry->get_field_group_type_name( $this->field_group );
-		$graphql_field_name = Utils::format_field_name( $this->field_name );
+	public function get_graphql_field_config() {
 
 		if ( ! empty( $this->get_graphql_type() ) ) {
 
-			register_graphql_field( $type_name, $graphql_field_name, [
+			return [
 				'type'    => $this->get_graphql_type(),
-				'resolve' => function( $source, $args, $context, $info ) use ( $graphql_field_name ) {
+				'resolve' => function( $source, $args, $context, $info ) {
 					return $this->resolve( $source, $args, $context, $info );
 				}
-			] );
+			];
 		}
+
+		return null;
 	}
 
 }

@@ -35,10 +35,14 @@ class Relationship extends AcfField {
 			}
 		];
 
+		$connection_name = $this->registry->get_connection_name( $type_name, 'ContentNode', $this->field_name );
+
+		// If the connection already exists, don't register it again
+		if ( null !== $type_registry->get_type( $connection_name ) ) {
+			return null;
+		}
 		$type_registry->register_connection( $connection_config );
-
-
-
+		return null;
 
 	}
 

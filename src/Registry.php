@@ -12,6 +12,11 @@ use WPGraphQL\ACF\Types\ObjectType\AcfLink;
 use WPGraphQL\Registry\TypeRegistry;
 use WPGraphQL\Utils\Utils;
 
+/**
+ * Class Registry
+ *
+ * @package WPGraphQL\ACF
+ */
 class Registry {
 
 	/**
@@ -37,6 +42,29 @@ class Registry {
 	protected $registered_field_names;
 
 	/**
+	 * Tracks which field groups have already been registered to avoid recursion
+	 *
+	 * @var array
+	 */
+	protected $registered_field_groups;
+
+	/**
+	 * Tracks which field groups have already been registered to avoid recursion and allow
+	 * referencing for cloned fields
+	 *
+	 * @var array
+	 */
+	protected $registered_field_group_interfaces;
+
+	/**
+	 * Tracks which field group Interfaces have already been registered to avoid recursion and
+	 * allow referencing in cloned fields
+	 *
+	 * @var array
+	 */
+	protected $registered_field_group_fields_interfaces;
+
+	/**
 	 * Initialize ACF Type Registry
 	 *
 	 * @param TypeRegistry $type_registry
@@ -52,6 +80,11 @@ class Registry {
 		// Get all ACF Field Groups
 		$this->acf_field_groups = acf_get_field_groups();
 
+		// Instantiate the field groups array
+		$this->registered_field_groups = [];
+		$this->registered_field_group_interfaces = [];
+		$this->registered_field_group_fields_interfaces = [];
+
 		// If there are no ACF Field Groups, don't proceed
 		if ( empty( $this->acf_field_groups ) || ! is_array( $this->acf_field_groups ) ) {
 			return;
@@ -65,6 +98,60 @@ class Registry {
 
 		// Register types
 		$this->map_acf_to_graphql();
+	}
+
+	/**
+	 * Determines if a field group has already been registered
+	 *
+	 * @param string $key
+	 *
+	 * @return bool
+	 */
+	public function get_registered_field_group( string $key ) {
+		return isset( $this->registered_field_groups[ $key ] );
+	}
+
+	/**
+	 *
+	 *
+	 * @param string string $key The key the field group is registered under
+	 * @param string $type_name $type_name The GraphQL Type name
+	 *
+	 * @return string
+	 */
+	public function add_registered_field_group( string $key, string $type_name ) {
+		$this->registered_field_groups[ $key ] = $type_name;
+		return $type_name;
+	}
+
+	public function add_registered_field_group_interface( $key, $interface_name ) {
+		$this->registered_field_group_interface[ $key ] = $interface_name;
+	}
+
+	public function add_registered_field_group_fields_interface( $key, $interface_name ) {
+		$this->registered_field_group_fields_interface[ $key ] = $interface_name;
+	}
+
+	/**
+	 * Given a from Type, to Type and from field name, a connection name is returned
+	 *
+	 * @param string $from_type The Type name the connection is coming from
+	 * @param string $to_type The Type name the connection is going to
+	 * @param string $from_field_name The name of the field the connection resolves from
+	 *
+	 * @return string
+	 */
+	public function get_connection_name( string $from_type, string $to_type, string $from_field_name ) {
+		// Create connection name using $from_type + To + $to_type + Connection.
+		$connection_name = ucfirst( $from_type ) . 'To' . ucfirst( $to_type ) . 'Connection';
+
+		// If connection type already exists with that connection name. Set connection name using
+		// $from_field_name + To + $to_type + Connection.
+		if ( ! empty( $this->type_registry->get_type( $connection_name ) ) ) {
+			$connection_name = ucfirst( $from_type ) . 'To' . ucfirst( $from_field_name ) . 'Connection';
+		}
+
+		return $connection_name;
 	}
 
 	/**
@@ -87,36 +174,35 @@ class Registry {
 	 */
 	public function resolve_meta_from_parent( bool $should, $object_id, string $meta_key, bool $single ) {
 
-		// Loop through all registered ACF fields that show in GraphQL.
-		if ( is_array( $this->registered_field_names ) && ! empty( $this->registered_field_names ) ) {
+		if ( empty( $this->registered_field_names ) || ! is_array( $this->registered_field_names ) ) {
+			return $should;
+		}
 
-			$matches = null;
+		$matches = null;
 
-			// Iterate over all field names
-			foreach ( $this->registered_field_names as $field_name ) {
+		// Iterate over all field names
+		foreach ( $this->registered_field_names as $field_name ) {
 
-				// If the field name is an exact match with the $meta_key, the ACF field should
-				// resolve from the revision meta, so we can return false here, so that meta can
-				// resolve from the revision instead of the parent
-				if ( $field_name === $meta_key ) {
-					return false;
-				}
+			// If the field name is an exact match with the $meta_key, the ACF field should
+			// resolve from the revision meta, so we can return false here, so that meta can
+			// resolve from the revision instead of the parent
+			if ( $field_name === $meta_key ) {
+				return false;
+			}
 
-				// For flex fields/repeaters, the meta keys are structured a bit funky.
-				// This checks to see if the $meta_key starts with the same string as one of the
-				// acf fields (a flex/repeater field) and then checks if it's preceeded by an underscore and a number.
-				if ( $field_name === substr( $meta_key, 0, strlen( $field_name ) ) ) {
-					// match any string that starts with the field name, followed by an underscore, followed by a number, followed by another string
-					// ex my_flex_field_0_text_field or some_repeater_field_12_25MostPopularDogToys
-					$pattern = '/' . $field_name . '_\d+_\w+/m';
-					preg_match( $pattern, $meta_key, $matches );
-				}
+			// For flex fields/repeaters, the meta keys are structured a bit funky.
+			// This checks to see if the $meta_key starts with the same string as one of the
+			// acf fields (a flex/repeater field) and then checks if it's preceeded by an underscore and a number.
+			if ( $field_name === substr( $meta_key, 0, strlen( $field_name ) ) ) {
+				// match any string that starts with the field name, followed by an underscore, followed by a number, followed by another string
+				// ex my_flex_field_0_text_field or some_repeater_field_12_25MostPopularDogToys
+				$pattern = '/' . $field_name . '_\d+_\w+/m';
+				preg_match( $pattern, $meta_key, $matches );
+			}
 
-				// If the meta key matches the pattern, treat it as a sub-field of an ACF Field Group
-				if ( null !== $matches ) {
-					return false;
-				}
-
+			// If the meta key matches the pattern, treat it as a sub-field of an ACF Field Group
+			if ( null !== $matches ) {
+				return false;
 			}
 
 		}
@@ -165,31 +251,31 @@ class Registry {
 			$page_slug  = $options_page['menu_slug'];
 			$type_name = isset( $options_page['graphql_field_name'] ) ? Utils::format_type_name( $options_page['graphql_field_name'] ) : Utils::format_type_name( $options_page['menu_slug'] );
 
-			if ( null === $this->type_registry->get_type( $type_name ) ) {
-
-				$this->type_registry->register_object_type( $type_name, [
-					'description' => sprintf( __( '%s options. Registered as an ACF Options page.', 'wp-graphql-acf' ), $page_title ),
-					'fields'      => [
-						'pageTitle' => [
-							'type'    => 'String',
-							'resolve' => function( $source ) use ( $page_title ) {
-								return ! empty( $page_title ) ? $page_title : null;
-							},
-						],
-						'pageSlug'  => [
-							'type'    => 'String',
-							'resolve' => function( $source ) use ( $page_slug ) {
-								return ! empty( $page_slug ) ? $page_slug : null;
-							},
-						],
-					],
-				] );
-
+			if ( null !== $this->type_registry->get_type( $type_name ) ) {
+				return;
 			}
+
+			register_graphql_object_type( $type_name, [
+				'description' => sprintf( __( '%s options. Registered as an ACF Options page.', 'wp-graphql-acf' ), $page_title ),
+				'fields'      => [
+					'pageTitle' => [
+						'type'    => 'String',
+						'resolve' => function( $source ) use ( $page_title ) {
+							return ! empty( $page_title ) ? $page_title : null;
+						},
+					],
+					'pageSlug'  => [
+						'type'    => 'String',
+						'resolve' => function( $source ) use ( $page_slug ) {
+							return ! empty( $page_slug ) ? $page_slug : null;
+						},
+					],
+				],
+			] );
 
 			$field_name = Utils::format_field_name( $type_name );
 
-			$this->type_registry->register_field(
+			register_graphql_field(
 				'RootQuery',
 				$field_name,
 				[
@@ -261,6 +347,11 @@ class Registry {
 	 * @throws Exception
 	 */
 	public function map_acf_field_groups_to_types() {
+
+		if ( empty( $this->acf_field_groups ) || ! is_array( $this->acf_field_groups ) ) {
+			return;
+		}
+
 		foreach ( $this->acf_field_groups as $field_group ) {
 			$this->add_acf_field_group_to_graphql( $field_group );
 		}
@@ -271,92 +362,171 @@ class Registry {
 	 * field group should show on.
 	 *
 	 * @param array $field_group The ACF Field Group config to add to the Schema
+	 * @param array $graphql_types The GraphQL Types the field group should show on
+	 * @param array<string> $interfaces Interfaces to apply to the Types
 	 *
-	 * @return mixed|string|null
+	 * @return mixed|string|void
 	 *
 	 * @throws Exception
 	 */
-	public function add_acf_field_group_to_graphql( array $field_group ) {
+	public function add_acf_field_group_to_graphql( array $field_group, array $graphql_types = [], $interfaces = [] ) {
+
+		// If the field group has already been registered, return the registered Type
+		if ( isset( $field_group['key'] ) && $this->get_registered_field_group( $field_group['key'] ) ) {
+			return $this->get_registered_field_group( $field_group['key'] );
+		}
 
 		if ( ! $this->should_field_group_show_in_graphql( $field_group ) ) {
-			return null;
+			return;
+		}
+
+		$field_group_name = '';
+
+		if ( isset( $field_group['graphql_field_name'] ) ) {
+
+			$field_group_name = $field_group['graphql_field_name'];
+		} else if ( isset( $field_group['title'] ) ) {
+			$field_group_name = $field_group['title'];
+		} else if ( isset( $field_group['label'] ) )  {
+			$field_group_name = $field_group['label'];
+		} else if ( isset( $field_group['name'] ) ) {
+			$field_group_name = $field_group['name'];
+		}
+
+		if ( empty( $field_group_name ) ) {
+			graphql_debug( __( 'No name could be determined for the field group', 'wp-graphql-acf'), [ 'fieldGroup' => $field_group ] );
+			return;
 		}
 
 		$type_name      = $this->get_field_group_type_name( $field_group );
-		$interface_name = 'With' . $type_name;
+		$interface_name = 'With_' . $type_name;
+		$fields_interface_name = $interface_name . '_' . 'Fields';
 
-		// Check if a GraphQL Type already exists for the Type
-		if ( null === $this->type_registry->get_type( $type_name ) ) {
-
-			$this->type_registry->register_object_type( $type_name, [
-				'description' => __( 'Acf Field Group', 'wp-graphql' ),
-				'interfaces'  => [ 'AcfFieldGroup', 'Node' ],
-				'fields'      => [
-					'id'                => [
-						'resolve' => function() use ( $field_group ) {
-							return Relay::toGlobalId( 'AcfFieldGroup', $field_group['ID'] );
-						}
-					],
-					'_fieldGroupConfig' => [
-						'resolve' => function( $root ) use ( $field_group ) {
-							return $field_group;
-						},
-					],
-					'fieldGroupName' => [
-						'resolve' => function() use ( $type_name ) {
-							return lcfirst( $type_name );
-						}
-					]
-				],
-			] );
-
-		}
-
-		$this->map_acf_fields_to_field_group( $field_group );
-
-		$graphql_types = $this->get_graphql_types_for_field_group( $field_group );
-
-		if ( ! empty( $graphql_types ) && is_array( $graphql_types ) ) {
-
-			if ( null === $this->type_registry->get_type( $interface_name ) ) {
-
-				$this->type_registry->register_interface_type( $interface_name, [
-					'description' => sprintf( __( 'A node that can have fields of the "%s" Field Group.', 'wp-graphql-acf' ), $type_name ),
-					'fields'      => [
-						lcfirst( $type_name ) => [
-							'type'        => $type_name,
-							'description' => sprintf( __( 'Fields of the "%s" Field Group.', 'wp-graphql' ), $type_name ),
-							'resolve'     => function( $root ) use ( $field_group ) {
-								return ! empty( $root ) ? $root : $field_group;
-
-							}
-						],
-					],
-				] );
-
-			}
-
-			register_graphql_interfaces_to_types( [ $interface_name ], $graphql_types );
-
-			$field_name = isset( $field_group['graphql_field_name'] ) ? lcfirst( $field_group['graphql_field_name'] ) : lcfirst( $type_name );
-
-			foreach ( $graphql_types as $graphql_type ) {
-
-				$this->type_registry->register_field( $graphql_type, $field_name, [
-					'type'        => $type_name,
-					'description' => sprintf( __( 'Fields of the "%s" Field Group.', 'wp-graphql' ), $graphql_type ),
+		$this->type_registry->register_interface_type( $interface_name, [
+			'description' => sprintf( __( 'Fields of the %s ACF Field Group', 'wp-graphql-acf' ), $field_group_name ),
+			'fields' => [
+				lcfirst( $type_name ) => [
+					'type' => $type_name,
+					'description' => sprintf( __( 'Types that support the %s field group', 'wp-graphql' ), $field_group_name ),
 					'resolve'     => function( $root ) use ( $field_group ) {
-						return [
-							'node'        => $root,
-							'field_group' => $field_group
-						];
+						return ! empty( $root ) ? $root : $field_group;
 					}
-				] );
+				],
+			],
+		] );
 
-			}
+		$fields = [
+			'fieldGroupName' => [
+				'type' => 'String',
+				'resolve' => function() use ( $type_name ) {
+					return lcfirst( $type_name );
+				}
+			]
+		];
+
+		// wp_send_json( [ $field_group, acf_get_raw_fields( $field_group['ID'] ) ] );
+
+		$mapped_fields = $this->map_acf_fields_to_field_group( $field_group );
+		$mapped_fields = ! empty( $mapped_fields ) ? array_merge( $fields, $mapped_fields ) : $fields;
+
+		$this->type_registry->register_interface_type( $fields_interface_name, [
+			'description' => sprintf( __( 'Field Groups with fields of the %s ACF Field Group', 'wp-graphql-acf' ), $field_group_name ),
+			'fields' => $mapped_fields
+		]);
+
+		$this->type_registry->register_object_type( $type_name, [
+			'interfaces' => [ 'AcfFieldGroup', $fields_interface_name ],
+			'fields' => $mapped_fields
+		]);
+
+		if ( empty( $graphql_types ) ) {
+			$graphql_types = $this->get_graphql_types_for_field_group( $field_group );
 		}
 
-		return $type_name;
+//		if ( 'Options' === $field_group['title'] ) {
+//			wp_send_json( [ $interface_name => $graphql_types ] );
+//		}
+
+		if ( ! empty( $graphql_types ) ) {
+			register_graphql_interfaces_to_types( $interface_name, $graphql_types );
+		}
+
+//		if ( false !== strpos( $field_group['key'], 'layout_' ) ) {
+//			wp_send_json( [ 'layout', $graphql_types, $field_group, $type_name, $interface_name ] );
+//		}
+
+		// Add the interfaces to a Registry, so they can be identified by field group key
+		$this->add_registered_field_group_interface( $field_group['key'], $interface_name );
+		$this->add_registered_field_group_fields_interface( $field_group['key'], $fields_interface_name );
+
+
+		// Add the field group to the list of registered field groups
+		return $this->add_registered_field_group( $field_group['key'], $type_name );
+
+//
+//		// Check if a GraphQL Type already exists for the Type
+//		if ( null !== $this->type_registry->get_type( $type_name ) ) {
+//			return $type_name;
+//		}
+//
+//		$this->type_registry->register_object_type( $type_name, [
+//			'description' => __( 'Acf Field Group', 'wp-graphql' ),
+//			'interfaces'  => [ 'AcfFieldGroup', 'Node' ],
+//			'fields'      => [
+//				'id'                => [
+//					'resolve' => function() use ( $field_group ) {
+//						return Relay::toGlobalId( 'AcfFieldGroup', $field_group['ID'] );
+//					}
+//				],
+//				'_fieldGroupConfig' => [
+//					'resolve' => function( $root ) use ( $field_group ) {
+//						return $field_group;
+//					},
+//				],
+//				'fieldGroupName' => [
+//					'resolve' => function() use ( $type_name ) {
+//						return lcfirst( $type_name );
+//					}
+//				]
+//			],
+//		] );
+//
+//		$this->map_acf_fields_to_field_group( $field_group );
+//
+//		if ( empty( $graphql_types ) ) {
+//			$graphql_types = $this->get_graphql_types_for_field_group( $field_group );
+//		}
+//
+//		if ( empty( $graphql_types ) ) {
+//			$graphql_types = [ $type_name ];
+//		}
+//
+//		if ( ! empty( $graphql_types ) && is_array( $graphql_types ) ) {
+//
+//			if ( null === $this->type_registry->get_type( $interface_name ) ) {
+//
+//				$field_name = isset( $field_group['graphql_field_name'] ) ? lcfirst( $field_group['graphql_field_name'] ) : lcfirst( $type_name );
+//
+//				$this->type_registry->register_interface_type( $interface_name, [
+//					'description' => sprintf( __( 'A node that can have fields of the "%s" Field Group.', 'wp-graphql-acf' ), $type_name ),
+//					'fields'      => [
+//						$field_name => [
+//							'type'        => $type_name,
+//							'description' => sprintf( __( 'Fields of the "%s" Field Group.', 'wp-graphql' ), $type_name ),
+//							'resolve'     => function( $root ) use ( $field_group ) {
+//								return ! empty( $root ) ? $root : $field_group;
+//							}
+//						],
+//					],
+//				] );
+//
+//			}
+//
+//			register_graphql_interfaces_to_types( [ $interface_name ], $graphql_types );
+//
+//		}
+//
+//		return $type_name;
 	}
 
 	/**
@@ -386,7 +556,7 @@ class Registry {
 			}
 		}
 
-		return $graphql_types;
+		return ! empty( $graphql_types ) && is_array( $graphql_types ) ? array_unique( array_filter( $graphql_types ) ) : [];
 
 	}
 
@@ -428,7 +598,7 @@ class Registry {
 	 *
 	 * @return bool
 	 */
-	protected function should_field_group_show_in_graphql( $field_group ) {
+	protected function should_field_group_show_in_graphql( array $field_group ) {
 
 		/**
 		 * By default, field groups will not be exposed to GraphQL.
@@ -439,6 +609,10 @@ class Registry {
 		 * If the field group is set to show_in_graphql, show it
 		 */
 		if ( isset( $field_group['show_in_graphql'] ) && true === (bool) $field_group['show_in_graphql'] ) {
+			$show = true;
+		}
+
+		if ( isset( $field_group['parent'] ) && ! empty( $field_group['parent'] ) ) {
 			$show = true;
 		}
 
@@ -454,7 +628,9 @@ class Registry {
 	}
 
 	/**
-	 * @param array $field_group
+	 * Given a field group config array, returns the Type name to be used in the graph
+	 *
+	 * @param array $field_group The ACF Field Group config array
 	 *
 	 * @return string
 	 */
@@ -466,21 +642,87 @@ class Registry {
 	}
 
 	/**
+	 * Get a list of supported field types that WPGraphQL for ACF supports.
+	 *
+	 * This is helpful for determining whether UI should be output for the field, and whether
+	 * the field should be added to the Schema.
+	 *
+	 * Some fields, such as "Accordion" are not supported currently.
+	 *
+	 * @return array
+	 */
+	public function get_supported_field_types() {
+
+		$supported_field_types = [
+			'text',
+			'textarea',
+			'number',
+			'range',
+			'email',
+			'url',
+			'password',
+			'image',
+			'file',
+			'wysiwyg',
+			'oembed',
+			'gallery',
+			'select',
+			'checkbox',
+			'radio',
+			'button_group',
+			'true_false',
+			'link',
+			'post_object',
+			'page_link',
+			'relationship',
+			'taxonomy',
+			'user',
+			'google_map',
+			'date_picker',
+			'date_time_picker',
+			'time_picker',
+			'color_picker',
+			'group',
+			'repeater',
+			'flexible_content'
+		];
+
+		/**
+		 * filter the supported fields to allow 3rd party extensions to hook in and
+		 * add support for their fields.
+		 *
+		 * @param array $supported_fields
+		 */
+		return apply_filters( 'wpgraphql_acf_supported_fields', $supported_field_types );
+
+	}
+
+	/**
 	 * Map Fields to the Field Groups in the Schema
 	 *
 	 * @param array $field_group
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function map_acf_fields_to_field_group( array $field_group ) {
 
 		// Get the ACF Fields for the specified field group
 		$fields = isset( $field_group['sub_fields'] ) && is_array( $field_group['sub_fields'] ) ? $field_group['sub_fields'] :  acf_get_fields( $field_group );
 
+		// $raw_fields = acf_get_raw_fields( $field_group['ID'] );
+
+//		wp_send_json( [
+//			'groups' => $this->acf_field_groups,
+//			'fields' => $fields,
+//			'rawFields' => $raw_fields
+//		] );
+
 		// If there are no for the field group, do nothing.
 		if ( empty( $fields ) || ! is_array( $fields ) ) {
-			return;
+			return [];
 		}
+
+		$mapped_fields = [];
 
 		// Store a list of field keys that have been registered
 		// to help avoid registering the same field twice on one
@@ -509,9 +751,22 @@ class Registry {
 				continue;
 			}
 
-			$this->register_graphql_field( $field, $field_group );
+			// If the ACF Field Type is not a supported field type, don't add it to the Schema.
+			// For example, Accordion and Tab types, and various extension types
+			// are not supported natively, but can be filtered in!
+			if ( ! in_array( $field['type'], $this->get_supported_field_types(), true ) ) {
+				continue;
+			}
+
+			$mapped_field = $this->map_graphql_field( $field, $field_group );
+
+			if ( $mapped_field instanceof AcfField && null !== $mapped_field->get_graphql_field_config() ) {
+				$mapped_fields[ $mapped_field->get_field_name() ] = $mapped_field->get_graphql_field_config();
+			}
 
 		}
+
+		return $mapped_fields;
 
 	}
 
@@ -519,9 +774,9 @@ class Registry {
 	 * @param array $field The ACF Field config
 	 * @param array $field_group The ACF Field Group Config
 	 *
-	 * @return void
+	 * @return AcfField
 	 */
-	public function register_graphql_field( array $field, array $field_group ) {
+	public function map_graphql_field( array $field, array $field_group ) {
 
 		$field_type = isset( $field['type'] ) ? $field['type'] : null;
 
@@ -535,11 +790,14 @@ class Registry {
 		$class_name = apply_filters( 'graphql_acf_field_class', $class_name, $field, $field_group, $this );
 
 		if ( class_exists( $class_name ) ) {
-			$field_class = new $class_name( $field, $field_group, $this );
-			$field_class->register_field();
+			$field = new $class_name( $field, $field_group, $this );
+			if ( $field instanceof AcfField ) {
+				return $field;
+			} else {
+				return new AcfField( $field, $field_group, $this );
+			}
 		} else {
-			$field_class = new AcfField( $field, $field_group, $this );
-			$field_class->register_field();
+			return new AcfField( $field, $field_group, $this );
 		}
 
 	}

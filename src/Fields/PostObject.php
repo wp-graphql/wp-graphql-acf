@@ -17,6 +17,8 @@ class PostObject extends AcfField {
 
 		$type_registry = $this->registry->get_type_registry();
 
+		$connection_name = $this->registry->get_connection_name( $type_name, 'ContentNode', $this->field_name );
+
 		$connection_config = [
 			'fromType' => $type_name,
 			'toType' => 'ContentNode',
@@ -41,7 +43,8 @@ class PostObject extends AcfField {
 		];
 
 		if ( ! isset( $this->field_config['multiple'] ) || true !== (bool) $this->field_config['multiple'] ) {
-			$connection_config['connectionTypeName'] = ucfirst( $type_name ) . 'ToSingleContentNodeConnection';
+			$connection_name = ucfirst( $type_name ) . 'ToSingleContentNodeConnection';
+			$connection_config['connectionTypeName'] = $connection_name;
 			$connection_config['oneToOne'] = true;
 			$connection_config['resolve'] = function( $root, $args, AppContext $context, $info ) {
 				$value = $this->resolve( $root, $args, $context, $info );
@@ -58,8 +61,13 @@ class PostObject extends AcfField {
 			};
 		}
 
-		$type_registry->register_connection( $connection_config );
+		// If the connection already exists, don't register it again
+		if ( null !== $type_registry->get_type( $connection_name ) ) {
+			return $type_registry->get_type( $connection_name );
+		}
 
+		$type_registry->register_connection( $connection_config );
+		return null;
 	}
 
 }

@@ -5,12 +5,17 @@ use Exception;
 use WPGraphQL\AppContext;
 use WPGraphQL\Data\Connection\PostObjectConnectionResolver;
 
+/**
+ * Class File
+ *
+ * @package WPGraphQL\ACF\Fields
+ */
 class File extends AcfField {
 
 	/**
 	 * Registers a GraphQL connection instead of returning a scalar Type
 	 *
-	 * @return null
+	 * @return string
 	 * @throws Exception
 	 */
 	public function get_graphql_type() {
@@ -20,6 +25,11 @@ class File extends AcfField {
 		$type_registry = $this->registry->get_type_registry();
 
 		$connection_name = ucfirst( $type_name ) . 'ToSingleMediaItemConnection';
+
+		// If the connection already exists, don't register it again
+		if ( null !== $type_registry->get_type( $connection_name ) ) {
+			return $connection_name;
+		}
 
 		$type_registry->register_connection([
 			'fromType' => $type_name,

@@ -15,7 +15,7 @@ class Taxonomy extends AcfField {
 	/**
 	 * Determines the GraphQL Type for Taxonomy Fields
 	 *
-	 * @return null
+	 * @return void
 	 * @throws Exception
 	 */
 	public function get_graphql_type() {
@@ -47,9 +47,14 @@ class Taxonomy extends AcfField {
 			}
 		];
 
-		$type_registry->register_connection( $connection_config );
+		$connection_name = $this->registry->get_connection_name( $type_name, 'TermNode', $this->field_name );
 
-		return null;
+		// If the connection already exists, don't register it again
+		if ( null !== $type_registry->get_type( $connection_name ) ) {
+			return $type_registry->get_type( $connection_name );
+		}
+
+		$type_registry->register_connection( $connection_config );
 
 	}
 

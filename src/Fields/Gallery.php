@@ -12,6 +12,13 @@ class Gallery extends AcfField {
 
 		$type_registry = $this->registry->get_type_registry();
 
+		$connection_name = $this->registry->get_connection_name( $type_name, 'MediaItem', $this->field_name );
+
+		// If the connection already exists, don't register it again
+		if ( null !== $type_registry->get_type( $connection_name ) ) {
+			return $type_registry->get_type( $connection_name );
+		}
+
 		$type_registry->register_connection([
 			'fromType' => $type_name,
 			'toType' => 'MediaItem',
@@ -35,6 +42,7 @@ class Gallery extends AcfField {
 					->get_connection();
 			}
 		]);
+
 
 		return null;
 	}

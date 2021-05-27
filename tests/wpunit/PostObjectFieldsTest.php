@@ -145,7 +145,6 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertSame( $expected_text_1, $actual['data']['postBy']['postFields']['textField'] );
 
 
-
 	}
 
 	/**
@@ -1238,7 +1237,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 		codecept_debug( $actual );
 
-		$this->assertSame( [], $actual['data']['postBy']['postFields']['selectMultiple'] );
+		$this->assertSame( null, $actual['data']['postBy']['postFields']['selectMultiple'] );
 
 	}
 
@@ -1500,9 +1499,6 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->register_acf_field([
 			'type' => 'repeater',
 			'name' => 'repeater_field',
-			'post_type'          => [
-				'post',
-			],
 			'sub_fields' => [
 				[
 					'key' => 'field_609d76ed7dc3e',
@@ -1616,13 +1612,10 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 		$this->register_acf_field([
 			'type' => 'repeater',
-			'name' => 'repeater_field',
-			'post_type'          => [
-				'post',
-			],
+			'name' => 'repeater_test',
 			'sub_fields' => [
 				[
-					'key' => 'field_609d76ed7dc3e',
+					'key' => 'field_609d76easdfere',
 					'label' => 'text',
 					'name' => 'text',
 					'type' => 'text',
@@ -1650,12 +1643,14 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    id
 		    title
 		    postFields {
-		      repeaterField {
+		      repeaterTest {
 		        text
 		      }
 		    }
 		  }
 		}';
+
+		update_field( 'repeater_test', [], $this->post_id );
 
 		$actual = graphql([
 			'query' => $query,
@@ -1664,19 +1659,21 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			]
 		]);
 
+		codecept_debug( $actual );
+
 		$this->assertArrayNotHasKey( 'errors', $actual );
 
-		$this->assertEmpty( $actual['data']['postBy']['postFields']['repeaterField'] );
+		$this->assertEmpty( $actual['data']['postBy']['postFields']['repeaterTest'] );
 
-		update_field( 'repeater_field', [
+		update_field( 'repeater_test', [
 			[
-				'field_609d76ed7dc3e' => 'text one'
+				'field_609d76easdfere' => 'text one'
 			],
 			[
-				'field_609d76ed7dc3e' => 'text two'
+				'field_609d76easdfere' => 'text two'
 			],
 			[
-				'field_609d76ed7dc3e' => 'text three'
+				'field_609d76easdfere' => 'text three'
 			]
 		], $this->post_id );
 
@@ -1686,7 +1683,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    id
 		    title
 		    postFields {
-		      repeaterField {
+		      repeaterTest {
 		        text
 		      }
 		    }
@@ -1704,9 +1701,83 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 		$this->assertArrayNotHasKey( 'errors', $actual );
 
-		$this->assertSame( 'text one', $actual['data']['postBy']['postFields']['repeaterField'][0]['text'] );
-		$this->assertSame( 'text two', $actual['data']['postBy']['postFields']['repeaterField'][1]['text'] );
-		$this->assertSame( 'text three', $actual['data']['postBy']['postFields']['repeaterField'][2]['text'] );
+		$this->assertSame( 'text one', $actual['data']['postBy']['postFields']['repeaterTest'][0]['text'] );
+		$this->assertSame( 'text two', $actual['data']['postBy']['postFields']['repeaterTest'][1]['text'] );
+		$this->assertSame( 'text three', $actual['data']['postBy']['postFields']['repeaterTest'][2]['text'] );
+
+	}
+
+	public function test_flex_field_with_empty_layout_does_not_return_errors() {
+
+		// @todo: Write this test!!!
+		// Register Flex Field
+		// Query flex field, with no data saved to it
+		// Assert no errors
+		// Update field with empty layout
+		// Query field
+		// Assert no errors
+		// Update field with layout data
+		// Query Field
+		// Assert no errors
+
+//		$this->register_acf_field([
+//			'key' => 'field_60a2eba592eca',
+//			'label' => 'FlexFieldWithEmptyLayout',
+//			'name' => 'flex_field_with_empty_layout',
+//			'type' => 'flexible_content',
+//			'instructions' => '',
+//			'required' => 0,
+//			'conditional_logic' => 0,
+//			'wrapper' => array(
+//				'width' => '',
+//				'class' => '',
+//				'id' => '',
+//			),
+//			'show_in_graphql' => 1,
+//			'layouts' => array(
+//				'layout_60a2ebb0ddd96' => array(
+//					'key' => 'layout_60a2ebb0ddd96',
+//					'name' => 'layout_one',
+//					'label' => 'Layout One',
+//					'display' => 'block',
+//					'sub_fields' => array(
+//						// No subfields in the layout, intentionally
+//					),
+//					'min' => '',
+//					'max' => '',
+//				),
+//			),
+//			'button_label' => 'Add Row',
+//			'min' => '',
+//			'max' => '',
+//		]);
+//
+//		$query = '
+//		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+//		  postBy( postId: $postId ) {
+//		    id
+//		    title
+//		    postFields {
+//		      flexFieldWithEmptyLayout {
+//		        __typename
+//		      }
+//		    }
+//		  }
+//		}';
+//
+//		$actual = graphql([
+//			'query' => $query,
+//			'variables' => [
+//				'postId' => $this->post_id,
+//			]
+//		]);
+//
+//		codecept_debug( $actual );
+//
+//
+//		$this->assertArrayNotHasKey( 'errors', $actual );
+//		$this->assertEmpty( $actual['data']['postBy']['postFields']['flexFieldWithEmptyLayout']);
+
 
 	}
 

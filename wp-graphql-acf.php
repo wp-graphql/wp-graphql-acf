@@ -7,7 +7,7 @@
  * Author URI:        https://www.wpgraphql.com
  * Text Domain:       wp-graphql-acf
  * Domain Path:       /languages
- * Version:           0.5.2
+ * Version:           0.6.0
  * Requires PHP:      7.0
  * GitHub Plugin URI: https://github.com/wp-graphql/wp-graphql-acf
  *
@@ -26,17 +26,17 @@ require_once( __DIR__ . '/vendor/autoload.php' );
  * Define constants
  */
 const WPGRAPHQL_REQUIRED_MIN_VERSION = '0.4.0';
-const WPGRAPHQL_ACF_VERSION = '0.5.2';
+const WPGRAPHQL_ACF_VERSION = '0.6.0';
 
 /**
  * Initialize the plugin
  *
- * @return ACF|void
+ * @return mixed|Acf|void
  */
 function init() {
 
 	/**
-	 * If either ACF or WPGraphQL are not active, show the admin notice and bail
+	 * If either Acf or WPGraphQL are not active, show the admin notice and bail
 	 */
 	if ( false === can_load_plugin() ) {
 		// Show the admin notice
@@ -49,16 +49,17 @@ function init() {
 	/**
 	 * Return the instance of WPGraphQL\ACF
 	 */
-	return ACF::instance();
+	return Acf::instance();
 }
 
-add_action( 'init', '\WPGraphQL\ACF\init' );
+add_action( 'init', '\WPGraphQL\Acf\init' );
+
 
 /**
  * Show admin notice to admins if this plugin is active but either ACF and/or WPGraphQL
  * are not active
  *
- * @return bool
+ * @return void
  */
 function show_admin_notice() {
 
@@ -66,7 +67,7 @@ function show_admin_notice() {
 	 * For users with lower capabilities, don't show the notice
 	 */
 	if ( ! current_user_can( 'manage_options' ) ) {
-		return false;
+		return;
 	}
 
 	add_action(
@@ -79,19 +80,21 @@ function show_admin_notice() {
 			<?php
 		}
 	);
+
+
 }
 
 
 /**
- * Check whether ACF and WPGraphQL are active, and whether the minimum version requirement has been
+ * Check whether Acf and WPGraphQL are active, and whether the minimum version requirement has been
  * met
  *
  * @return bool
  * @since 0.3
  */
 function can_load_plugin() {
-	// Is ACF active?
-	if ( ! class_exists( 'ACF' ) ) {
+	// Is Acf active?
+	if ( ! class_exists( 'Acf' ) ) {
 		return false;
 	}
 
@@ -106,11 +109,10 @@ function can_load_plugin() {
 	}
 
 	// Have we met the minimum version requirement?
+	// @phpstan-ignore-next-line
 	if ( true === version_compare( WPGRAPHQL_VERSION, WPGRAPHQL_REQUIRED_MIN_VERSION, 'lt' ) ) {
 		return false;
 	}
 
 	return true;
 }
-
-

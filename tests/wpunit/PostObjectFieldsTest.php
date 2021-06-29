@@ -145,7 +145,6 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertSame( $expected_text_1, $actual['data']['postBy']['postFields']['textField'] );
 
 
-
 	}
 
 	/**
@@ -411,11 +410,13 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      imageField {
-		        mediaItemId
-		        thumbnail: sourceUrl(size: THUMBNAIL)
-				medium: sourceUrl(size: MEDIUM)
-				full: sourceUrl(size: LARGE)
-				sourceUrl
+		        node {
+			      mediaItemId
+			      thumbnail: sourceUrl(size: THUMBNAIL)
+				  medium: sourceUrl(size: MEDIUM)
+				  full: sourceUrl(size: LARGE)
+				  sourceUrl
+				}
 		      }
 		    }
 		  }
@@ -437,7 +438,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			'medium' => wp_get_attachment_image_src( $img_id, 'medium' )[0],
 			'full' => wp_get_attachment_image_src( $img_id, 'full' )[0],
 			'sourceUrl' => wp_get_attachment_image_src( $img_id, 'full' )[0]
-		], $actual['data']['postBy']['postFields']['imageField'] );
+		], $actual['data']['postBy']['postFields']['imageField']['node'] );
 
 	}
 
@@ -464,8 +465,10 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      fileField {
-		        mediaItemId
-				sourceUrl
+		        node {
+			      mediaItemId
+				  sourceUrl
+				}
 		      }
 		    }
 		  }
@@ -484,7 +487,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertEquals( [
 			'mediaItemId' => $img_id,
 			'sourceUrl' => wp_get_attachment_image_src( $img_id, 'full' )[0]
-		], $actual['data']['postBy']['postFields']['fileField'] );
+		], $actual['data']['postBy']['postFields']['fileField']['node'] );
 
 	}
 
@@ -603,8 +606,10 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      galleryField {
-		        mediaItemId
-		        sourceUrl
+		        nodes {
+		          mediaItemId
+		          sourceUrl
+		        }
 		      }
 		    }
 		  }
@@ -628,8 +633,32 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			[
 				'mediaItemId' => $img_id_2,
 				'sourceUrl' => wp_get_attachment_image_src( $img_id_2, 'full' )[0]
-			]
-		], $actual['data']['postBy']['postFields']['galleryField'] );
+			],
+		], $actual['data']['postBy']['postFields']['galleryField']['nodes'] );
+
+		$img_ids = [ $img_id_2, $img_id_1 ];
+		update_field( 'gallery_field', $img_ids, $this->post_id );
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+		$this->assertSame( [
+			[
+				'mediaItemId' => $img_id_2,
+				'sourceUrl' => wp_get_attachment_image_src( $img_id_2, 'full' )[0]
+			],
+			[
+				'mediaItemId' => $img_id_1,
+				'sourceUrl' => wp_get_attachment_image_src( $img_id_1, 'full' )[0]
+			],
+		], $actual['data']['postBy']['postFields']['galleryField']['nodes'] );
 
 
 	}
@@ -911,12 +940,14 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      postObjectField {
-		        __typename
-		        ...on Post {
-		          postId
-		        }
-		        ...on Page {
-		          pageId
+		        node {
+		          __typename
+		          ...on Post {
+		            postId
+		          }
+		          ...on Page {
+		            pageId
+		          }
 		        }
 		      }
 		    }
@@ -936,7 +967,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertSame( [
 			'__typename' => 'Post',
 			'postId' => $post_id,
-		], $actual['data']['postBy']['postFields']['postObjectField'] );
+		], $actual['data']['postBy']['postFields']['postObjectField']['node'] );
 
 	}
 
@@ -962,12 +993,14 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      postObjectField {
-		        __typename
-		        ...on Post {
-		          postId
-		        }
-		        ...on Page {
-		          pageId
+		        node {
+		          __typename
+		          ...on Post {
+		            postId
+		          }
+		          ...on Page {
+		            pageId
+		          }
 		        }
 		      }
 		    }
@@ -987,7 +1020,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertSame( [
 			'__typename' => 'Page',
 			'pageId' => $page_id,
-		], $actual['data']['postBy']['postFields']['postObjectField'] );
+		], $actual['data']['postBy']['postFields']['postObjectField']['node'] );
 
 	}
 
@@ -1017,9 +1050,11 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      pageLinkField {
-		        __typename
-		        ...on Post {
-		          postId
+		        node {
+		          __typename
+		          ...on Post {
+		            postId
+		          }
 		        }
 		      }
 		    }
@@ -1039,7 +1074,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		$this->assertSame( [
 			'__typename' => 'Post',
 			'postId' => $id,
-		], $actual['data']['postBy']['postFields']['pageLinkField'] );
+		], $actual['data']['postBy']['postFields']['pageLinkField']['node'] );
 
 	}
 
@@ -1202,7 +1237,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 		codecept_debug( $actual );
 
-		$this->assertSame( [], $actual['data']['postBy']['postFields']['selectMultiple'] );
+		$this->assertSame( null, $actual['data']['postBy']['postFields']['selectMultiple'] );
 
 	}
 
@@ -1253,7 +1288,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 		$query = '
 		{
-		  __type( name: "AcfTest_Acftestfields" ) {
+		  __type( name: "AcfTestFields" ) {
 		    name
 		    description
 		    fields {
@@ -1331,11 +1366,7 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 			'post_title' => 'Test Page',
 		]);
 
-		$filename      = ( $this->test_image );
-		$img_id = $this->factory()->attachment->create_upload_object( $filename );
-
-
-		update_field( 'relationship_field', [ $post_id, $page_id, $img_id ], $this->post_id );
+		update_field( 'relationship_field', [ $post_id, $page_id ], $this->post_id );
 
 		$query = '
 		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
@@ -1344,15 +1375,14 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 		    title
 		    postFields {
 		      relationshipField {
-		        __typename
-		        ...on Post {
-		          postId
-		        }
-		        ...on Page {
-		          pageId
-		        }
-		        ...on MediaItem {
-		          mediaItemId
+		        nodes {
+		          __typename
+		          ...on Post {
+		            postId
+		          }
+		          ...on Page {
+		            pageId
+		          }
 		        }
 		      }
 		    }
@@ -1378,11 +1408,376 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 				'__typename' => 'Page',
 				'pageId' => $page_id,
 			],
+		], $actual['data']['postBy']['postFields']['relationshipField']['nodes'] );
+
+	}
+
+	public function test_relationship_field_with_draft_post_doesnt_cause_error() {
+
+		$this->register_acf_field([
+			'type' => 'relationship',
+			'name' => 'relationship_field',
+			'post_type'          => [
+				'post',
+				'page',
+				'attachment'
+			],
+		]);
+
+		$page_id = $this->factory()->post->create([
+			'post_type' => 'page',
+			'post_status' => 'draft',
+			'post_title' => 'Test Page',
+		]);
+
+		// Set the value of the field to a draft post
+		update_field( 'relationship_field', [ $page_id ], $this->post_id );
+
+		$query = '
+		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+		  postBy( postId: $postId ) {
+		    id
+		    title
+		    postFields {
+		      relationshipField {
+		        nodes {
+		          __typename
+		          ...on Post {
+		            postId
+		          }
+		          ...on Page {
+		            pageId
+		          }
+		        }
+		      }
+		    }
+		  }
+		}';
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+
+		// Since the related post is a draft, we shouldn't get any node returned, and should
+		// also get no errors
+		$this->assertSame( [], $actual['data']['postBy']['postFields']['relationshipField']['nodes'] );
+
+		// Update the relationship to have one published Post ID and one Draft Page ID
+		update_field( 'relationship_field', [ $this->post_id, $page_id ], $this->post_id );
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+
+		// Since the related post is published, but the related page is draft, we should
+		// get the post returned, but the draft page should not be in the response
+		$this->assertSame( [
 			[
-				'__typename' => 'MediaItem',
-				'mediaItemId' => $img_id,
+				'__typename' => 'Post',
+				'postId' => $this->post_id,
+			],
+		], $actual['data']['postBy']['postFields']['relationshipField']['nodes'] );
+
+	}
+
+	public function test_taxonomy_field_in_repeater_returns_terms() {
+
+		$this->register_acf_field([
+			'type' => 'repeater',
+			'name' => 'repeater_field',
+			'sub_fields' => [
+				[
+					'key' => 'field_609d76ed7dc3e',
+					'label' => 'category',
+					'name' => 'category',
+					'type' => 'taxonomy',
+					'instructions' => '',
+					'required' => 0,
+					'conditional_logic' => 0,
+					'wrapper' => [
+						'width' => '',
+						'class' => '',
+						'id' => '',
+					],
+					'show_in_graphql' => 1,
+					'taxonomy' => 'category',
+					'field_type' => 'checkbox',
+					'add_term' => 1,
+					'save_terms' => 0,
+					'load_terms' => 0,
+					'return_format' => 'id',
+					'multiple' => 0,
+					'allow_null' => 0,
+				],
+			],
+		]);
+
+		$category_1 = $this->factory()->category->create([
+			'name' => 'test one'
+		]);
+		$category_2 = $this->factory()->category->create([
+			'name' => 'test two',
+			'parent' => $category_1,
+		]);
+
+		update_field( 'repeater_field', [
+			[
+				'field_609d76ed7dc3e' => [ $category_1 ]
+			],
+			[
+				'field_609d76ed7dc3e' => [ $category_2, $category_1 ]
+			],
+			[
+				'field_609d76ed7dc3e' => [ $category_2 ]
 			]
-		], $actual['data']['postBy']['postFields']['relationshipField'] );
+		], $this->post_id );
+
+		codecept_debug( get_post_custom( $this->post_id ) );
+
+		$query = '
+		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+		  postBy( postId: $postId ) {
+		    id
+		    title
+		    postFields {
+		      repeaterField {
+		        category {
+		          nodes {
+		            __typename
+		            databaseId
+		          }
+		        }
+		      }
+		    }
+		  }
+		}';
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			]
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+
+		// First repeater has just the parent category
+		$this->assertSame( [
+			[
+				'__typename' => 'Category',
+				'databaseId' => $category_1,
+			],
+		], $actual['data']['postBy']['postFields']['repeaterField'][0]['category']['nodes'] );
+
+		// Next repeater has parent and child category, ordered with the child first, parent 2nd
+		$this->assertSame( [
+			[
+				'__typename' => 'Category',
+				'databaseId' => $category_2,
+			],
+			[
+				'__typename' => 'Category',
+				'databaseId' => $category_1,
+			],
+		], $actual['data']['postBy']['postFields']['repeaterField'][1]['category']['nodes'] );
+
+		// Next repeater has just child category
+		$this->assertSame( [
+			[
+				'__typename' => 'Category',
+				'databaseId' => $category_2,
+			],
+		], $actual['data']['postBy']['postFields']['repeaterField'][2]['category']['nodes'] );
+
+
+	}
+
+	public function test_repeater_field_with_no_values_returns_empty_array() {
+
+		$this->register_acf_field([
+			'type' => 'repeater',
+			'name' => 'repeater_test',
+			'sub_fields' => [
+				[
+					'key' => 'field_609d76easdfere',
+					'label' => 'text',
+					'name' => 'text',
+					'type' => 'text',
+					'instructions' => '',
+					'required' => 0,
+					'conditional_logic' => 0,
+					'wrapper' => [
+						'width' => '',
+						'class' => '',
+						'id' => '',
+					],
+					'show_in_graphql' => 1,
+					'add_term' => 1,
+					'save_terms' => 0,
+					'load_terms' => 0,
+					'multiple' => 0,
+					'allow_null' => 0,
+				],
+			],
+		]);
+
+		$query = '
+		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+		  postBy( postId: $postId ) {
+		    id
+		    title
+		    postFields {
+		      repeaterTest {
+		        text
+		      }
+		    }
+		  }
+		}';
+
+		update_field( 'repeater_test', [], $this->post_id );
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			]
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+
+		$this->assertEmpty( $actual['data']['postBy']['postFields']['repeaterTest'] );
+
+		update_field( 'repeater_test', [
+			[
+				'field_609d76easdfere' => 'text one'
+			],
+			[
+				'field_609d76easdfere' => 'text two'
+			],
+			[
+				'field_609d76easdfere' => 'text three'
+			]
+		], $this->post_id );
+
+		$query = '
+		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+		  postBy( postId: $postId ) {
+		    id
+		    title
+		    postFields {
+		      repeaterTest {
+		        text
+		      }
+		    }
+		  }
+		}';
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'postId' => $this->post_id,
+			]
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+
+		$this->assertSame( 'text one', $actual['data']['postBy']['postFields']['repeaterTest'][0]['text'] );
+		$this->assertSame( 'text two', $actual['data']['postBy']['postFields']['repeaterTest'][1]['text'] );
+		$this->assertSame( 'text three', $actual['data']['postBy']['postFields']['repeaterTest'][2]['text'] );
+
+	}
+
+	public function test_flex_field_with_empty_layout_does_not_return_errors() {
+
+		// @todo: Write this test!!!
+		// Register Flex Field
+		// Query flex field, with no data saved to it
+		// Assert no errors
+		// Update field with empty layout
+		// Query field
+		// Assert no errors
+		// Update field with layout data
+		// Query Field
+		// Assert no errors
+
+//		$this->register_acf_field([
+//			'key' => 'field_60a2eba592eca',
+//			'label' => 'FlexFieldWithEmptyLayout',
+//			'name' => 'flex_field_with_empty_layout',
+//			'type' => 'flexible_content',
+//			'instructions' => '',
+//			'required' => 0,
+//			'conditional_logic' => 0,
+//			'wrapper' => array(
+//				'width' => '',
+//				'class' => '',
+//				'id' => '',
+//			),
+//			'show_in_graphql' => 1,
+//			'layouts' => array(
+//				'layout_60a2ebb0ddd96' => array(
+//					'key' => 'layout_60a2ebb0ddd96',
+//					'name' => 'layout_one',
+//					'label' => 'Layout One',
+//					'display' => 'block',
+//					'sub_fields' => array(
+//						// No subfields in the layout, intentionally
+//					),
+//					'min' => '',
+//					'max' => '',
+//				),
+//			),
+//			'button_label' => 'Add Row',
+//			'min' => '',
+//			'max' => '',
+//		]);
+//
+//		$query = '
+//		query GET_POST_WITH_ACF_FIELD( $postId: Int! ) {
+//		  postBy( postId: $postId ) {
+//		    id
+//		    title
+//		    postFields {
+//		      flexFieldWithEmptyLayout {
+//		        __typename
+//		      }
+//		    }
+//		  }
+//		}';
+//
+//		$actual = graphql([
+//			'query' => $query,
+//			'variables' => [
+//				'postId' => $this->post_id,
+//			]
+//		]);
+//
+//		codecept_debug( $actual );
+//
+//
+//		$this->assertArrayNotHasKey( 'errors', $actual );
+//		$this->assertEmpty( $actual['data']['postBy']['postFields']['flexFieldWithEmptyLayout']);
+
 
 	}
 

@@ -799,7 +799,7 @@ class LocationRulesTest extends \Codeception\TestCase\WPTestCase {
 
 		// showInGraphqlTest should be queryable against the Post type in the Schema
 		$this->assertSame( $post_id, $actual['data']['post']['databaseId'] );
-		$this->assertSame( 'Post_Showingraphqltest', $actual['data']['post']['showInGraphqlTest']['__typename'] );
+		$this->assertSame( 'ShowInGraphqlTest', $actual['data']['post']['showInGraphqlTest']['__typename'] );
 
 		acf_remove_local_field_group( 'doNotShowInGraphQL' );
 		acf_remove_local_field_group( 'showInGraphqlTest' );

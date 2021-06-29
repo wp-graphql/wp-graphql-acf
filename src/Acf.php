@@ -10,14 +10,14 @@ namespace WPGraphQL\ACF;
 use GraphQL\Type\Definition\ResolveInfo;
 
 /**
- * Final class ACF
+ * Final class Acf
  */
-final class ACF {
+final class Acf {
 
 	/**
-	 * Stores the instance of the WPGraphQL\ACF class
+	 * Stores the instance of the WPGraphQL\Acf class
 	 *
-	 * @var ACF The one true WPGraphQL\Extensions\ACF
+	 * @var Acf The one true WPGraphQL\Acf
 	 * @access private
 	 */
 	private static $instance;
@@ -25,12 +25,12 @@ final class ACF {
 	/**
 	 * Get the singleton.
 	 *
-	 * @return ACF
+	 * @return Acf
 	 */
 	public static function instance() {
 
-		if ( ! isset( self::$instance ) && ! ( self::$instance instanceof ACF ) ) {
-			self::$instance = new ACF();
+		if ( ! isset( self::$instance ) && ! ( self::$instance instanceof Acf ) ) {
+			self::$instance = new Acf();
 			self::$instance->setup_constants();
 			self::$instance->includes();
 			self::$instance->actions();
@@ -41,7 +41,7 @@ final class ACF {
 		/**
 		 * Fire off init action
 		 *
-		 * @param ACF $instance The instance of the WPGraphQL\ACF class
+		 * @param Acf $instance The instance of the WPGraphQL\Acf class
 		 */
 		do_action( 'graphql_acf_init', self::$instance );
 
@@ -119,6 +119,8 @@ final class ACF {
 	/**
 	 * Sets up actions to run at certain spots throughout WordPress and the WPGraphQL execution
 	 * cycle
+	 *
+	 * @return void
 	 */
 	private function actions() {
 
@@ -126,6 +128,8 @@ final class ACF {
 
 	/**
 	 * Setup filters
+	 *
+	 * @return void
 	 */
 	private function filters() {
 
@@ -146,13 +150,15 @@ final class ACF {
 
 	/**
 	 * Initialize
+	 *
+	 * @return void
 	 */
 	private function init() {
 
-		$config = new Config();
-		add_action( 'graphql_register_types', [ $config, 'init' ], 10, 1 );
+		$registry = new Registry();
+		add_action( 'graphql_register_types', [ $registry, 'init' ], 10, 1 );
 
-		$acf_settings = new ACF_Settings();
+		$acf_settings = new AcfSettings();
 		$acf_settings->init();
 
 	}

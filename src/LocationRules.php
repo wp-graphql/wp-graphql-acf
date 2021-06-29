@@ -390,6 +390,10 @@ class LocationRules {
 
 				$field_group_name = isset( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : $field_group['title'];
 
+				if ( ! isset( $field_group['active'] ) || false === (bool) $field_group['active'] ) {
+					continue;
+				}
+
 				if ( ! empty( $field_group['location'] ) && is_array( $field_group['location'] ) ) {
 
 					foreach ( $field_group['location'] as $location_rule_group ) {
@@ -950,7 +954,9 @@ class LocationRules {
 			if ( ! isset( $options_page['show_in_graphql'] ) || false === (bool) $options_page['show_in_graphql'] ) {
 				return;
 			}
+
 			$type_name = isset( $options_page['graphql_field_name'] ) ? Utils::format_type_name( $options_page['graphql_field_name'] ) : Utils::format_type_name( $options_page['menu_slug'] );
+
 			$this->set_graphql_type( $field_group_name, $type_name );
 		}
 

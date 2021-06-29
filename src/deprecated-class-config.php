@@ -62,15 +62,6 @@ class Config {
 		$this->register_initial_types();
 
 		/**
-		 * Gets the location rules for backward compatibility.
-		 *
-		 * This allows for ACF Field Groups that were registered before the "graphql_types"
-		 * field was respected can still work with the old GraphQL Schema rules that mapped
-		 * from the ACF Location rules.
-		 */
-		$this->location_rules = $this->get_location_rules();
-
-		/**
 		 * Add ACF Fields to GraphQL Types
 		 */
 		$this->add_options_pages_to_schema();
@@ -304,23 +295,10 @@ class Config {
 		$show = false;
 
 		/**
-		 * If
+		 * If the field group is set to show_in_graphql, show it
 		 */
 		if ( isset( $field_group['show_in_graphql'] ) && true === (bool) $field_group['show_in_graphql'] ) {
 			$show = true;
-		}
-
-		/**
-		 * Determine conditions where the GraphQL Schema should NOT be shown in GraphQL for
-		 * root groups, not nested groups with parent.
-		 */
-		if ( ! isset( $field_group['parent'] ) ) {
-			if (
-				( isset( $field_group['active'] ) && true != $field_group['active'] ) ||
-				( empty( $field_group['location'] ) || ! is_array( $field_group['location'] ) )
-			) {
-				$show = false;
-			}
 		}
 
 		/**
@@ -547,8 +525,9 @@ class Config {
 		 */
 		$field_config = apply_filters( 'wpgraphql_acf_register_graphql_field', [
 			'type'    => null,
-			'resolve' => isset( $config['resolve'] ) && is_callable( $config['resolve'] ) ? $config['resolve'] : function( $root, $args, $context, $info ) use ( $acf_field ) {
+			'resolve' => isset( $config['resolve'] ) && is_callable( $config['resolve'] ) ? $config['resolve'] : function( $root, $args, $context, $info ) use ( $acf_field, $acf_type ) {
 				$value = $this->get_acf_field_value( $root, $acf_field );
+
 				return ! empty( $value ) ? $value : null;
 			},
 		], $type_name, $field_name, $config );
@@ -921,22 +900,39 @@ class Config {
 				if ( null !== $this->type_registry->get_type( $field_type_name ) ) {
 					$field_config['type'] = $field_type_name;
 					break;
-				}
+				} else {
 
-				$this->type_registry->register_object_type(
-					$field_type_name,
-					[
-						'description' => __( 'Field Group', 'wp-graphql-acf' ),
-						'interfaces' => [ 'AcfFieldGroup' ],
-						'fields'      => [
-							'fieldGroupName' => [
-								'resolve' => function( $source ) use ( $acf_field ) {
-									return ! empty( $acf_field['name'] ) ? $acf_field['name'] : null;
-								},
+					if ( isset( $acf_field['parent'] ) && ! empty( $acf_field['parent'] ) ) {
+
+						$parent_group = acf_get_field_group( $acf_field['parent'] );
+
+
+						if ( isset( $parent_group['graphql_field_name' ] ) ) {
+							if ( $this->type_registry->get_type( strtolower( $parent_group['graphql_field_name' ] ) ) ) {
+								$field_config['type'] = $parent_group['graphql_field_name' ];
+								break;
+							}
+						}
+
+						$field_type_name = $type_name . '_' . Utils::format_type_name( $acf_field['name'] );
+					}
+
+					$this->type_registry->register_object_type(
+						$field_type_name,
+						[
+							'description' => __( 'Field Group', 'wp-graphql-acf' ),
+							'interfaces'  => [ 'AcfFieldGroup' ],
+							'fields'      => [
+								'fieldGroupName' => [
+									'resolve' => function( $source ) use ( $acf_field ) {
+										return ! empty( $acf_field['name'] ) ? $acf_field['name'] : null;
+									},
+								],
 							],
-						],
-					]
-				);
+						]
+					);
+
+				}
 
 				$this->add_field_group_fields( $acf_field, $field_type_name );
 
@@ -946,119 +942,6 @@ class Config {
 
 			case 'google_map':
 				$field_type_name = 'ACF_GoogleMap';
-				if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
-					$field_config['type'] = $field_type_name;
-					break;
-				}
-
-				$fields = [
-					'streetAddress' => [
-						'type'        => 'String',
-						'description' => __( 'The street address associated with the map', 'wp-graphql-acf' ),
-						'resolve'     => function( $root ) {
-							return isset( $root['address'] ) ? $root['address'] : null;
-						},
-					],
-					'latitude'      => [
-						'type'        => 'Float',
-						'description' => __( 'The latitude associated with the map', 'wp-graphql-acf' ),
-						'resolve'     => function( $root ) {
-							return isset( $root['lat'] ) ? $root['lat'] : null;
-						},
-					],
-					'longitude'     => [
-						'type'        => 'Float',
-						'description' => __( 'The longitude associated with the map', 'wp-graphql-acf' ),
-						'resolve'     => function( $root ) {
-							return isset( $root['lng'] ) ? $root['lng'] : null;
-						},
-					],
-				];
-
-				// ACF 5.8.6 added more data to Google Maps field value
-				// https://www.advancedcustomfields.com/changelog/
-				if ( \acf_version_compare(acf_get_db_version(), '>=', '5.8.6' ) ) {
-                    $fields += [
-                        'streetName' => [
-							'type'        => 'String',
-							'description' => __( 'The street name associated with the map', 'wp-graphql-acf' ),
-							'resolve'     => function( $root ) {
-								return isset( $root['street_name'] ) ? $root['street_name'] : null;
-							},
-                        ],
-                        'streetNumber' => [
-							'type'        => 'String',
-							'description' => __( 'The street number associated with the map', 'wp-graphql-acf' ),
-							'resolve'     => function( $root ) {
-								return isset( $root['street_number'] ) ? $root['street_number'] : null;
-							},
-                        ],
-                        'city' => [
-							'type'        => 'String',
-							'description' => __( 'The city associated with the map', 'wp-graphql-acf' ),
-							'resolve'     => function( $root ) {
-								return isset( $root['city'] ) ? $root['city'] : null;
-							},
-                        ],
-                        'state' => [
-							'type'        => 'String',
-							'description' => __( 'The state associated with the map', 'wp-graphql-acf' ),
-							'resolve'     => function( $root ) {
-								return isset( $root['state'] ) ? $root['state'] : null;
-							},
-                        ],
-                        'stateShort' => [
-							'type'        => 'String',
-							'description' => __( 'The state abbreviation associated with the map', 'wp-graphql-acf' ),
-							'resolve'     => function( $root ) {
-								return isset( $root['state_short'] ) ? $root['state_short'] : null;
-							},
-                        ],
-                        'postCode' => [
-							'type'        => 'String',
-							'description' => __( 'The post code associated with the map', 'wp-graphql-acf' ),
-							'resolve'     => function( $root ) {
-								return isset( $root['post_code'] ) ? $root['post_code'] : null;
-							},
-                        ],
-                        'country' => [
-							'type'        => 'String',
-							'description' => __( 'The country associated with the map', 'wp-graphql-acf' ),
-							'resolve'     => function( $root ) {
-								return isset( $root['country'] ) ? $root['country'] : null;
-							},
-                        ],
-                        'countryShort' => [
-							'type'        => 'String',
-							'description' => __( 'The country abbreviation associated with the map', 'wp-graphql-acf' ),
-							'resolve'     => function( $root ) {
-								return isset( $root['country_short'] ) ? $root['country_short'] : null;
-							},
-                        ],
-                        'placeId' => [
-							'type'        => 'String',
-							'description' => __( 'The country associated with the map', 'wp-graphql-acf' ),
-							'resolve'     => function( $root ) {
-								return isset( $root['place_id'] ) ? $root['place_id'] : null;
-							},
-                        ],
-                        'zoom' => [
-							'type'        => 'String',
-							'description' => __( 'The zoom defined with the map', 'wp-graphql-acf' ),
-							'resolve'     => function( $root ) {
-								return isset( $root['zoom'] ) ? $root['zoom'] : null;
-							},
-                        ],
-                    ];
-                }
-
-				$this->type_registry->register_object_type(
-					$field_type_name,
-					[
-						'description' => __( 'Google Map field', 'wp-graphql-acf' ),
-						'fields'      => $fields,
-					]
-				);
 				$field_config['type'] = $field_type_name;
 				break;
 			case 'repeater':
@@ -1195,7 +1078,8 @@ class Config {
 
 		$config = array_merge( $config, $field_config );
 		$this->registered_field_names[] = $acf_field['name'];
-		return $this->type_registry->register_field( $type_name, $field_name, $config );
+
+		$this->type_registry->register_field( $type_name, $field_name, $config );
 	}
 
 	/**
@@ -1450,10 +1334,6 @@ class Config {
 				}
 			}
 
-			if ( ! is_array( $field_group['graphql_types'] ) || empty( $field_group['graphql_types'] ) ) {
-				continue;
-			}
-
 			/**
 			 * Determine if the field group should be exposed
 			 * to graphql
@@ -1483,12 +1363,60 @@ class Config {
 			$qualifier =  sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was set to Show in GraphQL.', 'wp-graphql-acf' ), $field_group['title'] );
 			$config['description'] = $field_group['description'] ? $field_group['description'] . ' | ' . $qualifier : $qualifier;
 
-			/**
-			 * Loop over the GraphQL types for this field group on
-			 */
-			foreach ( $graphql_types as $graphql_type ) {
-				$this->register_graphql_field( $graphql_type, $field_name, $config );
+			$field_type_name = $field_name;
+			$interface_name = 'With' . ucfirst( $field_type_name );
+
+			if ( ! $this->type_registry->get_type( $field_type_name ) ) {
+
+				$this->type_registry->register_object_type(
+					$field_type_name,
+					[
+						'description' => __( 'Field Group', 'wp-graphql-acf' ),
+						'interfaces'  => [ 'AcfFieldGroup' ],
+						'fields'      => [
+							'fieldGroupName' => [
+								'resolve' => function( $source ) use ( $config ) {
+									return ! empty( $config['name'] ) ? $config['name'] : null;
+								},
+							],
+						],
+					]
+				);
+
+				$this->add_field_group_fields( $field_group, $field_type_name );
+
 			}
+
+			if ( ! $this->type_registry->get_type( strtolower( $interface_name ) ) && ! empty( $graphql_types ) ) {
+
+				$explicit_name   = ! empty( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null;
+				$name            = empty( $explicit_name ) && ! empty( $field_group['name'] ) ? self::camel_case( $field_group['name'] ) : $explicit_name;
+
+				$this->type_registry->register_interface_type( $interface_name, [
+					'description' => sprintf( __( 'A node that can have fields of the "%s" Field Group.', 'wp-graphql-acf' ), $field_type_name ),
+					'fields'      => [
+						$name => [
+							'type' => $field_type_name,
+							'description' => sprintf( __( 'Fields of the "%s" Field Group.', 'wp-graphql' ), $field_type_name ),
+							'resolve' => function( $root ) use ( $field_group ) {
+								return $root;
+							}
+						],
+					],
+
+				] );
+
+				register_graphql_interfaces_to_types( [ $interface_name ], $graphql_types );
+
+				/**
+				 * Loop over the GraphQL types for this field group on
+				 */
+				foreach ( $graphql_types as $graphql_type ) {
+					$this->register_graphql_field( $graphql_type, $field_name, $config );
+				}
+
+			}
+
 		}
 
 	}

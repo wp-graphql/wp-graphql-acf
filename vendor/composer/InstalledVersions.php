@@ -25,24 +25,24 @@ class InstalledVersions
 private static $installed = array (
   'root' => 
   array (
-    'pretty_version' => 'dev-master',
-    'version' => 'dev-master',
+    'pretty_version' => 'dev-develop',
+    'version' => 'dev-develop',
     'aliases' => 
     array (
     ),
-    'reference' => 'dc5e83d190211baf88978a905ff44a9122fdaff8',
+    'reference' => 'fcb8eff327217940b33752a4efe12c7b066da7eb',
     'name' => 'wp-graphql/wp-graphql-acf',
   ),
   'versions' => 
   array (
     'wp-graphql/wp-graphql-acf' => 
     array (
-      'pretty_version' => 'dev-master',
-      'version' => 'dev-master',
+      'pretty_version' => 'dev-develop',
+      'version' => 'dev-develop',
       'aliases' => 
       array (
       ),
-      'reference' => 'dc5e83d190211baf88978a905ff44a9122fdaff8',
+      'reference' => 'fcb8eff327217940b33752a4efe12c7b066da7eb',
     ),
   ),
 );

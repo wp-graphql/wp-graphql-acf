@@ -1,0 +1,22 @@
+parameters:
+    level: 8
+    inferPrivatePropertyTypeFromConstructor: true
+    checkMissingIterableValueType: false
+    stubFiles:
+        # Simulate added properties
+        - phpstan/class-wp-post-type.stub
+        - phpstan/class-wp-taxonomy.stub
+    scanDirectories:
+        - local/public/wp-content/plugins/advanced-custom-fields-pro
+        - local/public/wp-content/plugins/wp-graphql
+    bootstrapFiles:
+        - phpstan/constants.php
+        - wp-graphql-acf.php
+    paths:
+        - wp-graphql-acf.php
+        - src/
+    excludePaths:
+        - src/deprecated-class-config.php
+    ignoreErrors:
+        # Ignore any filters that are applied with more than 2 paramaters
+        - '#^Function apply_filters(_ref_array)? invoked with ([1-9]|1[0-2]) parameters, 2 required\.$#'

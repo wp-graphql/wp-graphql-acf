@@ -21,11 +21,10 @@ class Repeater extends AcfField {
 	 */
 	public function get_graphql_type() {
 		$parent_type = $this->get_parent_type();
-		$title = isset( $this->field_config['title'] ) ? $this->field_config['title'] : ( isset( $this->field_config['label'] ) ? $this->field_config['label'] : 'no label or title' );
+		$title = $this->field_config['title'] ?? ( $this->field_config['label'] ?? 'no label or title' );
 		$this->field_config['graphql_field_name'] = $parent_type . Utils::format_type_name( $title );
 		$type_name = $this->registry->add_acf_field_group_to_graphql( $this->field_config, [ $parent_type ] );
-		register_graphql_object_type( $type_name, [] );
-		return [ 'non_null' => [ 'list_of' => $this->field_config['graphql_field_name'] ] ];
+		return [ 'non_null' => [ 'list_of' => $type_name ] ];
 	}
 
 	/**

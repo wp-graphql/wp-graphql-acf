@@ -75,7 +75,7 @@ class FlexFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 		$defaults = [
 			'parent'            => $this->group_key,
-			'key'               => 'field_5d7812fd000a4',
+			'key'               => 'field_5d7812fd0789678',
 			'label'             => 'Text',
 			'name'              => 'text',
 			'type'              => 'text',
@@ -109,9 +109,189 @@ class FlexFieldsTest extends \Codeception\TestCase\WPTestCase {
 
 	public function test_query_flex_field_on_post() {
 
-		$this->register_acf_field(
+		$this->register_acf_field([
+			'key' => 'field_flex_12345',
+			'type' => 'flexible_content',
+			'name' => 'flex_field',
+			'layouts' => [
+				'layout_60a6eec68967' => array(
+					'key' => 'layout_60a6eec68967',
+					'name' => 'layout_one',
+					'label' => 'Layout One',
+					'display' => 'block',
+					'sub_fields' => array(
+						array(
+							'key' => 'field_60a6eec4566',
+							'label' => 'text',
+							'name' => 'text',
+							'type' => 'text',
+							'instructions' => '',
+							'required' => 0,
+							'conditional_logic' => 0,
+							'wrapper' => array(
+								'width' => '',
+								'class' => '',
+								'id' => '',
+							),
+							'show_in_graphql' => 1,
+							'default_value' => '',
+							'placeholder' => '',
+							'prepend' => '',
+							'append' => '',
+							'maxlength' => '',
+						),
+						array(
+							'key' => 'field_60a6eee67866',
+							'label' => 'Image',
+							'name' => 'image',
+							'type' => 'image',
+							'instructions' => '',
+							'required' => 0,
+							'conditional_logic' => 0,
+							'wrapper' => array(
+								'width' => '',
+								'class' => '',
+								'id' => '',
+							),
+							'show_in_graphql' => 1,
+							'return_format' => 'array',
+							'preview_size' => 'medium',
+							'library' => 'all',
+							'min_width' => '',
+							'min_height' => '',
+							'min_size' => '',
+							'max_width' => '',
+							'max_height' => '',
+							'max_size' => '',
+							'mime_types' => '',
+						),
+					),
+					'min' => '',
+					'max' => '',
+				),
+				'layout_60a6eee6567687' => [
+					'key' => 'layout_60a6eee6567687',
+					'name' => 'layout_two',
+					'label' => 'Layout Two',
+					'display' => 'block',
+					'sub_fields' => [
+						[
+							'key' => 'field_60a6eee345453',
+							'label' => 'Gallery',
+							'name' => 'gallery',
+							'type' => 'gallery',
+							'instructions' => '',
+							'required' => 0,
+							'conditional_logic' => 0,
+							'wrapper' => [
+								'width' => '',
+								'class' => '',
+								'id' => '',
+							],
+							'show_in_graphql' => 1,
+							'return_format' => 'array',
+							'preview_size' => 'medium',
+							'insert' => 'append',
+							'library' => 'all',
+							'min' => '',
+							'max' => '',
+							'min_width' => '',
+							'min_height' => '',
+							'min_size' => '',
+							'max_width' => '',
+							'max_height' => '',
+							'max_size' => '',
+							'mime_types' => '',
+						],
+					],
+					'min' => '',
+					'max' => '',
+				],
+			],
+			'button_label' => 'Add Row',
+			'min' => '',
+			'max' => '',
+		]);
 
-		);
+		$query = '
+		query post($id: ID!) {
+		  post(id: $id, idType: DATABASE_ID) {
+		    id
+		    databaseId
+		    postFields {
+		      flexField {
+		        __typename
+		        ...LayoutOne
+		        ...LayoutTwo
+		      }
+		    }
+		  }
+		}
+
+		fragment LayoutOne on PostFields_FlexField_LayoutOne {
+		  text
+		  image {
+		    node {
+		      __typename
+		      databaseId
+		    }
+		  }
+		}
+
+		fragment LayoutTwo on PostFields_FlexField_LayoutTwo {
+		  gallery {
+		    nodes {
+		      __typename
+		      databaseId
+		    }
+		  }
+		}
+		';
+
+		$gallery_ids = [];
+		$image_id = $this->factory()->attachment->create();
+		$gallery_ids[] = $this->factory()->attachment->create();
+		$gallery_ids[] = $this->factory()->attachment->create();
+
+		// Update the Flex Field data
+		update_field( 'flex_field', [
+			[
+				'acf_fc_layout' => 'layout_one',
+				'image' => $image_id,
+				'text' => 'Some Example Text...'
+			],
+			[
+				'acf_fc_layout' => 'layout_two',
+				'gallery' => $gallery_ids,
+			]
+		], $this->post_id );
+
+		codecept_debug( get_post_custom( $this->post_id ));
+
+		$actual = graphql([
+			'query' => $query,
+			'variables' => [
+				'id' => $this->post_id,
+			],
+		]);
+
+		codecept_debug( $actual );
+
+		$this->assertArrayNotHasKey( 'errors', $actual );
+		$this->assertSame( $this->post_id, $actual['data']['post']['databaseId'] );
+
+		// Assert that there are 2 rows of flex fields
+		$this->assertSame( 2, count( $actual['data']['post']['postFields']['flexField'] ) );
+
+
+		// Assert the first layout values
+		$this->assertSame( 'Some Example Text...', $actual['data']['post']['postFields']['flexField'][0]['text'] );
+		$this->assertSame( $image_id, $actual['data']['post']['postFields']['flexField'][0]['image']['node']['databaseId'] );
+
+		// Assert the 2nd layout values
+		$this->assertSame( $gallery_ids[0], $actual['data']['post']['postFields']['flexField'][1]['gallery']['nodes'][0]['databaseId'] );
+		$this->assertSame( $gallery_ids[1], $actual['data']['post']['postFields']['flexField'][1]['gallery']['nodes'][1]['databaseId'] );
+
 
 	}
 

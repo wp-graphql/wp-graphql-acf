@@ -8,7 +8,7 @@ class Relationship extends AcfField {
 
 	public function get_graphql_type() {
 
-		$type_name = $this->get_parent_type();
+		$type_name = $this->get_parent_type_fields_interface();
 
 		$type_registry = $this->registry->get_type_registry();
 

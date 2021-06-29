@@ -139,6 +139,15 @@ class AcfField {
 	}
 
 	/**
+	 * Returns the name of the Parent Type's fields Interface
+	 *
+	 * @return mixed|string|null
+	 */
+	public function get_parent_type_fields_interface() {
+		return ! empty( $this->get_parent_type() ) ? 'With_' . $this->get_parent_type() . '_Fields' : null;
+	}
+
+	/**
 	 * Returns the config array for the ACF Field
 	 *
 	 * @return array

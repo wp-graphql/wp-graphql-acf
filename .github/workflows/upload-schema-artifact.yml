@@ -1,4 +1,4 @@
-name: Schema Linter
+name: Schema Artifact
 
 on:
   workflow_dispatch:

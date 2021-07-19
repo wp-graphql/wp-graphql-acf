@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Activate wp-graphql
-wp plugin activate wp-graphql --allow-root
+wp plugin install wp-graphql --allow-root --activate
+wp plugin activate wp-graphql-acf --allow-root
 
 # Set pretty permalinks.
 wp rewrite structure '/%year%/%monthnum%/%postname%/' --allow-root

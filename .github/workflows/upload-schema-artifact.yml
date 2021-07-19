@@ -1,6 +1,7 @@
 name: Schema Linter
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - develop

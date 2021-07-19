@@ -1,12 +1,19 @@
 ###############################################################################
-# Pre-configured WordPress Installation w/ WPGraphQL, WPGraphQL for ACF, ACF Pro #
+# Pre-configured WordPress Installation w/ WPGraphQL, WPGatsby #
 # For testing only, use in production not recommended. #
 ###############################################################################
+
+# Use build args to get the right wordpress + php image
 ARG WP_VERSION
 ARG PHP_VERSION
 
 FROM wordpress:${WP_VERSION}-php${PHP_VERSION}-apache
 
+# Needed to specify the build args again after the FROM command.
+ARG WP_VERSION
+ARG PHP_VERSION
+
+# Save the build args for use by the runtime environment
 ENV WP_VERSION=${WP_VERSION}
 ENV PHP_VERSION=${PHP_VERSION}
 
@@ -39,13 +46,9 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 
 # Set project environmental variables
 ENV WP_ROOT_FOLDER="/var/www/html"
-ENV WORDPRESS_DB_HOST=${DB_HOST}
-ENV WORDPRESS_DB_USER=${DB_USER}
-ENV WORDPRESS_DB_PASSWORD=${DB_PASSWORD}
-ENV WORDPRESS_DB_NAME=${DB_NAME}
 ENV PLUGINS_DIR="${WP_ROOT_FOLDER}/wp-content/plugins"
 ENV PROJECT_DIR="${PLUGINS_DIR}/wp-graphql-acf"
-ENV WPGRAPHQL_VERSION="${WPGRAPHQL_VERSION}"
+ENV DATA_DUMP_DIR="${PROJECT_DIR}/tests/_data"
 
 # Remove exec statement from base entrypoint script.
 RUN sed -i '$d' /usr/local/bin/docker-entrypoint.sh
@@ -66,13 +69,16 @@ RUN echo "Installing XDebug 3 (in disabled state)" \
     && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/disabled/docker-php-ext-xdebug.ini \
     && echo "xdebug.client_host=host.docker.internal" >> /usr/local/etc/php/conf.d/disabled/docker-php-ext-xdebug.ini \
     && echo "xdebug.client_port=9003" >> /usr/local/etc/php/conf.d/disabled/docker-php-ext-xdebug.ini \
+    && echo "xdebug.max_nesting_level=512" >> /usr/local/etc/php/conf.d/disabled/docker-php-ext-xdebug.ini \
     ;
 
 # Set xdebug configuration off by default. See the entrypoint.sh.
-ENV USING_XDEBUG=${USING_XDEBUG}
+ENV USING_XDEBUG=0
 
 # Set up entrypoint
 WORKDIR    /var/www/html
+COPY       docker/app.setup.sh /usr/local/bin/app-setup.sh
+COPY       docker/app.post-setup.sh /usr/local/bin/app-post-setup.sh
 COPY       docker/app.entrypoint.sh /usr/local/bin/app-entrypoint.sh
 RUN        chmod 755 /usr/local/bin/app-entrypoint.sh
 ENTRYPOINT ["app-entrypoint.sh"]

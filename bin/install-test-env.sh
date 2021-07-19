@@ -138,6 +138,8 @@ install_db() {
 		fi
 	fi
 
+	env | sort
+
 	# create database
 	RESULT=`mysql -u $DB_USER --password="$DB_PASS" --skip-column-names -e "SHOW DATABASES LIKE '$DB_NAME'"$EXTRA`
 	if [ "$RESULT" != $DB_NAME ]; then

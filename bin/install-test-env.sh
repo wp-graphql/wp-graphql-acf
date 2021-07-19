@@ -9,8 +9,6 @@ fi
 
 source .env
 
-env | sort
-
 print_usage_instruction() {
 	echo "Ensure that .env file exist in project root directory exists."
 	echo "And run the following 'composer build-test' in the project root directory"
@@ -140,8 +138,6 @@ install_db() {
 			EXTRA=" --host=$DB_HOSTNAME --protocol=tcp"
 		fi
 	fi
-
-	env | sort
 
 	# create database
 	RESULT=`mysql -u $DB_USER --password="$DB_PASS" --skip-column-names -e "SHOW DATABASES LIKE '$DB_NAME'"$EXTRA`

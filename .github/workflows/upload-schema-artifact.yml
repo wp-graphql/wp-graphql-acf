@@ -1,15 +1,8 @@
-name: Schema Artifact
+name: Upload Schema Artifact
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - develop
-      - master
-  pull_request:
-    branches:
-      - develop
-      - master
+  release:
+    types: [ published ]
 
 jobs:
   run:
@@ -51,14 +44,9 @@ jobs:
           cd /tmp/wordpress/
           # Output: /tmp/schema.graphql
           wp graphql generate-static-schema
-      - name: Upload Schema Artifact
-        uses: actions/upload-artifact@v2
+      - name: Upload schema as release artifact
+        uses: softprops/action-gh-release@v1
         with:
-          name: dist-without-markdown
-          path: /tmp/schema.graphql
-#      - name: Upload schema as release artifact
-#        uses: softprops/action-gh-release@v1
-#        with:
-#          files: /tmp/schema.graphql
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: /tmp/schema.graphql
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

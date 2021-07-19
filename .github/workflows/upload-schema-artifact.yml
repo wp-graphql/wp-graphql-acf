@@ -42,12 +42,10 @@ jobs:
 
       - name: Install WP CLI for ACF
         run: |
-          cd /tmp/wordpress/
-          wp plugin install https://github.com/hoppinger/advanced-custom-fields-wpcli/archive/refs/heads/master.zip --activate
+          wp plugin install https://github.com/hoppinger/advanced-custom-fields-wpcli/archive/refs/heads/master.zip --activate --path="/tmp/wordpress"
       - name: Import test Field Group
         run: |
-          echo ${GITHUB_WORKSPACE}/docs/field-group-examples-export.json
-          wp acf import --json_file="${GITHUB_WORKSPACE}/docs/field-group-examples-export.json"
+          wp acf import --json_file="${GITHUB_WORKSPACE}/docs/field-group-examples-export.json" --path="/tmp/wordpress"
       - name: Generate the Static Schema
         run: |
           cd /tmp/wordpress/

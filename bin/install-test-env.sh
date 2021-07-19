@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 
+if [[ ! -f ".env" ]]; then
+  echo "No .env file was detected. .env.dist has been copied to .env"
+  echo "Open the .env file and enter values to match your local environment"
+  cp .env.dist .env
+fi
+
 source .env
 
 print_usage_instruction() {
 	echo "Ensure that .env file exist in project root directory exists."
-	echo "And run the following 'composer install-wp-tests' in the project root directory"
+	echo "And run the following 'composer build-test' in the project root directory"
 	exit 1
 }
 
@@ -142,17 +148,8 @@ install_db() {
 configure_wordpress() {
     cd $WP_CORE_DIR
     wp config create --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASS" --dbhost="$DB_HOST" --skip-check --force=true
-    wp core install --url=wp.test --title="WPGraphQL ACF Tests" --admin_user=admin --admin_password=password --admin_email=admin@wp.test
+    wp core install --url=wp.test --title="WPGraphQL Tests" --admin_user=admin --admin_password=password --admin_email=admin@wp.test
     wp rewrite structure '/%year%/%monthnum%/%postname%/'
-}
-
-install_acf_pro() {
-	if [ ! -d $WP_CORE_DIR/wp-content/plugins/advanced-custom-fields-pro ]; then
-		echo "Cloning ACF PRO"
-		git clone https://github.com/wp-premium/advanced-custom-fields-pro.git $WP_CORE_DIR/wp-content/plugins/advanced-custom-fields-pro
-	fi
-	echo "Cloning ACF PRO"
-	wp plugin activate advanced-custom-fields-pro
 }
 
 setup_plugin() {
@@ -190,5 +187,4 @@ setup_plugin() {
 install_wp
 install_db
 configure_wordpress
-install_acf_pro
 setup_plugin

@@ -8,6 +8,8 @@ fi
 
 source .env
 
+env | sort
+
 print_usage_instruction() {
 	echo "Ensure that .env file exist in project root directory exists."
 	echo "And run the following 'composer build-test' in the project root directory"

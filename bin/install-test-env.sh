@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-if [[ ! -f ".env" ]]; then
+if [ ! -f .env ]; then
   echo "No .env file was detected. .env.dist has been copied to .env"
   echo "Open the .env file and enter values to match your local environment"
-  cp .env.dist .env
+  cp ./.env.dist ./.env
+  export $(cat .env | xargs)
 fi
 
-source .env.dist
-
-env | sort
+source .env
 
 print_usage_instruction() {
 	echo "Ensure that .env file exist in project root directory exists."
@@ -139,8 +138,6 @@ install_db() {
 			EXTRA=" --host=$DB_HOSTNAME --protocol=tcp"
 		fi
 	fi
-
-	env | sort
 
 	# create database
 	RESULT=`mysql -u $DB_USER --password="$DB_PASS" --skip-column-names -e "SHOW DATABASES LIKE '$DB_NAME'"$EXTRA`

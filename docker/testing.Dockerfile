@@ -5,7 +5,7 @@
 ARG WP_VERSION
 ARG PHP_VERSION
 
-FROM wp-graphql:latest-wp${WP_VERSION}-php${PHP_VERSION}
+FROM wpgraphql-acf-app:latest
 
 LABEL author=jasonbahl
 LABEL author_uri=https://github.com/jasonbahl

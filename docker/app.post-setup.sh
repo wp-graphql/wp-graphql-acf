@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Activate wp-graphql
-wp plugin install https://github.com/wp-premium/advanced-custom-fields-pro/archive/refs/heads/master.zip --activate -allow-root
+wp plugin install https://github.com/wp-premium/advanced-custom-fields-pro/archive/refs/heads/master.zip --activate --allow-root
 wp plugin install wp-graphql --allow-root --activate
 wp plugin activate wp-graphql-acf --allow-root
 

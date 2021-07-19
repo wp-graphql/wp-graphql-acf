@@ -45,7 +45,7 @@
     "phpstan": ["phpstan analyze --ansi --memory-limit=1G"]
   },
   "require": {
-    "php": "^7"
+    "php": "^7.1 || ^8.0"
   },
   "require-dev": {
     "lucatume/wp-browser": "^2.4",
@@ -63,7 +63,7 @@
     "phpstan/phpstan": "^0.12.64",
     "szepeviktor/phpstan-wordpress": "^0.7.1",
     "codeception/module-rest": "^1.2",
-    "wp-graphql/wp-graphql-testcase": "^1.0",
+    "wp-graphql/wp-graphql-testcase": "~2.1",
     "phpunit/phpunit": "9.4.1",
     "simpod/php-coveralls-mirror": "^3.0",
     "phpstan/extension-installer": "^1.1"

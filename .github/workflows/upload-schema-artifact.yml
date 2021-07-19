@@ -51,7 +51,6 @@ jobs:
           cd /tmp/wordpress/
           # Output: /tmp/schema.graphql
           wp graphql generate-static-schema
-          echo "$(</tmp/schema.graphql )"
       - name: Upload Schema Artifact
         uses: actions/upload-artifact@v2
         with:

@@ -161,7 +161,6 @@ install_acf_pro() {
 	wp plugin activate advanced-custom-fields-pro
 }
 
-
 setup_plugin() {
 	# Add this repo as a plugin to the repo
 	if [ ! -d $WP_CORE_DIR/wp-content/plugins/wp-graphql-acf ]; then

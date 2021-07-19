@@ -52,6 +52,11 @@ jobs:
           # Output: /tmp/schema.graphql
           wp graphql generate-static-schema
           echo "$(</tmp/schema.graphql )"
+      - name: Upload Schema Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist-without-markdown
+          path: /tmp/schema.graphql
 #      - name: Upload schema as release artifact
 #        uses: softprops/action-gh-release@v1
 #        with:

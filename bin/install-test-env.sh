@@ -6,7 +6,7 @@ if [[ ! -f ".env" ]]; then
   cp .env.dist .env
 fi
 
-source .env
+source .env.dist
 
 env | sort
 

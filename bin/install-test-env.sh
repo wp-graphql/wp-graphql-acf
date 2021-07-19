@@ -152,6 +152,16 @@ configure_wordpress() {
     wp rewrite structure '/%year%/%monthnum%/%postname%/'
 }
 
+install_acf_pro() {
+	if [ ! -d $WP_CORE_DIR/wp-content/plugins/advanced-custom-fields-pro ]; then
+		echo "Cloning ACF PRO"
+		git clone https://github.com/wp-premium/advanced-custom-fields-pro.git $WP_CORE_DIR/wp-content/plugins/advanced-custom-fields-pro
+	fi
+	echo "Cloning ACF PRO"
+	wp plugin activate advanced-custom-fields-pro
+}
+
+
 setup_plugin() {
 	# Add this repo as a plugin to the repo
 	if [ ! -d $WP_CORE_DIR/wp-content/plugins/wp-graphql-acf ]; then
@@ -187,4 +197,5 @@ setup_plugin() {
 install_wp
 install_db
 configure_wordpress
+install_acf_pro
 setup_plugin

@@ -369,7 +369,7 @@ class Config {
 	 *
 	 * @return mixed
 	 */
-	protected function get_acf_field_value( $root, $acf_field, $format = false ) {
+	public function get_acf_field_value( $root, $acf_field, $format = false ) {
 
 		$value = null;
 		$id = null;

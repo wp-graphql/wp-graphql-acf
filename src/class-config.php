@@ -516,6 +516,13 @@ class Config {
 		];
 
 		/**
+		 * Add support for the Table plugin for ACF
+		 */
+		if (is_plugin_active('advanced-custom-fields-table-field/acf-table.php')) {
+			array_push($supported_fields, 'table');
+		}
+
+		/**
 		 * filter the supported fields
 		 *
 		 * @param array $supported_fields
@@ -1184,6 +1191,42 @@ class Config {
 						return ! empty( $value ) ? $value : [];
 					};
 				}
+				break;
+			/**
+			 * Process table plugin data for ACF
+			 */
+			case 'table':
+				$field_type_name = 'ACF_Table';
+				if ( $this->type_registry->get_type( $field_type_name ) == $field_type_name ) {
+					$field_config['type'] = $field_type_name;
+					break;
+				}
+
+				$fields = [
+					'header' => [
+						'type' => [ 'list_of' => [ 'list_of' => 'String' ] ],
+						'description' => __( 'Presetting the usage of table header', 'wp-graphql-acf' ),
+						'resolve'     => function( $root ) {
+							return isset( $root['h'] ) ? $root['h'] : null;
+						},
+					],
+					'body' => [
+						'type' => [ 'list_of' => [ 'list_of' => [ 'list_of' => 'String' ] ] ],
+						'description' => __( 'Table content', 'wp-graphql-acf' ),
+						'resolve'     => function( $root ) {
+							return isset( $root['b'] ) ? $root['b'] : null;
+						},
+					],
+				];
+				
+				$this->type_registry->register_object_type(
+					$field_type_name,
+					[
+						'description' => __( 'Table Field', 'wp-graphql-acf' ),
+						'fields'      => $fields,
+					]
+				);
+				$field_config['type'] = $field_type_name;
 				break;
 			default:
 				break;

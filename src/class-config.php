@@ -541,6 +541,14 @@ class Config {
 		}
 
 		/**
+		 * filter the acf_type variable to enable custom field types to reuse the logic of existing ones in the switch
+		 *
+		 * @param string $acf_type The original name of the ACF type for the field
+		 * @param array $config The GraphQL configuration of the field.
+		 */
+		$acf_type = apply_filters('wpgraphql_acf_register_graphql_field_overwriting_type', $acf_type, $config);
+
+		/**
 		 * filter the field config for custom field types
 		 *
 		 * @param array $field_config

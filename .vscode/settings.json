@@ -8,5 +8,5 @@
   "phpcbf.configSearch": true,
   "editor.formatOnSaveTimeout": 5000,
   "phpcbf.debug": true,
-  "editor.formatOnSave": true
+  "editor.formatOnSave": false
 }

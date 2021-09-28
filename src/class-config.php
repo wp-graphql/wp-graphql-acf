@@ -687,7 +687,7 @@ class Config {
 						if ( ! empty( $value ) && is_array( $value ) ) {
 							foreach ( $value as $post_id ) {
 								$post_object = get_post( $post_id );
-								if ( $post_object instanceof \WP_Post ) {
+								if ( $post_object->post_status == 'publish' && $post_object instanceof \WP_Post ) {
 									$post_model = new Post( $post_object );
 
 									/**

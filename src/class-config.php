@@ -535,6 +535,8 @@ class Config {
 	protected function register_graphql_field( string $type_name, string $field_name, array $config ) {
 		$acf_field = isset( $config['acf_field'] ) ? $config['acf_field'] : null;
 		$acf_type  = isset( $acf_field['type'] ) ? $acf_field['type'] : null;
+		$required = isset( $acf_field['required'] ) ? $acf_field['required'] : false;
+		$allow_null = isset( $acf_field['allow_null'] ) ? $acf_field['allow_null'] : true;
 
 		if ( empty( $acf_type ) ) {
 			return false;
@@ -587,6 +589,11 @@ class Config {
 				};
 				break;
 			case 'select':
+				$type = 'String';
+
+				if ( !$allow_null ) {
+					$type = ['non_null' => $type];
+				}
 
 				/**
 				 * If the select field is configured to not allow multiple values
@@ -598,17 +605,17 @@ class Config {
 				 */
 				if ( empty( $acf_field['multiple'] ) ) {
 					if('array' === $acf_field['return_format'] ){
-						$field_config['type'] = [ 'list_of' => 'String' ];
+						$field_config['type'] = [ 'list_of' => $type ];
 						$field_config['resolve'] = function( $root ) use ( $acf_field) {
 							$value = $this->get_acf_field_value( $root, $acf_field, true);
 
 							return ! empty( $value ) && is_array( $value ) ? $value : [];
 						};
 					}else{
-						$field_config['type'] = 'String';
+						$field_config['type'] = $type;
 					}
 				} else {
-					$field_config['type']    = [ 'list_of' => 'String' ];
+					$field_config['type']    = [ 'list_of' => $type ];
 					$field_config['resolve'] = function( $root ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 
@@ -678,6 +685,10 @@ class Config {
 					$type = 'PostObjectUnion';
 				}
 
+				if ( $required ) {
+					$type = ['non_null' => $type];
+				}
+
 				$field_config = [
 					'type'    => [ 'list_of' => $type ],
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
@@ -735,6 +746,11 @@ class Config {
 
 				// If the field is allowed to be a multi select
 				if ( 0 !== $acf_field['multiple'] ) {
+					
+					if ( !$allow_null ) {
+						$type = ['non_null' => $type];
+					}
+
 					$type = [ 'list_of' => $type ];
 				}
 
@@ -802,8 +818,14 @@ class Config {
 				];
 				break;
 			case 'checkbox':
+				$type = 'String';
+
+				if ( $required ) {
+					$type = ['non_null' => $type];
+				}
+
 				$field_config = [
-					'type'    => [ 'list_of' => 'String' ],
+					'type'    => [ 'list_of' => $type ],
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 
@@ -812,8 +834,14 @@ class Config {
 				];
 				break;
 			case 'gallery':
+				$type = 'MediaItem';
+
+				if ( $required ) {
+					$type = ['non_null' => $type];
+				}
+
 				$field_config = [
-					'type'    => [ 'list_of' => 'MediaItem' ],
+					'type'    => [ 'list_of' => $type ],
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value   = $this->get_acf_field_value( $root, $acf_field );
 						$gallery = [];
@@ -836,6 +864,11 @@ class Config {
 				$type = 'User';
 
 				if ( isset( $acf_field['multiple'] ) &&  1 === $acf_field['multiple'] ) {
+
+					if ( !$allow_null ) {
+						$type = ['non_null' => $type];
+					}
+
 					$type = [ 'list_of' => $type ];
 				}
 
@@ -890,9 +923,21 @@ class Config {
 				}
 
 				$is_multiple = isset( $acf_field['field_type'] ) && in_array( $acf_field['field_type'], array( 'checkbox', 'multi_select' ) );
+				
+				if ( $is_multiple ) {
+					/**
+					 * only multi select has "allow_null" property.
+					 * for checkbox check if "required" property.
+					*/
+					if ( (!$allow_null && $acf_field['field_type'] == 'multi_select') || ($required && $acf_field['field_type'] == 'checkbox') ) {
+						$type = ['non_null' => $type];
+					}
+
+					$type = ['list_of' => $type];
+				}
 
 				$field_config = [
-					'type'    => $is_multiple ? ['list_of' => $type ] : $type,
+					'type'    => $type,
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field, $is_multiple ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 						/**
@@ -1090,7 +1135,11 @@ class Config {
 				);
 
 				$this->add_field_group_fields( $acf_field, $field_type_name );
-
+				
+				if ( $required ) {
+					$field_type_name = ['non_null' => $field_type_name];
+				}
+				
 				$field_config['type'] = [ 'list_of' => $field_type_name ];
 				break;
 
@@ -1177,6 +1226,10 @@ class Config {
 						}
 					] );
 
+					if ( $required ) {
+						$field_type_name = ['non_null' => $field_type_name];
+					}
+
 					$field_config['type']    = [ 'list_of' => $field_type_name ];
 					$field_config['resolve'] = function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
@@ -1191,6 +1244,10 @@ class Config {
 
 		if ( empty( $field_config ) || empty( $field_config['type'] ) ) {
 			return null;
+		}
+
+		if ( $required ) {
+			$field_config['type'] = ['non_null' => $field_config['type']];
 		}
 
 		$config = array_merge( $config, $field_config );

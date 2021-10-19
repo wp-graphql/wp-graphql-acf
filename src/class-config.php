@@ -671,8 +671,6 @@ class Config {
 
 							$type = $field_type_name;
 						}
-
-
 					}
 				} else {
 					$type = 'PostObjectUnion';
@@ -681,20 +679,37 @@ class Config {
 				$field_config = [
 					'type'    => [ 'list_of' => $type ],
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
-						$relationship = [];
 						$value        = $this->get_acf_field_value( $root, $acf_field );
+						
+						$relationship = [];
 
 						if ( ! empty( $value ) && is_array( $value ) ) {
-							foreach ( $value as $post_id ) {
-								$post_object = get_post( $post_id );
-								if ( $post_object instanceof \WP_Post ) {
-									$post_model     = new Post( $post_object );
-									$relationship[] = $post_model;
+							foreach ( $value as $id ) {
+								$post = get_post( $id );
+								if ( ! empty ( $post ) ) {
+									$relationship[] = new Post( $post );
 								}
 							}
 						}
 
-						return isset( $value ) ? $relationship : null;
+						$relationship = isset ( $value ) ? $relationship : null;
+
+						/**
+						 * This hooks allows for filtering of the post object source. In case an non-core defined
+						 * post-type is being targeted.
+						 *
+						 * @param mixed|null  $source  GraphQL Type source.
+						 * @param mixed|null  $value   Root ACF field value.
+						 * @param AppContext  $context AppContext instance.
+						 * @param ResolveInfo $info    ResolveInfo instance.
+						 */
+						return apply_filters(
+							'graphql_acf_post_object_source',
+							$relationship,
+							$value,
+							$context,
+							$info
+						);
 
 					},
 				];
@@ -744,6 +759,7 @@ class Config {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 
 						$return = [];
+
 						if ( ! empty( $value ) ) {
 							if ( is_array( $value ) ) {
 								foreach ( $value as $id ) {

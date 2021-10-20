@@ -636,7 +636,7 @@ class Config {
 						$value = $this->get_acf_field_value( $root, $acf_field, true );
 
 						if ( ! empty( $value ) && ! empty( $acf_field['return_format'] ) ) {
-							$value = date( $acf_field['return_format'], strtotime( $value ) );
+							$value = date_i18n( $acf_field['return_format'], strtotime( $value ) );
 						}
 						return ! empty( $value ) ? $value : null;
 					},

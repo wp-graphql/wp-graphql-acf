@@ -89,6 +89,7 @@ class ExplicitOptionsTest extends \Codeception\TestCase\WPTestCase {
 				'show_in_graphql'     => true,
 				'graphql_single_name' => 'acfCpt',
 				'graphql_plural_name' => 'acfCpts',
+				'public'              => true,
 			]
 		);
 
@@ -148,7 +149,7 @@ class ExplicitOptionsTest extends \Codeception\TestCase\WPTestCase {
 			]
 		);
 
-		$expected_text_3 = 'test value2';
+		$expected_text_3 = 'test value3';
 		update_field( 'acf_text_field', $expected_text_3, $cpt_id );
 
 		// post assert validation.

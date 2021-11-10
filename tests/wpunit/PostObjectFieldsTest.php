@@ -1213,8 +1213,8 @@ class PostObjectFieldsTest extends \Codeception\TestCase\WPTestCase {
 	public function testQueryFieldOnCustomPostType() {
 
 		register_post_type( 'acf_test', [
-			'show_ui' => true,
-			'show_in_graphql' => 'true',
+			'public'              => true,
+			'show_in_graphql'     => 'true',
 			'graphql_single_name' => 'acfTest',
 			'graphql_plural_name' => 'acfTests'
 		] );

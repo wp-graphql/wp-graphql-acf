@@ -206,7 +206,7 @@ class LocationRules {
 	 *
 	 * @return bool
 	 */
-	public function check_params_for_conflicts( array $and_params = [], $param ) {
+	public function check_params_for_conflicts( array $and_params = [], string $param = '' ) {
 		switch ( $param ) {
 			case 'post_type':
 				$allowed_and_params = [

@@ -378,6 +378,12 @@ class Config {
 			$id = $root['node']->ID;
 		}
 
+		if ( is_array( $root ) && isset( $root['blockName'] ) ) {
+			if ( isset( $root[ 'attrs' ][ 'data' ][ $acf_field['name'] ] ) ) {
+				$value = $root[ 'attrs' ][ 'data' ][ $acf_field['name'] ];
+			}
+		}
+
 		if ( is_array( $root ) && ! ( ! empty( $root['type'] ) && 'options_page' === $root['type'] ) ) {
 
 			if ( isset( $root[ $acf_field['key'] ] ) ) {

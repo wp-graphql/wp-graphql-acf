@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
+if [ ! -f .env ]; then
+  echo "No .env file was detected. .env.dist has been copied to .env"
+  echo "Open the .env file and enter values to match your local environment"
+  cp ./.env.dist ./.env
+  export $(cat .env | xargs)
+fi
+
 source .env
 
 print_usage_instruction() {
 	echo "Ensure that .env file exist in project root directory exists."
-	echo "And run the following 'composer install-wp-tests' in the project root directory"
+	echo "And run the following 'composer build-test' in the project root directory"
 	exit 1
 }
 
@@ -29,7 +36,7 @@ TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${TEST_WP_ROOT_FOLDER-$TMPDIR/wordpress/}
 PLUGIN_DIR=$(pwd)
-DB_SERVE_NAME=${DB_SERVE_NAME-wpgatsby_serve}
+DB_SERVE_NAME=${DB_SERVE_NAME-wpgraphql_acf_serve}
 SKIP_DB_CREATE=${SKIP_DB_CREATE-false}
 
 download() {
@@ -142,7 +149,7 @@ install_db() {
 configure_wordpress() {
     cd $WP_CORE_DIR
     wp config create --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASS" --dbhost="$DB_HOST" --skip-check --force=true
-    wp core install --url=wp.test --title="WPGraphQL ACF Tests" --admin_user=admin --admin_password=password --admin_email=admin@wp.test
+    wp core install --url=wp.test --title="WPGraphQL for ACF Tests" --admin_user=admin --admin_password=password --admin_email=admin@wp.test
     wp rewrite structure '/%year%/%monthnum%/%postname%/'
 }
 

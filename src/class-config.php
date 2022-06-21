@@ -639,7 +639,7 @@ class Config {
 						$value = $this->get_acf_field_value( $root, $acf_field, true );
 
 						if ( ! empty( $value ) && ! empty( $acf_field['return_format'] ) ) {
-							$value = date( $acf_field['return_format'], strtotime( $value ) );
+							$value = date_i18n( $acf_field['return_format'], strtotime( $value ) );
 						}
 						return ! empty( $value ) ? $value : null;
 					},
@@ -692,12 +692,14 @@ class Config {
 								$post_object = get_post( $post_id );
 								if ( $post_object instanceof \WP_Post ) {
 									$post_model     = new Post( $post_object );
-									$relationship[] = $post_model;
+									if ( 'private' != $post_model->get_visibility() ) {
+										$relationship[] = $post_model;
+									}
 								}
 							}
 						}
 
-						return isset( $value ) ? $relationship : null;
+						return empty( $relationship ) ? null : $relationship;
 
 					},
 				];

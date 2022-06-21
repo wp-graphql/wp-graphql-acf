@@ -49,7 +49,7 @@
     ]
   },
   "require": {
-    "php": "^7"
+    "php": "^7.1 || ^8.0"
   },
   "require-dev": {
     "lucatume/wp-browser": "^2.4",

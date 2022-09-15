@@ -14,10 +14,14 @@ namespace WPGraphQL\ACF;
  */
 class ACF_Settings {
 
+	protected $is_acf6_or_higher = false;
+
 	/**
 	 * Initialize ACF Settings for the plugin
 	 */
 	public function init() {
+
+		$this->is_acf6_or_higher = defined( 'ACF_MAJOR_VERSION' ) && version_compare( ACF_MAJOR_VERSION, 6, '>=' );
 
 		/**
 		 * Add settings to individual fields to allow each field granular control
@@ -90,6 +94,26 @@ class ACF_Settings {
 	}
 
 	/**
+	 * Wrapper over the acf_render_field_wrap setting to support
+	 * ACF >= v6 and ACF =< v5
+	 *
+	 * @param array $config The field config to render
+	 *
+	 * @return void
+	 */
+	public function render_field_wrap( $config ) {
+
+		// The signature for acf_render_field_wrap has changed, so we
+		// treat it different for versions < 6 and versions >= 6
+		if ( $this->is_acf6_or_higher ) {
+			acf_render_field_wrap( $config, 'div', 'label', true );
+		} else {
+			acf_render_field_wrap( $config );
+		}
+
+	}
+
+	/**
 	 * Display the GraphQL Settings Metabox on the Field Group admin page
 	 *
 	 * @param $field_group_post_object
@@ -101,7 +125,7 @@ class ACF_Settings {
 		/**
 		 * Render a field in the Field Group settings to allow for a Field Group to be shown in GraphQL.
 		 */
-		acf_render_field_wrap(
+		$this->render_field_wrap(
 			[
 				'label'        => __( 'Show in GraphQL', 'acf' ),
 				'instructions' => __( 'If the field group is active, and this is set to show, the fields in this group will be available in the WPGraphQL Schema based on the respective Location rules.' ),
@@ -116,7 +140,7 @@ class ACF_Settings {
 		/**
 		 * Render a field in the Field Group settings to set the GraphQL field name for the field group.
 		 */
-		acf_render_field_wrap(
+		$this->render_field_wrap(
 			[
 				'label'        => __( 'GraphQL Field Name', 'acf' ),
 				'instructions' => __( 'The name of the field group in the GraphQL Schema. Names should not include spaces or special characters. Best practice is to use "camelCase".', 'wp-graphql-acf' ),
@@ -129,7 +153,7 @@ class ACF_Settings {
 			]
 		);
 
-		acf_render_field_wrap(
+		$this->render_field_wrap(
 			[
 				'label'        => __( 'Manually Set GraphQL Types for Field Group', 'acf' ),
 				'instructions' => __( 'By default, ACF Field groups are added to the GraphQL Schema based on the field group\'s location rules. Checking this box will let you manually control the GraphQL Types the field group should be shown on in the GraphQL Schema using the checkboxes below, and the Location Rules will no longer effect the GraphQL Types.', 'wp-graphql-acf' ),
@@ -142,7 +166,7 @@ class ACF_Settings {
 		);
 
 		$choices = Config::get_all_graphql_types();
-		acf_render_field_wrap(
+		$this->render_field_wrap(
 			[
 				'label'        => __( 'GraphQL Types to Show the Field Group On', 'wp-graphql-acf' ),
 				'instructions' => __( 'Select the Types in the WPGraphQL Schema to show the fields in this field group on', 'wp-graphql-acf' ),
@@ -164,7 +188,7 @@ class ACF_Settings {
 			if (typeof acf !== 'undefined') {
 				acf.newPostbox({
 					'id': 'wpgraphql-acf-meta-box',
-					'label': 'left'
+					'label': <?php echo $this->is_acf6_or_higher ? 'top' : "'left'"; ?>
 				});
 			}
 		</script>
@@ -217,14 +241,12 @@ class ACF_Settings {
 	public function enqueue_graphql_acf_scripts( string $screen ) {
 		global $post;
 
-		if ( $screen == 'post-new.php' || $screen == 'post.php' ) {
-			if ( 'acf-field-group' === $post->post_type ) {
-				wp_enqueue_script( 'graphql-acf', plugins_url( 'src/js/main.js', dirname( __FILE__ ) ), array(
+		if ( ( $screen === 'post-new.php' || $screen === 'post.php' ) && ( isset( $post->post_type ) && 'acf-field-group' === $post->post_type ) ) {
+				wp_enqueue_script( 'graphql-acf', plugins_url( 'src/js/main.js', __DIR__ ), array(
 					'jquery',
 					'acf-input',
 					'acf-field-group'
 				) );
-			}
 		}
 	}
 

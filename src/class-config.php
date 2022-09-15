@@ -633,18 +633,7 @@ class Config {
 				$field_config['type'] = 'Float';
 				break;
 			case 'true_false':
-				$field_config = [
-					'type' => 'Boolean',
-					'resolve' => function ($root, $args, $context, $info) use ($acf_field) {
-
-						$value = $this->get_acf_field_value($root, $acf_field, true);
-						if (empty($value)) {
-							$value = false;
-						}
-
-						return $value;
-					}
-				];
+				$field_config['type'] = 'Boolean';
 				break;
 			case 'date_picker':
 			case 'time_picker':

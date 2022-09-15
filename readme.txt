@@ -4,7 +4,7 @@ Donate link: https://wpgraphql.com/acf
 Tags: WPGraphQL, GraphQL, API, Advanced Custom Fields, ACF
 Requires at least: 5.0
 Tested up to: 5.1.1
-Stable tag: 0.5.3
+Stable tag: 0.6.0
 License: GPL-3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -17,38 +17,10 @@ allowing for interacting with ACF field data using GraphQL Queries.
 
 == Changelog ==
 
-= 0.1.7 =
-* Add support for User Edit and User Register form locations
+= 0.6.0 =
 
-= 0.1.6 =
-* Add support for Single Post / Page location rule for ACF Field Groups
-* Fix bug with WYSIWYG field nested within repeaters/flex fields not properly getting wpautop applied
-* Fix bug where Relationship fields were throwing errors when an item in the relationship had been deleted. Now the items are not included in the response at all and no errors are thrown
-
-= 0.1.5 =
-* Fix bug where field groups would disappear when using acf-local-json
-
-= 0.1.4 =
-* Fixes bug with WYSIWYG fields nested in Flex Fields and Repeater Fields not properly resolving
-* Adds support for assigning ACF Field Groups to attachments (MediaItems)
-
-= 0.1.3 =
-
-* Adds support for the following locations: Menus, Menu Items, Taxonomies, Comments
-* Fixed a bug where the "show_in_graphql" button wasn't showing on Radio Buttons
-
-= 0.1.2 =
-* Fixes bug with Nested Fields not properly showing in the Schema. By defualt, fields are not supposed
-to be exposed in the Schema if they are not set to "show_in_graphql", however there was a flaw in
-logic causing nested fields of Flex Field layouts to not properly be exposed to the Schema. This
-fixes that issue, so nested fields of Flex Field layouts can properly be queried and seen in the
-Schema.
-
-= 0.1.1 =
-* Fixes bug with Field groups not properly being exposed to the Schema for custom post types.
-
-= 0.1.0 =
-* Initial public release.
+- updates to work with the upcoming ACF v6.0 release
+-
 
 
 == Upgrade Notice ==

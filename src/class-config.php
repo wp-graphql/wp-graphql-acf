@@ -97,7 +97,7 @@ class Config {
 
 					// For flex fields/repeaters, the meta keys are structured a bit funky.
 					// This checks to see if the $meta_key starts with the same string as one of the
-					// acf fields (a flex/repeater field) and then checks if it's preceeded by an underscore and a number.
+					// acf fields (a flex/repeater field) and then checks if it's preceded by an underscore and a number.
 					if ( $field_name === substr( $meta_key, 0, strlen( $field_name ) ) ) {
 						// match any string that starts with the field name, followed by an underscore, followed by a number, followed by another string
 						// ex my_flex_field_0_text_field or some_repeater_field_12_25MostPopularDogToys
@@ -315,8 +315,9 @@ class Config {
 		 * root groups, not nested groups with parent.
 		 */
 		if ( ! isset( $field_group['parent'] ) ) {
+
 			if (
-				( isset( $field_group['active'] ) && true != $field_group['active'] ) ||
+				( isset( $field_group['active'] ) && true !== $field_group['active'] ) ||
 				( empty( $field_group['location'] ) || ! is_array( $field_group['location'] ) )
 			) {
 				$show = false;

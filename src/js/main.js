@@ -201,7 +201,16 @@ $j(document).ready(function () {
 	 */
 	function setGraphqlFieldName() {
 		var graphqlFieldNameField = $j('#acf_field_group-graphql_field_name');
-		var fieldGroupTitle = $j('#titlediv #title');
+
+		// support for v6+
+		if ( $j('#title.acf-headerbar-title-field').exists() ) {
+			var fieldGroupTitle = $j('#title.acf-headerbar-title-field');
+
+		// versions of ACF < v6
+		} else {
+			var fieldGroupTitle = $j('#titlediv #title');
+		}
+
 		if ('' === graphqlFieldNameField.val()) {
 			graphqlFieldNameField.val(formatFieldName(fieldGroupTitle.val()));
 		}

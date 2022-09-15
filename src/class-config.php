@@ -459,6 +459,15 @@ class Config {
 		}
 
 		/**
+		 * Filters the returned ACF field value using acf filters
+		 *
+		 * @param mixed $value     The resolved ACF field value
+		 * @param int   $id        The ID of the object
+		 * @param array $acf_field The ACF field config
+		 */
+		$value = apply_filters('acf/format_value', $value, $id, $acf_field);
+
+		/**
 		 * Filters the returned ACF field value
 		 *
 		 * @param mixed $value     The resolved ACF field value
@@ -636,7 +645,7 @@ class Config {
 						$value = $this->get_acf_field_value( $root, $acf_field, true );
 
 						if ( ! empty( $value ) && ! empty( $acf_field['return_format'] ) ) {
-							$value = date( $acf_field['return_format'], strtotime( $value ) );
+							$value = date_i18n( $acf_field['return_format'], strtotime( $value ) );
 						}
 						return ! empty( $value ) ? $value : null;
 					},
@@ -689,12 +698,14 @@ class Config {
 								$post_object = get_post( $post_id );
 								if ( $post_object instanceof \WP_Post ) {
 									$post_model     = new Post( $post_object );
-									$relationship[] = $post_model;
+									if ( 'private' != $post_model->get_visibility() ) {
+										$relationship[] = $post_model;
+									}
 								}
 							}
 						}
 
-						return isset( $value ) ? $relationship : null;
+						return empty( $relationship ) ? null : $relationship;
 
 					},
 				];
@@ -1340,7 +1351,7 @@ class Config {
 				$graphql_types[ $interface_name ] = '<span data-interface="'. $interface_name .'">' . $interface_name . ' Interface (' . $config['plural_label'] . ')</span>';
 				$label = '<span data-implements="'. $interface_name .'"> (' . $config['label'] . ')</span>';
 				foreach ( $possible_types as $type ) {
-					$type_label = $type['name'] . $label;
+					$type_label = $type['name'] . '&nbsp;' . $label;
 					$type_key = $type['name'];
 
 					$graphql_types[ $type_key ] = $type_label;

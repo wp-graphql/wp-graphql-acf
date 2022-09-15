@@ -17,11 +17,7 @@ allowing for interacting with ACF field data using GraphQL Queries.
 
 == Changelog ==
 
-= 0.6.0 =
-
-- updates to work with the upcoming ACF v6.0 release
--
-
+SEE: https://github.com/wp-graphql/wp-graphql-acf/releases
 
 == Upgrade Notice ==
 

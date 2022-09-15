@@ -1342,7 +1342,7 @@ class Config {
 				$graphql_types[ $interface_name ] = '<span data-interface="'. $interface_name .'">' . $interface_name . ' Interface (' . $config['plural_label'] . ')</span>';
 				$label = '<span data-implements="'. $interface_name .'"> (' . $config['label'] . ')</span>';
 				foreach ( $possible_types as $type ) {
-					$type_label = $type['name'] . $label;
+					$type_label = $type['name'] . '&nbsp;' . $label;
 					$type_key = $type['name'];
 
 					$graphql_types[ $type_key ] = $type_label;

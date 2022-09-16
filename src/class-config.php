@@ -459,15 +459,6 @@ class Config {
 		}
 
 		/**
-		 * Filters the returned ACF field value using acf filters
-		 *
-		 * @param mixed $value     The resolved ACF field value
-		 * @param int   $id        The ID of the object
-		 * @param array $acf_field The ACF field config
-		 */
-		$value = apply_filters('acf/format_value', $value, $id, $acf_field);
-
-		/**
 		 * Filters the returned ACF field value
 		 *
 		 * @param mixed $value     The resolved ACF field value

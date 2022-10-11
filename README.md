@@ -94,7 +94,7 @@ Setting the value of this field to "Yes" will show the field group in the WPGrap
 
 When registering ACF Fields in PHP, you need to add `show_in_graphql` and `graphql_field_name` when defining your field group.  See below as an example.
 
-```
+```php
 function my_acf_add_local_field_groups() {
 
 	acf_add_local_field_group(array(

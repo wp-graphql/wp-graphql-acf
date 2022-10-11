@@ -14,10 +14,14 @@ namespace WPGraphQL\ACF;
  */
 class ACF_Settings {
 
+	protected $is_acf6_or_higher = false;
+
 	/**
 	 * Initialize ACF Settings for the plugin
 	 */
 	public function init() {
+
+		$this->is_acf6_or_higher = defined( 'ACF_MAJOR_VERSION' ) && version_compare( ACF_MAJOR_VERSION, 6, '>=' );
 
 		/**
 		 * Add settings to individual fields to allow each field granular control
@@ -110,7 +114,10 @@ class ACF_Settings {
 				'prefix'       => 'acf_field_group',
 				'value'        => isset( $field_group['show_in_graphql'] ) ? (bool) $field_group['show_in_graphql'] : false,
 				'ui'           => 1,
-			]
+			],
+			'div',
+			'label',
+			true
 		);
 
 		/**
@@ -126,7 +133,10 @@ class ACF_Settings {
 				'required'     => isset( $field_group['show_in_graphql'] ) ? (bool) $field_group['show_in_graphql'] : false,
 				'placeholder'  => ! empty( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null,
 				'value'        => ! empty( $field_group['graphql_field_name'] ) ? $field_group['graphql_field_name'] : null,
-			]
+			],
+			'div',
+			'label',
+			true
 		);
 
 		acf_render_field_wrap(
@@ -138,7 +148,10 @@ class ACF_Settings {
 				'prefix'       => 'acf_field_group',
 				'value'        => isset( $field_group['map_graphql_types_from_location_rules'] ) ? (bool) $field_group['map_graphql_types_from_location_rules'] : false,
 				'ui'           => 1,
-			]
+			],
+			'div',
+			'label',
+			true
 		);
 
 		$choices = Config::get_all_graphql_types();
@@ -152,7 +165,10 @@ class ACF_Settings {
 				'value'        => ! empty( $field_group['graphql_types'] ) ? $field_group['graphql_types'] : [],
 				'toggle'       => true,
 				'choices'      => $choices,
-			]
+			],
+			'div',
+			'label',
+			true
 		);
 
 		?>
@@ -164,7 +180,7 @@ class ACF_Settings {
 			if (typeof acf !== 'undefined') {
 				acf.newPostbox({
 					'id': 'wpgraphql-acf-meta-box',
-					'label': 'left'
+					'label': <?php echo $this->is_acf6_or_higher ? 'top' : "'left'"; ?>
 				});
 			}
 		</script>
@@ -217,14 +233,12 @@ class ACF_Settings {
 	public function enqueue_graphql_acf_scripts( string $screen ) {
 		global $post;
 
-		if ( $screen == 'post-new.php' || $screen == 'post.php' ) {
-			if ( 'acf-field-group' === $post->post_type ) {
-				wp_enqueue_script( 'graphql-acf', plugins_url( 'src/js/main.js', dirname( __FILE__ ) ), array(
+		if ( ( $screen === 'post-new.php' || $screen === 'post.php' ) && ( isset( $post->post_type ) && 'acf-field-group' === $post->post_type ) ) {
+				wp_enqueue_script( 'graphql-acf', plugins_url( 'src/js/main.js', __DIR__ ), array(
 					'jquery',
 					'acf-input',
 					'acf-field-group'
 				) );
-			}
 		}
 	}
 

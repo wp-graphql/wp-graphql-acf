@@ -100,6 +100,7 @@ jobs:
         env:
           PHP_VERSION: ${{ matrix.php }}
           WP_VERSION: ${{ matrix.wordpress }}
+          DOCKER_REGISTRY: ghcr.io/wp-graphql/
         run: composer build-test
 
       - name: Run Tests w/ Docker.

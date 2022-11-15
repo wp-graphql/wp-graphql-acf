@@ -24,6 +24,7 @@ fi
 TAG=${TAG-latest}
 WP_VERSION=${WP_VERSION-5.9}
 PHP_VERSION=${PHP_VERSION-8.0}
+DOCKER_REGISTRY=${DOCKER_REGISTRY-}
 
 BUILD_NO_CACHE=${BUILD_NO_CACHE-}
 
@@ -46,22 +47,25 @@ case "$subcommand" in
                     echo "Build app"
                     docker build $BUILD_NO_CACHE -f docker/Dockerfile \
                         -t wpgraphql-acf-app:latest \
-                        --build-arg WP_VERSION=${WP_VERSION-5.4} \
-                        --build-arg PHP_VERSION=${PHP_VERSION-7.4} \
+                        --build-arg WP_VERSION=${WP_VERSION} \
+                        --build-arg PHP_VERSION=${PHP_VERSION} \
+                        --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                         .
                     ;;
                 t )
                     echo "Build app"
                     docker build $BUILD_NO_CACHE -f docker/Dockerfile \
                         -t wpgraphql-acf-app:latest \
-                        --build-arg WP_VERSION=${WP_VERSION-5.4} \
-                        --build-arg PHP_VERSION=${PHP_VERSION-7.4} \
+                        --build-arg WP_VERSION=${WP_VERSION} \
+                        --build-arg PHP_VERSION=${PHP_VERSION} \
+                        --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                         .
                     echo "Build testing"
                     docker build $BUILD_NO_CACHE -f docker/Dockerfile.testing \
                         -t wpgraphql-acf-testing:latest \
-                        --build-arg WP_VERSION=${WP_VERSION-5.4} \
-                        --build-arg PHP_VERSION=${PHP_VERSION-7.4} \
+                        --build-arg WP_VERSION=${WP_VERSION} \
+                        --build-arg PHP_VERSION=${PHP_VERSION} \
+                        --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                         .
                     ;;
                 \? ) print_usage_instructions;;

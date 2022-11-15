@@ -24,7 +24,7 @@ fi
 TAG=${TAG-latest}
 WP_VERSION=${WP_VERSION-5.9}
 PHP_VERSION=${PHP_VERSION-8.0}
-DOCKER_REGISTRY=${DOCKER_REGISTRY-}
+DOCKER_REGISTRY=${DOCKER_REGISTRY-ghcr.io/wp-graphql/}
 
 BUILD_NO_CACHE=${BUILD_NO_CACHE-}
 
@@ -53,20 +53,11 @@ case "$subcommand" in
                         .
                     ;;
                 t )
-                    echo "Build app"
-                    docker build $BUILD_NO_CACHE -f docker/Dockerfile \
-                        -t wpgraphql-acf-app:latest \
+                    echo "Build app and testing"
+                    docker-compose build
                         --build-arg WP_VERSION=${WP_VERSION} \
                         --build-arg PHP_VERSION=${PHP_VERSION} \
                         --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
-                        .
-                    echo "Build testing"
-                    docker build $BUILD_NO_CACHE -f docker/Dockerfile.testing \
-                        -t wpgraphql-acf-testing:latest \
-                        --build-arg WP_VERSION=${WP_VERSION} \
-                        --build-arg PHP_VERSION=${PHP_VERSION} \
-                        --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
-                        .
                     ;;
                 \? ) print_usage_instructions;;
                 * ) print_usage_instructions;;
@@ -81,14 +72,13 @@ case "$subcommand" in
                     WP_VERSION=${WP_VERSION} PHP_VERSION=${PHP_VERSION} docker compose up app
                     ;;
                 t )
+                    WP_VERSION=${WP_VERSION} \
+                    PHP_VERSION=${PHP_VERSION} \
+                    DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                     docker-compose run --rm \
                         -e COVERAGE=${COVERAGE-} \
                         -e USING_XDEBUG=${USING_XDEBUG-} \
                         -e DEBUG=${DEBUG-} \
-                        -e WP_VERSION=${WP_VERSION} \
-                        -e PHP_VERSION=${PHP_VERSION} \
-                        -e DOCKER_REGISTRY=${DOCKER_REGISTRY} \
-                        -e WPGRAPHQL_VERSION=${WPGRAPHQL_VERSION-} \
                         testing --scale app=0
                     ;;
                 \? ) print_usage_instructions;;

@@ -96,12 +96,15 @@ jobs:
       - name: Install dependencies
         run: composer install
 
-      - name: Build "testing" Docker Image
+      - name: Build container image
         env:
           PHP_VERSION: ${{ matrix.php }}
           WP_VERSION: ${{ matrix.wordpress }}
-          DOCKER_REGISTRY: ghcr.io/wp-graphql/
-        run: composer build-test
+        run: |
+          docker-compose build \
+            --build-arg WP_VERSION=${{ matrix.wordpress }} \
+            --build-arg PHP_VERSION=${{ matrix.php }} \
+            --build-arg DOCKER_REGISTRY=ghcr.io/wp-graphql/
 
       - name: Run Tests w/ Docker.
         env:

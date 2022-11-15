@@ -46,18 +46,27 @@ case "$subcommand" in
                 a )
                     echo "Build app"
                     docker build $BUILD_NO_CACHE -f docker/Dockerfile \
-                        -t wpgraphql-acf-app:latest \
+                        -t wpgraphql-acf-app:${TAG}-wp${WP_VERSION}-php${PHP_VERSION} \
                         --build-arg WP_VERSION=${WP_VERSION} \
                         --build-arg PHP_VERSION=${PHP_VERSION} \
                         --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                         .
                     ;;
                 t )
-                    echo "Build app and testing"
-                    docker-compose build
+                    echo "Build app"
+                    docker build $BUILD_NO_CACHE -f docker/Dockerfile \
+                        -t wpgraphql-acf-app:${TAG}-wp${WP_VERSION}-php${PHP_VERSION} \
                         --build-arg WP_VERSION=${WP_VERSION} \
                         --build-arg PHP_VERSION=${PHP_VERSION} \
                         --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
+                        .
+                    echo "Build testing"
+                    docker build $BUILD_NO_CACHE -f docker/Dockerfile.testing \
+                        -t wpgraphql-acf-testing:${TAG}-wp${WP_VERSION}-php${PHP_VERSION} \
+                        --build-arg WP_VERSION=${WP_VERSION} \
+                        --build-arg PHP_VERSION=${PHP_VERSION} \
+                        --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
+                        .
                     ;;
                 \? ) print_usage_instructions;;
                 * ) print_usage_instructions;;
@@ -72,13 +81,13 @@ case "$subcommand" in
                     WP_VERSION=${WP_VERSION} PHP_VERSION=${PHP_VERSION} docker compose up app
                     ;;
                 t )
-                    WP_VERSION=${WP_VERSION} \
-                    PHP_VERSION=${PHP_VERSION} \
-                    DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                     docker-compose run --rm \
                         -e COVERAGE=${COVERAGE-} \
                         -e USING_XDEBUG=${USING_XDEBUG-} \
                         -e DEBUG=${DEBUG-} \
+                        -e WP_VERSION=${WP_VERSION} \
+                        -e PHP_VERSION=${PHP_VERSION} \
+                        -e DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                         testing --scale app=0
                     ;;
                 \? ) print_usage_instructions;;

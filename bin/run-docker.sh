@@ -22,8 +22,8 @@ if [ -z "$1" ]; then
 fi
 
 TAG=${TAG-latest}
-WP_VERSION=${WP_VERSION-5.6}
-PHP_VERSION=${PHP_VERSION-7.4}
+WP_VERSION=${WP_VERSION-5.9}
+PHP_VERSION=${PHP_VERSION-8.0}
 
 BUILD_NO_CACHE=${BUILD_NO_CACHE-}
 
@@ -44,7 +44,7 @@ case "$subcommand" in
                     ;;
                 a )
                     echo "Build app"
-                    docker build $BUILD_NO_CACHE -f docker/app.Dockerfile \
+                    docker build $BUILD_NO_CACHE -f docker/Dockerfile \
                         -t wpgraphql-acf-app:latest \
                         --build-arg WP_VERSION=${WP_VERSION-5.4} \
                         --build-arg PHP_VERSION=${PHP_VERSION-7.4} \
@@ -52,14 +52,16 @@ case "$subcommand" in
                     ;;
                 t )
                     echo "Build app"
-                    docker build $BUILD_NO_CACHE -f docker/app.Dockerfile \
+                    docker build $BUILD_NO_CACHE -f docker/Dockerfile \
                         -t wpgraphql-acf-app:latest \
                         --build-arg WP_VERSION=${WP_VERSION-5.4} \
                         --build-arg PHP_VERSION=${PHP_VERSION-7.4} \
                         .
                     echo "Build testing"
-                    docker build $BUILD_NO_CACHE -f docker/testing.Dockerfile \
+                    docker build $BUILD_NO_CACHE -f docker/Dockerfile.testing \
                         -t wpgraphql-acf-testing:latest \
+                        --build-arg WP_VERSION=${WP_VERSION-5.4} \
+                        --build-arg PHP_VERSION=${PHP_VERSION-7.4} \
                         .
                     ;;
                 \? ) print_usage_instructions;;
@@ -72,13 +74,15 @@ case "$subcommand" in
         while getopts ":at" opt; do
             case ${opt} in
                 a )
-                    docker-compose up --scale testing=0
+                    WP_VERSION=${WP_VERSION} PHP_VERSION=${PHP_VERSION} docker compose up app
                     ;;
                 t )
                     docker-compose run --rm \
                         -e COVERAGE=${COVERAGE-} \
                         -e USING_XDEBUG=${USING_XDEBUG-} \
                         -e DEBUG=${DEBUG-} \
+                        -e WP_VERSION=${WP_VERSION} \
+                        -e PHP_VERSION=${PHP_VERSION} \
                         -e WPGRAPHQL_VERSION=${WPGRAPHQL_VERSION-} \
                         testing --scale app=0
                     ;;

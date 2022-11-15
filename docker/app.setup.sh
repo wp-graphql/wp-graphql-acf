@@ -22,3 +22,6 @@ fi
 # Activate the plugin
 wp plugin install advanced-custom-fields --activate --allow-root
 wp plugin activate wp-graphql-acf --allow-root
+
+# Some version of acf-pro that let's tests pass.
+wp plugin install https://github.com/wp-premium/advanced-custom-fields-pro/archive/refs/heads/master.zip --activate --allow-root

@@ -87,6 +87,7 @@ case "$subcommand" in
                         -e DEBUG=${DEBUG-} \
                         -e WP_VERSION=${WP_VERSION} \
                         -e PHP_VERSION=${PHP_VERSION} \
+                        -e DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                         -e WPGRAPHQL_VERSION=${WPGRAPHQL_VERSION-} \
                         testing --scale app=0
                     ;;

@@ -84,7 +84,7 @@ jobs:
 
       - name: Get Composer Cache Directory
         id: composercache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "{name}={ dir::$(composer config cache-files-dir) }" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
         uses: actions/cache@v2
@@ -111,6 +111,7 @@ jobs:
           SKIP_TESTS_CLEANUP: ${{ matrix.coverage }}
           PHP_VERSION: ${{ matrix.php }}
           WP_VERSION: ${{ matrix.wordpress }}
+          DOCKER_REGISTRY: ghcr.io/wp-graphql/
         run: composer run-test
 
       - name: Push Codecoverage to Coveralls.io

@@ -4,25 +4,17 @@ services:
   app:
     depends_on:
       - app_db
-    image: wpgraphql-acf-app:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: wp-graphql-acf:latest-wp${WP_VERSION}-php${PHP_VERSION}
     volumes:
       - '.:/var/www/html/wp-content/plugins/wp-graphql-acf'
       - './.log/app:/var/log/apache2'
     env_file:
-      - .env
+      - .env.dist
     environment:
-      WP_URL: 'http://localhost:8091'
-      WP_DOMAIN: 'localhost:8091'
-      DB_HOST: app_db
-      DB_NAME: wordpress
-      DB_USER: wordpress
-      DB_PASSWORD: wordpress
-      WP_DOMAIN: localhost
-      ADMIN_EMAIL: admin@example.com
-      ADMIN_USERNAME: admin
-      ADMIN_PASSWORD: password
       USING_XDEBUG: ${USING_XDEBUG:-}
-      WPGRAPHQL_VERSION: ${WPGRAPHQL_VERSION:-}
     ports:
       - '8091:80'
     networks:
@@ -30,35 +22,40 @@ services:
 
   app_db:
     image: mariadb:10.2
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE:      wordpress
-      MYSQL_USER:          wordpress
-      MYSQL_PASSWORD:      wordpress
+    env_file:
+      - .env.dist
     ports:
       - '3306'
     networks:
-      testing:
       local:
 
   testing:
     depends_on:
-      - app_db
-    image: wpgraphql-acf-testing:latest
+      - testing_db
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.testing
+    image: wp-graphql-acf-testing:latest-wp${WP_VERSION}-php${PHP_VERSION}
     volumes:
       - '.:/var/www/html/wp-content/plugins/wp-graphql-acf'
       - './.log/testing:/var/log/apache2'
       - './codeception.dist.yml:/var/www/html/wp-content/plugins/wp-graphql-acf/codeception.yml'
     env_file:
-      - .env
+      - .env.testing
     environment:
-      DB_HOST: app_db
-      WP_URL: 'http://localhost'
-      WP_DOMAIN: 'localhost'
-      SUITES: ${SUITES:-}
+      WP_URL: http://localhost
+      USING_XDEBUG: ${USING_XDEBUG:-}
     networks:
-      testing:
+      local:
+
+  testing_db:
+    image: mariadb:10.2
+    env_file:
+      - .env.testing
+    ports:
+      - '3306'
+    networks:
+      local:
 
 networks:
   local:
-  testing:

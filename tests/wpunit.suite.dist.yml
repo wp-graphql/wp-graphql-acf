@@ -8,19 +8,3 @@ modules:
   disabled:
     - WPDb
     - WPBrowser
-  config:
-    WPDb:
-      cleanup: false
-    WPLoader:
-      plugins:
-        - wp-graphql-acf/tests/_bootstrap/bootstrap.php
-        - wp-graphql/wp-graphql.php
-        - advanced-custom-fields-pro/acf.php
-        - wp-graphql-acf/wp-graphql-acf.php
-      activatePlugins:
-        - wp-graphql-acf/tests/_bootstrap/bootstrap.php
-        - wp-graphql/wp-graphql.php
-        - advanced-custom-fields-pro/acf.php
-        - wp-graphql-acf/wp-graphql-acf.php
-      configFile:
-        - 'tests/_data/config.php'

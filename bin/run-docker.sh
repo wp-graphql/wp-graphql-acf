@@ -22,8 +22,9 @@ if [ -z "$1" ]; then
 fi
 
 TAG=${TAG-latest}
-WP_VERSION=${WP_VERSION-5.6}
-PHP_VERSION=${PHP_VERSION-7.4}
+WP_VERSION=${WP_VERSION-5.9}
+PHP_VERSION=${PHP_VERSION-8.0}
+DOCKER_REGISTRY=${DOCKER_REGISTRY-ghcr.io/wp-graphql/}
 
 BUILD_NO_CACHE=${BUILD_NO_CACHE-}
 
@@ -44,22 +45,27 @@ case "$subcommand" in
                     ;;
                 a )
                     echo "Build app"
-                    docker build $BUILD_NO_CACHE -f docker/app.Dockerfile \
-                        -t wpgraphql-acf-app:latest \
-                        --build-arg WP_VERSION=${WP_VERSION-5.4} \
-                        --build-arg PHP_VERSION=${PHP_VERSION-7.4} \
+                    docker build $BUILD_NO_CACHE -f docker/Dockerfile \
+                        -t wpgraphql-acf-app:${TAG}-wp${WP_VERSION}-php${PHP_VERSION} \
+                        --build-arg WP_VERSION=${WP_VERSION} \
+                        --build-arg PHP_VERSION=${PHP_VERSION} \
+                        --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                         .
                     ;;
                 t )
                     echo "Build app"
-                    docker build $BUILD_NO_CACHE -f docker/app.Dockerfile \
-                        -t wpgraphql-acf-app:latest \
-                        --build-arg WP_VERSION=${WP_VERSION-5.4} \
-                        --build-arg PHP_VERSION=${PHP_VERSION-7.4} \
+                    docker build $BUILD_NO_CACHE -f docker/Dockerfile \
+                        -t wpgraphql-acf-app:${TAG}-wp${WP_VERSION}-php${PHP_VERSION} \
+                        --build-arg WP_VERSION=${WP_VERSION} \
+                        --build-arg PHP_VERSION=${PHP_VERSION} \
+                        --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                         .
                     echo "Build testing"
-                    docker build $BUILD_NO_CACHE -f docker/testing.Dockerfile \
-                        -t wpgraphql-acf-testing:latest \
+                    docker build $BUILD_NO_CACHE -f docker/Dockerfile.testing \
+                        -t wpgraphql-acf-testing:${TAG}-wp${WP_VERSION}-php${PHP_VERSION} \
+                        --build-arg WP_VERSION=${WP_VERSION} \
+                        --build-arg PHP_VERSION=${PHP_VERSION} \
+                        --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                         .
                     ;;
                 \? ) print_usage_instructions;;
@@ -72,14 +78,16 @@ case "$subcommand" in
         while getopts ":at" opt; do
             case ${opt} in
                 a )
-                    docker-compose up --scale testing=0
+                    WP_VERSION=${WP_VERSION} PHP_VERSION=${PHP_VERSION} docker compose up app
                     ;;
                 t )
                     docker-compose run --rm \
                         -e COVERAGE=${COVERAGE-} \
                         -e USING_XDEBUG=${USING_XDEBUG-} \
                         -e DEBUG=${DEBUG-} \
-                        -e WPGRAPHQL_VERSION=${WPGRAPHQL_VERSION-} \
+                        -e WP_VERSION=${WP_VERSION} \
+                        -e PHP_VERSION=${PHP_VERSION} \
+                        -e DOCKER_REGISTRY=${DOCKER_REGISTRY} \
                         testing --scale app=0
                     ;;
                 \? ) print_usage_instructions;;

@@ -76,6 +76,12 @@ class Config {
 		$this->add_options_pages_to_schema();
 		$this->add_acf_fields_to_graphql_types();
 
+		/**
+		 * Add ACF Fields to GraphQL mutations
+		 */
+		$mutations_obj = new Mutations();
+		$mutations_obj->init( $type_registry, $this );
+
 		// This filter tells WPGraphQL to resolve revision meta for ACF fields from the revision's meta, instead
 		// of the parent (published post) meta.
 		add_filter( 'graphql_resolve_revision_meta_from_parent', function( $should, $object_id, $meta_key, $single ) {
@@ -167,7 +173,7 @@ class Config {
 	 * Gets the location rules
 	 * @return array
 	 */
-	protected function get_location_rules() {
+	public static function get_location_rules() {
 
 		$field_groups = acf_get_field_groups();
 		if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
@@ -296,7 +302,7 @@ class Config {
 	 *
 	 * @return bool
 	 */
-	protected function should_field_group_show_in_graphql( $field_group ) {
+	public function should_field_group_show_in_graphql( $field_group ) {
 
 		/**
 		 * By default, field groups will not be exposed to GraphQL.

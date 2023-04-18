@@ -114,7 +114,7 @@ class Mutations
 	 *
 	 * @return array|null
 	 */
-	private function add_field_group_fields( array $field_group, bool $layout = false ) {
+	private function add_field_group_fields( array $field_group, string $parent_type_name, bool $layout = false ) {
 
 		/**
 		 * If the field group has the show_in_graphql setting configured, respect it's setting
@@ -189,7 +189,7 @@ class Mutations
 				'acf_field_group' => $field_group,
 			];
 
-			$field_config = $this->register_graphql_field( $name, $config );
+			$field_config = $this->register_graphql_field( $config, $parent_type_name );
 			if ( ! empty( $field_config ) ) {
 				$registered_fields[$name] = $field_config;
 			}
@@ -277,27 +277,23 @@ class Mutations
 		}
 	}
 
-	private function prepare_input_type_name( string $acf_field_name ): string {
-		$field_type_name = 'ACF_' . ucfirst( Config::camel_case( $acf_field_name ) ) . 'Input';
-
-		$counter = 1;
-		while ( null !== $this->type_registry->get_type( $field_type_name ) ) {
-			$field_type_name .= "_{$counter}";
-			$counter++;
+	private function prepare_input_type_name( string $acf_field_name, string $parent_type_name ): string {
+		$prefix = '';
+		if ( ! empty( $parent_type_name ) ) {
+			$prefix = "{$parent_type_name}_";
 		}
 
-		return $field_type_name;
+		return $prefix . ucfirst( Config::camel_case( $acf_field_name ) ) . 'Input';
 	}
 
 	/**
 	 * Undocumented function
 	 *
-	 * @param string $field_name The name of the field to add to the GraphQL Type.
 	 * @param array $config The GraphQL configuration of the field.
 	 *
 	 * @return array|null
 	 */
-	private function register_graphql_field( string $field_name, array $config ) {
+	private function register_graphql_field( array $config, string $parent_type_name = '' ) {
 		$acf_field = isset( $config['acf_field'] ) ? $config['acf_field'] : null;
 		$acf_type  = isset( $acf_field['type'] ) ? $acf_field['type'] : null;
 
@@ -403,9 +399,9 @@ class Mutations
 				break;
 			case 'group':
 
-				$field_type_name = $this->prepare_input_type_name( $acf_field['name'] );
+				$field_type_name = $this->prepare_input_type_name( $acf_field['name'], $parent_type_name );
 
-				$sub_fields_config = $this->add_field_group_fields( $acf_field );
+				$sub_fields_config = $this->add_field_group_fields( $acf_field, $field_type_name );
 
 				if ( ! empty( $sub_fields_config ) ) {
 					$this->type_registry->register_input_type(
@@ -424,9 +420,9 @@ class Mutations
 				break;
 			case 'repeater':
 
-				$field_type_name = $this->prepare_input_type_name( $acf_field['name'] );
+				$field_type_name = $this->prepare_input_type_name( $acf_field['name'], $parent_type_name );
 
-				$sub_fields_config = $this->add_field_group_fields( $acf_field );
+				$sub_fields_config = $this->add_field_group_fields( $acf_field, $field_type_name );
 
 				if ( ! empty( $sub_fields_config ) ) {
 					$this->type_registry->register_input_type(
@@ -537,7 +533,7 @@ class Mutations
 			$qualifier =  sprintf( __( 'Added to the GraphQL Schema because the ACF Field Group "%1$s" was set to Show in GraphQL.', 'wp-graphql-acf' ), $field_group['title'] );
 			$config['description'] = $field_group['description'] ? $field_group['description'] . ' | ' . $qualifier : $qualifier;
 
-			$field_config = $this->register_graphql_field( $field_name, $config );
+			$field_config = $this->register_graphql_field( $config );
 			if ( ! empty( $field_config ) ) {
 				/**
 				 * Loop over the GraphQL types for this field group on

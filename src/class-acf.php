@@ -84,20 +84,22 @@ final class ACF {
 	 * @return void
 	 */
 	private function setup_constants() {
+		$main_file_path = dirname( __DIR__ ) . '/wp-graphql-acf.php';
+
 
 		// Plugin Folder Path.
 		if ( ! defined( 'WPGRAPHQL_ACF_PLUGIN_DIR' ) ) {
-			define( 'WPGRAPHQL_ACF_PLUGIN_DIR', plugin_dir_path( __FILE__ . '/..' ) );
+			define( 'WPGRAPHQL_ACF_PLUGIN_DIR', plugin_dir_path( $main_file_path ) );
 		}
 
 		// Plugin Folder URL.
 		if ( ! defined( 'WPGRAPHQL_ACF_PLUGIN_URL' ) ) {
-			define( 'WPGRAPHQL_ACF_PLUGIN_URL', plugin_dir_url( __FILE__ . '/..' ) );
+			define( 'WPGRAPHQL_ACF_PLUGIN_URL', plugin_dir_url( $main_file_path ) );
 		}
 
 		// Plugin Root File.
 		if ( ! defined( 'WPGRAPHQL_ACF_PLUGIN_FILE' ) ) {
-			define( 'WPGRAPHQL_ACF_PLUGIN_FILE', __FILE__ . '/..' );
+			define( 'WPGRAPHQL_ACF_PLUGIN_FILE', $main_file_path );
 		}
 	}
 

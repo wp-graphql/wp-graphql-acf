@@ -72,7 +72,7 @@ class Updater {
 	 */
 	public function disable_autoupdate( $update, $item ) {
 		// Return early if this is not our plugin.
-		if ( $item->slug !== $this->plugin_config['slug'] ) {
+		if ( $item->slug !== $this->plugin_config['slug'] && $item->plugin !== $this->plugin_config['slug'] .'/' .$this->plugin_config['slug'] .'.php') {
 			return $update;
 		}
 
@@ -128,6 +128,7 @@ class Updater {
 		$transient->response[ WPGRAPHQL_ACF_PLUGIN_FILE ]->new_version = $new_version;
 		$transient->response[ WPGRAPHQL_ACF_PLUGIN_FILE ]->package     = $download_url;
 		$transient->response[ WPGRAPHQL_ACF_PLUGIN_FILE ]->zip_url     = $download_url;
+
 
 		return $transient;
 	}

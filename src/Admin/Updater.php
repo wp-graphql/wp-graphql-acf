@@ -34,7 +34,7 @@ class Updater {
 	/**
 	 * The Plugin data from wordpress.org
 	 *
-	 * @var array
+	 * @var ?object
 	 */
 	protected $wporg_data;
 
@@ -60,6 +60,7 @@ class Updater {
 		add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'api_check' ] );
 		add_filter( 'plugins_api_result', [ $this, 'api_result' ], 10, 3 );
 		add_filter( 'upgrader_source_selection', [ $this, 'upgrader_source_selection' ], 10, 2 );
+		add_action( 'in_plugin_update_message-' . $this->plugin_config['plugin_file'], [ $this, 'update_message' ] );
 	}
 
 	/**
@@ -129,6 +130,17 @@ class Updater {
 		$transient->response[ $this->plugin_config['plugin_file'] ]->package     = $download_url;
 		$transient->response[ $this->plugin_config['plugin_file'] ]->zip_url     = $download_url;
 
+		$update_type = self::get_semver_update_type( $new_version, WPGRAPHQL_ACF_VERSION );
+		if ( 'major' === $update_type ) {
+			$message = sprintf(
+				/* translators: %s: breaking change message. */
+				__( '&#9888; Warning: %s', 'wp-graphql-acf' ),
+				self::get_breaking_change_message( $new_version )
+			);
+			$transient->response[ $this->plugin_config['plugin_file'] ]->upgrade_notice = $message;
+		}
+
+
 		return $transient;
 	}
 
@@ -142,6 +154,18 @@ class Updater {
 	 * @return object|\WP_Error
 	 */
 	public function api_result( $response, $action, $args ) {
+		/**
+		 * Filters the slug used to check the API response.
+		 * This is useful for testing.
+		 *
+		 * @param ?string $custom_slug The custom slug to use. If null, the default slug is used.
+		 * @param object  $args        The API request arguments.
+		 */
+		$custom_slug = apply_filters( 'wpgraphql_acf_wporg_api_result_slug', null, $args );
+		if ( null !== $custom_slug ) {
+			$args->slug = $custom_slug;
+		}
+
 		// Bail if this is not checking our plugin.
 		if ( ! isset( $args->slug ) || $args->slug !== $this->plugin_config['slug'] ) {
 			return $response;
@@ -151,7 +175,7 @@ class Updater {
 		$new_version = $this->get_latest_version();
 
 		// Bail if the version is not newer.
-		if ( version_compare( $new_version, $args->version, '<=' ) ) {
+		if ( version_compare( $new_version, WPGRAPHQL_ACF_VERSION, '<=' ) ) {
 			return $response;
 		}
 
@@ -164,11 +188,12 @@ class Updater {
 		$warning     = '';
 
 		if ( 'major' === $update_type ) {
-			$warning = sprintf(
+			$message = sprintf(
 				/* translators: %s: version number. */
-				__( '<h1><span>&#9888;</span>%s</h1>', 'wp-graphql-acf' ),
+				__( '<strong>&#9888; Warning</strong></h4><p>%s</p>', 'wp-graphql-acf' ),
 				self::get_breaking_change_message( $new_version )
 			);
+			$warning = $this->get_inline_notice( 'major', $message );
 		}
 
 		// If there is a warning, append it to each section.
@@ -206,6 +231,35 @@ class Updater {
 	}
 
 	/**
+	 * Outputs a warning message about a major update.
+	 *
+	 * @param array $args The update message arguments.
+	 */
+	public function update_message( $args ) : void {
+		if ( ! isset( $args['slug'] ) || $args['slug'] !== $this->plugin_config['slug'] ) {
+			return;
+		}
+
+		// Get the latest version.
+		$new_version = $args['new_version'];
+
+		// If this is a major update, add a warning.
+		$update_type = self::get_semver_update_type( $new_version, WPGRAPHQL_ACF_VERSION );
+
+		if ( 'major' !== $update_type ) {
+			return;
+		}
+
+		$message = sprintf(
+			/* translators: %s: version number. */
+			__( '<strong>&#9888; Warning</strong></h4><p>%s</p>', 'wp-graphql-acf' ),
+			self::get_breaking_change_message( $new_version )
+		);
+			
+		echo '</p></div>' . wp_kses_post( $this->get_inline_notice( 'major', $message ) );
+	}
+
+	/**
 	 * Returns the notice to display inline on the plugins page.
 	 *
 	 * @param string $upgrade_type The type of upgrade.
@@ -214,8 +268,8 @@ class Updater {
 	public function get_inline_notice( string $upgrade_type, string $message, ) : string {
 		ob_start();
 		?>
-			<div class="wpgraphql_acf_plugin_upgrade_notice extensions_warning <?php echo esc_attr( $upgrade_type ); ?>">
-				<p><?php echo wp_kses_post( $message ); ?></p>
+			<div class="notice inline notice-warning <?php echo esc_attr( $upgrade_type ); ?>">
+				<?php echo wp_kses_post( $message ); ?>
 			</div>
 		<?php
 
@@ -269,19 +323,23 @@ class Updater {
 	 */
 	protected function get_latest_version() : string {
 		$latest_version = get_site_transient( self::VERSION_TRANSIENT );
+
 		if ( empty( $latest_version ) ) {
 			$data = $this->get_wporg_data();
 
 			/** @var string $latest_version */
-			$latest_version = $data['version'] ?? '';
+			$latest_version = isset( $data->version ) ? $data->version : '';
 
 			/** @var array<string,string> $versions */
-			$versions = $data['versions'] ?? [];
+			$versions = isset( $data->versions ) ? (array) $data->versions : [];
 
 			// Sort the versions by descending order.
-			uksort( $versions, function( $a, $b ) {
-				return version_compare( $b, $a );
-			});
+			uksort(
+				$versions,
+				static function ( $a, $b ) {
+					return version_compare( $b, $a );
+				}
+			);
 
 			foreach ( $versions as $version => $download_url ) {
 				// Skip trunk.
@@ -311,9 +369,9 @@ class Updater {
 	/**
 	 * Gets the data from the WordPress plugin directory.
 	 *
-	 * @return array<string,mixed>
+	 * @return ?object
 	 */
-	protected function get_wporg_data() : array {
+	protected function get_wporg_data() {
 		// Return cached data if available.
 		if ( ! empty( $this->wporg_data ) ) {
 			return $this->wporg_data;
@@ -322,21 +380,28 @@ class Updater {
 		// Get data from transient.
 		$data = get_site_transient( self::WPORG_DATA_TRANSIENT );
 
-		if ( empty( $data ) || ! is_array( $data ) || isset( $data['error'] ) ) {
-			$data = wp_remote_get( $this->plugin_config['api_url'] ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+		if ( empty( $data ) || ! is_object( $data ) ) {
+			/**
+			 * Filters the API URL to use for fetching the plugin data.
+			 * Useful for testing.
+			 *
+			 * @param string $api_url The API URL to use.
+			 */
+			$api_url = apply_filters( 'wpgraphql_acf_wporg_api_url', $this->plugin_config['api_url'] );
 
-			$body = wp_remote_retrieve_body( $data );
+			$req = wp_remote_get( $api_url ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 
-			// Bail because we couldn't parse the body.
+			$body = wp_remote_retrieve_body( $req );
+
 			if ( empty( $body ) ) {
-				return [];
+				return null;
 			}
 
-			$data = json_decode( $body, true );
+			$data = json_decode( $body );
 
 			// Bail because we couldn't decode the body.
-			if ( empty( $data ) || ! is_array( $data ) ) {
-				return [];
+			if ( empty( $data ) || ! is_object( $data ) ) {
+				return null;
 			}
 
 			// Refresh every 6 hours.
@@ -359,11 +424,7 @@ class Updater {
 	protected function get_download_url( string $version ) {
 		$data = $this->get_wporg_data();
 
-		if ( empty( $data['versions'][ $version ] ) ) {
-			return false;
-		}
-
-		return $data['versions'][ $version ];
+		return ! empty( $data->versions->$version ) ? $data->versions->$version : false;
 	}
 
 	/**

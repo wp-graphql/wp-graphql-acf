@@ -44,7 +44,7 @@ class Updater {
 	public function __construct() {
 		// Defining this in the constructor makes things easier to mock/test
 		$this->plugin_config = [
-			'plugin_file'        => WPGRAPHQL_ACF_PLUGIN_FILE,
+			'plugin_file'        => self::PLUGIN_SLUG . '/' . self::PLUGIN_SLUG . '.php',
 			'slug'               => self::PLUGIN_SLUG,
 			'proper_folder_name' => self::PLUGIN_SLUG,
 			'api_url'            => 'https://api.wordpress.org/plugins/info/1.0/' . self::PLUGIN_SLUG . '.json',
@@ -72,7 +72,7 @@ class Updater {
 	 */
 	public function disable_autoupdate( $update, $item ) {
 		// Return early if this is not our plugin.
-		if ( $item->slug !== $this->plugin_config['slug'] && $item->plugin !== $this->plugin_config['slug'] .'/' .$this->plugin_config['slug'] .'.php') {
+		if ( $item->slug !== $this->plugin_config['slug'] && $item->plugin !== $this->plugin_config['plugin_file'] ) {
 			return $update;
 		}
 
@@ -121,14 +121,13 @@ class Updater {
 		$download_url = $this->get_download_url( $new_version );
 
 		// Populate the transient data.
-		if ( ! isset( $transient->response[ WPGRAPHQL_ACF_PLUGIN_FILE ] ) ) {
-			$transient->response[ WPGRAPHQL_ACF_PLUGIN_FILE ] = (object) $this->plugin_config;
+		if ( ! isset( $transient->response[ $this->plugin_config['plugin_file'] ] ) ) {
+			$transient->response[ $this->plugin_config['plugin_file'] ] = (object) $this->plugin_config;
 		}
 
-		$transient->response[ WPGRAPHQL_ACF_PLUGIN_FILE ]->new_version = $new_version;
-		$transient->response[ WPGRAPHQL_ACF_PLUGIN_FILE ]->package     = $download_url;
-		$transient->response[ WPGRAPHQL_ACF_PLUGIN_FILE ]->zip_url     = $download_url;
-
+		$transient->response[ $this->plugin_config['plugin_file'] ]->new_version = $new_version;
+		$transient->response[ $this->plugin_config['plugin_file'] ]->package     = $download_url;
+		$transient->response[ $this->plugin_config['plugin_file'] ]->zip_url     = $download_url;
 
 		return $transient;
 	}
@@ -270,7 +269,6 @@ class Updater {
 	 */
 	protected function get_latest_version() : string {
 		$latest_version = get_site_transient( self::VERSION_TRANSIENT );
-
 		if ( empty( $latest_version ) ) {
 			$data = $this->get_wporg_data();
 
@@ -280,6 +278,10 @@ class Updater {
 			/** @var array<string,string> $versions */
 			$versions = $data['versions'] ?? [];
 
+			// Sort the versions by descending order.
+			uksort( $versions, function( $a, $b ) {
+				return version_compare( $b, $a );
+			});
 
 			foreach ( $versions as $version => $download_url ) {
 				// Skip trunk.
@@ -295,6 +297,7 @@ class Updater {
 				
 				// Return the first matching version.
 				$latest_version = $version;
+				break;
 			}
 
 			if ( ! empty( $latest_version ) ) {
@@ -319,7 +322,7 @@ class Updater {
 		// Get data from transient.
 		$data = get_site_transient( self::WPORG_DATA_TRANSIENT );
 
-		if ( empty( $data ) || ! is_array( $data ) ) {
+		if ( empty( $data ) || ! is_array( $data ) || isset( $data['error'] ) ) {
 			$data = wp_remote_get( $this->plugin_config['api_url'] ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 
 			$body = wp_remote_retrieve_body( $data );

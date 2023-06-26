@@ -167,7 +167,7 @@ class Updater {
 		}
 
 		// Bail if this is not checking our plugin.
-		if ( ! isset( $args->slug ) || $args->slug !== $this->plugin_config['slug'] ) {
+		if ( ! isset( $args->slug ) || ( $args->slug !== $this->plugin_config['slug'] && $args->slug !== $custom_slug ) ) {
 			return $response;
 		}
 

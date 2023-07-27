@@ -602,19 +602,20 @@ class Config {
 				 *
 				 * @see: https://github.com/wp-graphql/wp-graphql-acf/issues/25
 				 */
+				$field_type = $this->register_choices_of_acf_fields_as_enum_type( $acf_field );
 				if ( empty( $acf_field['multiple'] ) ) {
 					if('array' === $acf_field['return_format'] ){
-						$field_config['type'] = [ 'list_of' => 'String' ];
+						$field_config['type'] = [ 'list_of' => $field_type ];
 						$field_config['resolve'] = function( $root ) use ( $acf_field) {
 							$value = $this->get_acf_field_value( $root, $acf_field, true);
 
 							return ! empty( $value ) && is_array( $value ) ? $value : [];
 						};
 					}else{
-						$field_config['type'] = 'String';
+						$field_config['type'] = $field_type;
 					}
 				} else {
-					$field_config['type']    = [ 'list_of' => 'String' ];
+					$field_config['type']    = [ 'list_of' => $field_type ];
 					$field_config['resolve'] = function( $root ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 
@@ -623,7 +624,8 @@ class Config {
 				}
 				break;
 			case 'radio':
-				$field_config['type'] = 'String';
+				$field_type           = $this->register_choices_of_acf_fields_as_enum_type( $acf_field );
+				$field_config['type'] = $field_type;
 				break;
 			case 'number':
 			case 'range':
@@ -1499,6 +1501,44 @@ class Config {
 			}
 		}
 
+	}
+
+	public function register_choices_of_acf_fields_as_enum_type( array $acf_field ): string {
+		// If the field isn't a select or radio field or if there are no choices available, return 'String'.
+		if ( ( 'select' !== $acf_field['type'] && 'radio' !== $acf_field['type'] ) || empty( $acf_field['choices'] ) ) {
+			return 'String';
+		}
+
+		// Generate a unique name for the enum type using the field name.
+		$enum_type_name = ucfirst( self::camel_case( $acf_field['name'] ) ) . 'Enum';
+		if ( ! $this->type_registry->has_type( $enum_type_name ) ) {
+			// Initialize an empty array to hold your enum values.
+			$enum_values = [];
+
+			// Loop over the choices in the field and add them to the enum values array.
+			foreach ( $acf_field['choices'] as $key => $choice ) {
+				// Use the sanitize_key function to create a valid enum name from the choice key.
+				$enum_key = strtoupper( sanitize_key( $key ) );
+
+				// Add the choice to the enum values array.
+				$enum_values[ $enum_key ] = [
+					'value'       => $key,
+					'description' => $choice,
+				];
+			}
+
+			// Register enum type.
+			$this->type_registry->register_enum_type(
+				$enum_type_name,
+				[
+					'description' => $acf_field['label'],
+					'values'      => $enum_values,
+				]
+			);
+		}
+
+		// Return the enum type name.
+		return $enum_type_name;
 	}
 
 }

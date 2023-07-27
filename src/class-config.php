@@ -988,79 +988,79 @@ class Config {
 				// ACF 5.8.6 added more data to Google Maps field value
 				// https://www.advancedcustomfields.com/changelog/
 				if ( \acf_version_compare(acf_get_db_version(), '>=', '5.8.6' ) ) {
-					$fields += [
-						'streetName' => [
+                    $fields += [
+                        'streetName' => [
 							'type'        => 'String',
 							'description' => __( 'The street name associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['street_name'] ) ? $root['street_name'] : null;
 							},
-						],
-						'streetNumber' => [
+                        ],
+                        'streetNumber' => [
 							'type'        => 'String',
 							'description' => __( 'The street number associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['street_number'] ) ? $root['street_number'] : null;
 							},
-						],
-						'city' => [
+                        ],
+                        'city' => [
 							'type'        => 'String',
 							'description' => __( 'The city associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['city'] ) ? $root['city'] : null;
 							},
-						],
-						'state' => [
+                        ],
+                        'state' => [
 							'type'        => 'String',
 							'description' => __( 'The state associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['state'] ) ? $root['state'] : null;
 							},
-						],
-						'stateShort' => [
+                        ],
+                        'stateShort' => [
 							'type'        => 'String',
 							'description' => __( 'The state abbreviation associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['state_short'] ) ? $root['state_short'] : null;
 							},
-						],
-						'postCode' => [
+                        ],
+                        'postCode' => [
 							'type'        => 'String',
 							'description' => __( 'The post code associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['post_code'] ) ? $root['post_code'] : null;
 							},
-						],
-						'country' => [
+                        ],
+                        'country' => [
 							'type'        => 'String',
 							'description' => __( 'The country associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['country'] ) ? $root['country'] : null;
 							},
-						],
-						'countryShort' => [
+                        ],
+                        'countryShort' => [
 							'type'        => 'String',
 							'description' => __( 'The country abbreviation associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['country_short'] ) ? $root['country_short'] : null;
 							},
-						],
-						'placeId' => [
+                        ],
+                        'placeId' => [
 							'type'        => 'String',
 							'description' => __( 'The country associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['place_id'] ) ? $root['place_id'] : null;
 							},
-						],
-						'zoom' => [
+                        ],
+                        'zoom' => [
 							'type'        => 'String',
 							'description' => __( 'The zoom defined with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['zoom'] ) ? $root['zoom'] : null;
 							},
-						],
-					];
-				}
+                        ],
+                    ];
+                }
 
 				$this->type_registry->register_object_type(
 					$field_type_name,

@@ -602,21 +602,20 @@ class Config {
 				 *
 				 * @see: https://github.com/wp-graphql/wp-graphql-acf/issues/25
 				 */
-				$enum_type = $this->register_choices_of_acf_fields_as_enum_type( $acf_field );
-				$enum_type = ! empty( $enum_type ) ? $enum_type : 'String';
+				$field_type = $this->register_choices_of_acf_fields_as_enum_type( $acf_field );
 				if ( empty( $acf_field['multiple'] ) ) {
 					if('array' === $acf_field['return_format'] ){
-						$field_config['type'] = [ 'list_of' => $enum_type ];
+						$field_config['type'] = [ 'list_of' => $field_type ];
 						$field_config['resolve'] = function( $root ) use ( $acf_field) {
 							$value = $this->get_acf_field_value( $root, $acf_field, true);
 
 							return ! empty( $value ) && is_array( $value ) ? $value : [];
 						};
 					}else{
-						$field_config['type'] = $enum_type;
+						$field_config['type'] = $field_type;
 					}
 				} else {
-					$field_config['type']    = [ 'list_of' => $enum_type ];
+					$field_config['type']    = [ 'list_of' => $field_type ];
 					$field_config['resolve'] = function( $root ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 
@@ -625,9 +624,8 @@ class Config {
 				}
 				break;
 			case 'radio':
-				$enum_type            = $this->register_choices_of_acf_fields_as_enum_type( $acf_field );
-				$enum_type            = ! empty( $enum_type ) ? $enum_type : 'String';
-				$field_config['type'] = $enum_type;
+				$field_type           = $this->register_choices_of_acf_fields_as_enum_type( $acf_field );
+				$field_config['type'] = $field_type;
 				break;
 			case 'number':
 			case 'range':
@@ -990,79 +988,79 @@ class Config {
 				// ACF 5.8.6 added more data to Google Maps field value
 				// https://www.advancedcustomfields.com/changelog/
 				if ( \acf_version_compare(acf_get_db_version(), '>=', '5.8.6' ) ) {
-                    $fields += [
-                        'streetName' => [
+					$fields += [
+						'streetName' => [
 							'type'        => 'String',
 							'description' => __( 'The street name associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['street_name'] ) ? $root['street_name'] : null;
 							},
-                        ],
-                        'streetNumber' => [
+						],
+						'streetNumber' => [
 							'type'        => 'String',
 							'description' => __( 'The street number associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['street_number'] ) ? $root['street_number'] : null;
 							},
-                        ],
-                        'city' => [
+						],
+						'city' => [
 							'type'        => 'String',
 							'description' => __( 'The city associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['city'] ) ? $root['city'] : null;
 							},
-                        ],
-                        'state' => [
+						],
+						'state' => [
 							'type'        => 'String',
 							'description' => __( 'The state associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['state'] ) ? $root['state'] : null;
 							},
-                        ],
-                        'stateShort' => [
+						],
+						'stateShort' => [
 							'type'        => 'String',
 							'description' => __( 'The state abbreviation associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['state_short'] ) ? $root['state_short'] : null;
 							},
-                        ],
-                        'postCode' => [
+						],
+						'postCode' => [
 							'type'        => 'String',
 							'description' => __( 'The post code associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['post_code'] ) ? $root['post_code'] : null;
 							},
-                        ],
-                        'country' => [
+						],
+						'country' => [
 							'type'        => 'String',
 							'description' => __( 'The country associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['country'] ) ? $root['country'] : null;
 							},
-                        ],
-                        'countryShort' => [
+						],
+						'countryShort' => [
 							'type'        => 'String',
 							'description' => __( 'The country abbreviation associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['country_short'] ) ? $root['country_short'] : null;
 							},
-                        ],
-                        'placeId' => [
+						],
+						'placeId' => [
 							'type'        => 'String',
 							'description' => __( 'The country associated with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['place_id'] ) ? $root['place_id'] : null;
 							},
-                        ],
-                        'zoom' => [
+						],
+						'zoom' => [
 							'type'        => 'String',
 							'description' => __( 'The zoom defined with the map', 'wp-graphql-acf' ),
 							'resolve'     => function( $root ) {
 								return isset( $root['zoom'] ) ? $root['zoom'] : null;
 							},
-                        ],
-                    ];
-                }
+						],
+					];
+				}
 
 				$this->type_registry->register_object_type(
 					$field_type_name,
@@ -1506,12 +1504,12 @@ class Config {
 	}
 
 	public function register_choices_of_acf_fields_as_enum_type( array $acf_field ): string {
-		// If the field isn't a select or radio field, return an empty string.
-		if ( 'select' !== $acf_field['type'] && 'radio' !== $acf_field['type'] ) {
-			return '';
+		// If the field isn't a select or radio field or if there are no choices available, return 'String'.
+		if ( ( 'select' !== $acf_field['type'] && 'radio' !== $acf_field['type'] ) || empty( $acf_field['choices'] ) ) {
+			return 'String';
 		}
 
-		// Generate a unique name for the enum type using the field key.
+		// Generate a unique name for the enum type using the field name.
 		$enum_type_name = ucfirst( self::camel_case( $acf_field['name'] ) ) . 'Enum';
 		if ( ! $this->type_registry->has_type( $enum_type_name ) ) {
 			// Initialize an empty array to hold your enum values.

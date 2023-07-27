@@ -318,11 +318,9 @@ class Mutations
 			case 'textarea':
 				$field_config['type'] = 'String';
 				break;
-
 			case 'radio':
-				$enum_type            = $this->config->register_choices_of_acf_fields_as_enum_type( $acf_field );
-				$enum_type            = ! empty( $enum_type ) ? $enum_type : 'String';
-				$field_config['type'] = $enum_type;
+				$field_type           = $this->config->register_choices_of_acf_fields_as_enum_type( $acf_field );
+				$field_config['type'] = $field_type;
 				break;
 			case 'select':
 
@@ -331,12 +329,11 @@ class Mutations
 				 * the field will accept a string, but if it is configured to allow
 				 * multiple values it will accept a list of strings
 				 */
-				$enum_type = $this->config->register_choices_of_acf_fields_as_enum_type( $acf_field );
-				$enum_type = ! empty( $enum_type ) ? $enum_type : 'String';
+				$field_type = $this->config->register_choices_of_acf_fields_as_enum_type( $acf_field );
 				if ( empty( $acf_field['multiple'] ) ) {
-					$field_config['type'] = $enum_type;
+					$field_config['type'] = $field_type;
 				} else {
-					$field_config['type'] = [ 'list_of' => $enum_type ];
+					$field_config['type'] = [ 'list_of' => $field_type ];
 				}
 				break;
 			case 'number':

@@ -70,15 +70,22 @@ class Mutations
 	     */
 	    $this->add_acf_fields_to_graphql_types();
 
-	    add_action( 'graphql_post_object_mutation_update_additional_data', function ( int $post_id, array $input ) {
-			$this->save_registered_fields_data( $post_id, self::POST_OBJECT_TYPE, $input, $this->registered_fields );
+		// Use same hook that acf normally used to save its data when post create/update from UI and that to be
+		// more compatible with other plugins that waiting the acf to save to do something depending on it like
+		// WPML sync feature that sync acf data from master post to its translations.
+		add_filter( 'graphql_post_object_insert_post_args', function ( array $insert_post_args, array $input ) {
+			self::add_action_once( 'save_post', function ( int $post_id ) use ( $input ) {
+				$this->save_registered_fields_data( $post_id, self::POST_OBJECT_TYPE, $input, $this->registered_fields );
+			} );
+
+			return $insert_post_args;
 	    }, 10, 2 );
 
 		add_filter( 'graphql_term_object_insert_term_args', function ( array $insert_args, array $input ) {
-			self::add_action_once( 'graphql_insert_term', function ( int $term_id ) use ( $input ) {
+			self::add_action_once( 'create_term', function ( int $term_id ) use ( $input ) {
 			    $this->save_registered_fields_data( $term_id, self::TERM_OBJECT_TYPE, $input, $this->registered_fields );
 		    } );
-			self::add_action_once( 'graphql_update_term', function ( int $term_id ) use ( $input ) {
+			self::add_action_once( 'edit_term', function ( int $term_id ) use ( $input ) {
 				$this->save_registered_fields_data( $term_id, self::TERM_OBJECT_TYPE, $input, $this->registered_fields );
 			} );
 

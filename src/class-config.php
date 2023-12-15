@@ -692,7 +692,11 @@ class Config {
 						$relationship = [];
 						$value        = $this->get_acf_field_value( $root, $acf_field );
 
-						if ( ! empty( $value ) && is_array( $value ) ) {
+						if ( ! empty( $value ) ) {
+							// It sometimes saved as single id like in case of WPML sync acf field to translations posts
+							if ( ! is_array( $value ) ) {
+								$value = [ $value ];
+							}
 							foreach ( $value as $post_id ) {
 								$post_object = get_post( $post_id );
 								if ( $post_object instanceof \WP_Post ) {

@@ -1,5 +1,24 @@
 # WPGraphQL for Advanced Custom Fields
 
+----
+
+🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+
+This plugin has gone through a complete re-architecture and this repository will soon be archived. 
+
+We recommend you upgrade to the new WPGraphQL for ACF v2.0+ at your earliest convenience. 
+
+The new version contains breaking changes, so update with caution. Below are some resources to help:
+
+- UPGRADE GUIDE: https://acf.wpgraphql.com/upgrade-guide
+- NEW PLUGIN REPO: https://github.com/wp-graphql/wpgraphql-acf
+- NEW PLUGIN ON WORDPRESS.ORG: https://wordpress.org/plugins/wpgraphql-acf
+- NEW PLUGIN ON COMPOSER: https://packagist.org/packages/wp-graphql/wpgraphql-acf
+- NEW PLUGIN ON WPPACKAGIST: https://wpackagist.org/search?q=wpgraphql-acf&type=any&search=
+
+🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨
+----
+
 WPGraphQL for Advanced Custom Fields automatically exposes your ACF fields to the WPGraphQL Schema.
 
 - [Install and Activate](#install-and-activate)

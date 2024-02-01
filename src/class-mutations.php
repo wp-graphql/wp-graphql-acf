@@ -2,6 +2,7 @@
 
 namespace WPGraphQL\ACF;
 
+use WP_Post;
 use WPGraphQL\Registry\TypeRegistry;
 use WPGraphQL\Utils\Utils;
 
@@ -74,9 +75,15 @@ class Mutations
 		// more compatible with other plugins that waiting the acf to save to do something depending on it like
 		// WPML sync feature that sync acf data from master post to its translations.
 		add_filter( 'graphql_post_object_insert_post_args', function ( array $insert_post_args, array $input ) {
-			self::add_action_once( 'save_post', function ( int $post_id ) use ( $input ) {
+			self::add_action_once( 'save_post', function ( int $post_id, WP_Post $post ) use ( $input ) {
+				// Ignore revision because it's not the post that updated and we don't want to run saving ACF data into it.
+				if ( 'revision' === $post->post_type ) {
+					// Return false to prevent removing action because it's not the action that we need.
+					return false;
+				}
+
 				$this->save_registered_fields_data( $post_id, self::POST_OBJECT_TYPE, $input, $this->registered_fields );
-			} );
+			}, 10, 2 );
 
 			return $insert_post_args;
 	    }, 10, 2 );
@@ -577,8 +584,10 @@ class Mutations
 	 */
 	public static function add_action_once( string $hook_name, callable $callback, int $priority = 10, int $accepted_args = 1 ): bool {
 		$singular = function () use ( $hook_name, $callback, $priority, $accepted_args, &$singular ) {
-			remove_action( $hook_name, $singular, $priority );
-			call_user_func_array( $callback, func_get_args() );
+			$should_be_removed = call_user_func_array( $callback, func_get_args() );
+			if ( false !== $should_be_removed ) {
+				remove_action( $hook_name, $singular, $priority );
+			}
 		};
 
 		return add_action( $hook_name, $singular, $priority, $accepted_args );

@@ -5,8 +5,7 @@ paths:
   support: '%TESTS_SUPPORT%'
   envs: '%TESTS_ENVS%'
 params:
-  - env
-  - .env
+    - .env.testing
 actor_suffix: Tester
 settings:
   colors: true
@@ -64,13 +63,13 @@ modules:
       uploads: '/wp-content/uploads'
     WPLoader:
       wpRootFolder: '%WP_ROOT_FOLDER%'
-      dbName: '%DB_NAME%'
-      dbHost: '%DB_HOST%'
-      dbUser: '%DB_USER%'
-      dbPassword: '%DB_PASSWORD%'
-      tablePrefix: '%WP_TABLE_PREFIX%'
-      domain: '%WP_DOMAIN%'
-      adminEmail: '%ADMIN_EMAIL%'
+      dbName: '%TEST_DB_NAME%'
+      dbHost: '%TEST_DB_HOST%'
+      dbUser: '%TEST_DB_USER%'
+      dbPassword: '%TEST_DB_PASSWORD%'
+      tablePrefix: '%TEST_TABLE_PREFIX%'
+      domain: '%TEST_SITE_WP_DOMAIN%'
+      adminEmail: '%TEST_SITE_ADMIN_EMAIL%'
       title: 'Test'
       plugins:
         - wp-graphql-acf/tests/_bootstrap/bootstrap.php

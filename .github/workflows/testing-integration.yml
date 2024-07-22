@@ -11,6 +11,7 @@ on:
       - master
     paths:
       - '**.php'
+      - '.github/workflows/*.yml'
       - '!docs/**'
 
 jobs:
@@ -18,8 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: [ '7.3', '7.4' ]
-        wordpress: [ '5.7.2', '5.6.2', '5.5.3' ]
+        php: [ '8.0', '7.4', '7.3' ]
+        wordpress: [ '6.0', '5.9', '5.8', '5.7.2', '5.6', '5.5.3' ]
         include:
           - php: '8.0'
             wordpress: '5.7.2'
@@ -62,12 +63,13 @@ jobs:
             WPGRAPHQL_VERSION: 'v0.11.0'
           - php: '7.4'
             wordpress: '5.5.3'
-          - php: '7.4'
-            wordpress: '5.4.2'
           - php: '7.3'
             wordpress: '5.5.3'
+        exclude:
+          - php: '8.0'
+            wordpress: '5.5.3'
           - php: '7.3'
-            wordpress: '5.4.2'
+            wordpress: '6.0'
       fail-fast: false
     name: WordPress ${{ matrix.wordpress }} on PHP ${{ matrix.php }}
     steps:
@@ -78,6 +80,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          tools: composer:v2
           extensions: json, mbstring, zip, unzip
 
       - name: Get Composer Cache Directory
@@ -88,17 +91,21 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ steps.composercache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
+          key: php-${{ matrix.php }}-${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: php-${{ matrix.php }}-${{ runner.os }}-composer-
 
       - name: Install dependencies
         run: composer install
 
-      - name: Build "testing" Docker Image
+      - name: Build container image
         env:
           PHP_VERSION: ${{ matrix.php }}
           WP_VERSION: ${{ matrix.wordpress }}
-        run: composer build-test
+        run: |
+          docker-compose build \
+            --build-arg WP_VERSION=${{ matrix.wordpress }} \
+            --build-arg PHP_VERSION=${{ matrix.php }} \
+            --build-arg DOCKER_REGISTRY=ghcr.io/wp-graphql/
 
       - name: Run Tests w/ Docker.
         env:
@@ -106,6 +113,9 @@ jobs:
           USING_XDEBUG: ${{ matrix.coverage }}
           DEBUG: ${{ matrix.debug }}
           SKIP_TESTS_CLEANUP: ${{ matrix.coverage }}
+          PHP_VERSION: ${{ matrix.php }}
+          WP_VERSION: ${{ matrix.wordpress }}
+          DOCKER_REGISTRY: ghcr.io/wp-graphql/
         run: composer run-test
 
       - name: Push Codecoverage to Coveralls.io

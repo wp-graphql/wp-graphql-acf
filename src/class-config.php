@@ -799,7 +799,7 @@ class Config {
 					'resolve' => function( $root, $args, $context, $info ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 
-						return DataSource::resolve_post_object( (int) $value, $context );
+						return $context->get_loader( 'post' )->load_deferred( (int) $value );
 					},
 				];
 				break;
@@ -903,11 +903,11 @@ class Config {
 						 */
 						if ( ! empty( $value ) && is_array( $value ) ) {
 							foreach ( $value as $term ) {
-								$terms[] = DataSource::resolve_term_object( (int) $term, $context );
+								$terms[] = $context->get_loader( 'term' )->load_deferred( (int) $term );
 							}
 							return $terms;
 						} else {
-							return DataSource::resolve_term_object( (int) $value, $context );
+							return $context->get_loader( 'term' )->load_deferred( (int) $value );
 						}
 					},
 				];

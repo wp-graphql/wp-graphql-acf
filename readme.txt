@@ -21,6 +21,11 @@ SEE: https://github.com/wp-graphql/wp-graphql-acf/releases
 
 == Upgrade Notice ==
 
+= 0.6.2 =
+
+NOTE: This is the final release of this plugin. Please migrate to the [new WPGraphQL for ACF](https://github.com/wp-graphql/wpgraphql-acf) at your earliest convenience.
+
+
 = 0.1.1 =
 ACF Field groups were not properly being added to the GraphQL Schema for Custom Post Types. This
 addresses that issue, so now Field groups that are set to "show_in_graphql" and are assigned to a

@@ -4,7 +4,7 @@ Donate link: https://wpgraphql.com/acf
 Tags: WPGraphQL, GraphQL, API, Advanced Custom Fields, ACF
 Requires at least: 5.0
 Tested up to: 5.1.1
-Stable tag: 0.6.1
+Stable tag: 0.6.2
 License: GPL-3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -20,6 +20,11 @@ allowing for interacting with ACF field data using GraphQL Queries.
 SEE: https://github.com/wp-graphql/wp-graphql-acf/releases
 
 == Upgrade Notice ==
+
+= 0.6.2 =
+
+NOTE: This is the final release of this plugin. Please migrate to the [new WPGraphQL for ACF](https://github.com/wp-graphql/wpgraphql-acf) at your earliest convenience.
+
 
 = 0.1.1 =
 ACF Field groups were not properly being added to the GraphQL Schema for Custom Post Types. This

@@ -76,6 +76,12 @@ class Config {
 		$this->add_options_pages_to_schema();
 		$this->add_acf_fields_to_graphql_types();
 
+		/**
+		 * Add ACF Fields to GraphQL mutations
+		 */
+		$mutations_obj = new Mutations();
+		$mutations_obj->init( $type_registry, $this );
+
 		// This filter tells WPGraphQL to resolve revision meta for ACF fields from the revision's meta, instead
 		// of the parent (published post) meta.
 		add_filter( 'graphql_resolve_revision_meta_from_parent', function( $should, $object_id, $meta_key, $single ) {
@@ -167,7 +173,7 @@ class Config {
 	 * Gets the location rules
 	 * @return array
 	 */
-	protected function get_location_rules() {
+	public static function get_location_rules() {
 
 		$field_groups = acf_get_field_groups();
 		if ( empty( $field_groups ) || ! is_array( $field_groups ) ) {
@@ -296,7 +302,7 @@ class Config {
 	 *
 	 * @return bool
 	 */
-	protected function should_field_group_show_in_graphql( $field_group ) {
+	public function should_field_group_show_in_graphql( $field_group ) {
 
 		/**
 		 * By default, field groups will not be exposed to GraphQL.
@@ -596,19 +602,20 @@ class Config {
 				 *
 				 * @see: https://github.com/wp-graphql/wp-graphql-acf/issues/25
 				 */
+				$field_type = $this->register_choices_of_acf_fields_as_enum_type( $acf_field );
 				if ( empty( $acf_field['multiple'] ) ) {
 					if('array' === $acf_field['return_format'] ){
-						$field_config['type'] = [ 'list_of' => 'String' ];
+						$field_config['type'] = [ 'list_of' => $field_type ];
 						$field_config['resolve'] = function( $root ) use ( $acf_field) {
 							$value = $this->get_acf_field_value( $root, $acf_field, true);
 
 							return ! empty( $value ) && is_array( $value ) ? $value : [];
 						};
 					}else{
-						$field_config['type'] = 'String';
+						$field_config['type'] = $field_type;
 					}
 				} else {
-					$field_config['type']    = [ 'list_of' => 'String' ];
+					$field_config['type']    = [ 'list_of' => $field_type ];
 					$field_config['resolve'] = function( $root ) use ( $acf_field ) {
 						$value = $this->get_acf_field_value( $root, $acf_field );
 
@@ -617,7 +624,8 @@ class Config {
 				}
 				break;
 			case 'radio':
-				$field_config['type'] = 'String';
+				$field_type           = $this->register_choices_of_acf_fields_as_enum_type( $acf_field );
+				$field_config['type'] = $field_type;
 				break;
 			case 'number':
 			case 'range':
@@ -684,7 +692,11 @@ class Config {
 						$relationship = [];
 						$value        = $this->get_acf_field_value( $root, $acf_field );
 
-						if ( ! empty( $value ) && is_array( $value ) ) {
+						if ( ! empty( $value ) ) {
+							// It sometimes saved as single id like in case of WPML sync acf field to translations posts
+							if ( ! is_array( $value ) ) {
+								$value = [ $value ];
+							}
 							foreach ( $value as $post_id ) {
 								$post_object = get_post( $post_id );
 								if ( $post_object instanceof \WP_Post ) {
@@ -1493,6 +1505,44 @@ class Config {
 			}
 		}
 
+	}
+
+	public function register_choices_of_acf_fields_as_enum_type( array $acf_field ): string {
+		// If the field isn't a select or radio field or if there are no choices available, return 'String'.
+		if ( ( 'select' !== $acf_field['type'] && 'radio' !== $acf_field['type'] ) || empty( $acf_field['choices'] ) ) {
+			return 'String';
+		}
+
+		// Generate a unique name for the enum type using the field name.
+		$enum_type_name = ucfirst( self::camel_case( $acf_field['name'] ) ) . 'Enum';
+		if ( ! $this->type_registry->has_type( $enum_type_name ) ) {
+			// Initialize an empty array to hold your enum values.
+			$enum_values = [];
+
+			// Loop over the choices in the field and add them to the enum values array.
+			foreach ( $acf_field['choices'] as $key => $choice ) {
+				// Use the sanitize_key function to create a valid enum name from the choice key.
+				$enum_key = strtoupper( sanitize_key( $key ) );
+
+				// Add the choice to the enum values array.
+				$enum_values[ $enum_key ] = [
+					'value'       => $key,
+					'description' => $choice,
+				];
+			}
+
+			// Register enum type.
+			$this->type_registry->register_enum_type(
+				$enum_type_name,
+				[
+					'description' => $acf_field['label'],
+					'values'      => $enum_values,
+				]
+			);
+		}
+
+		// Return the enum type name.
+		return $enum_type_name;
 	}
 
 }

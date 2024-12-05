@@ -443,6 +443,10 @@ class Config {
 				$format = true;
 			}
 
+			if ( 'textarea' === $acf_field['type']) {
+				$format = true;
+			}
+
 			/**
 			 * Check if cloned field and retrieve the key accordingly.
 			 */

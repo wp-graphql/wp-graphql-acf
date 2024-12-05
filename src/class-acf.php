@@ -8,6 +8,7 @@
 namespace WPGraphQL\ACF;
 
 use GraphQL\Type\Definition\ResolveInfo;
+use WPGraphQL\ACF\Admin\Updater;
 
 /**
  * Final class ACF
@@ -17,7 +18,7 @@ final class ACF {
 	/**
 	 * Stores the instance of the WPGraphQL\ACF class
 	 *
-	 * @var ACF The one true WPGraphQL\Extensions\ACF
+	 * @var \WPGraphQL\ACF\ACF The one true WPGraphQL\Extensions\ACF
 	 * @access private
 	 */
 	private static $instance;
@@ -25,12 +26,11 @@ final class ACF {
 	/**
 	 * Get the singleton.
 	 *
-	 * @return ACF
+	 * @return \WPGraphQL\ACF\ACF
 	 */
 	public static function instance() {
-
-		if ( ! isset( self::$instance ) && ! ( self::$instance instanceof ACF ) ) {
-			self::$instance = new ACF();
+		if ( ! isset( self::$instance ) && ! ( self::$instance instanceof self ) ) {
+			self::$instance = new self();
 			self::$instance->setup_constants();
 			self::$instance->includes();
 			self::$instance->actions();
@@ -41,7 +41,7 @@ final class ACF {
 		/**
 		 * Fire off init action
 		 *
-		 * @param ACF $instance The instance of the WPGraphQL\ACF class
+		 * @param \WPGraphQL\ACF\ACF $instance The instance of the WPGraphQL\ACF class
 		 */
 		do_action( 'graphql_acf_init', self::$instance );
 
@@ -63,7 +63,6 @@ final class ACF {
 
 		// Cloning instances of the class is forbidden.
 		_doing_it_wrong( __FUNCTION__, esc_html__( 'The \WPGraphQL\ACF class should not be cloned.', 'wp-graphql-acf' ), '0.0.1' );
-
 	}
 
 	/**
@@ -76,7 +75,6 @@ final class ACF {
 
 		// De-serializing instances of the class is forbidden.
 		_doing_it_wrong( __FUNCTION__, esc_html__( 'De-serializing instances of the \WPGraphQL\ACF class is not allowed', 'wp-graphql-acf' ), '0.0.1' );
-
 	}
 
 	/**
@@ -86,22 +84,23 @@ final class ACF {
 	 * @return void
 	 */
 	private function setup_constants() {
+		$main_file_path = dirname( __DIR__ ) . '/wp-graphql-acf.php';
+
 
 		// Plugin Folder Path.
 		if ( ! defined( 'WPGRAPHQL_ACF_PLUGIN_DIR' ) ) {
-			define( 'WPGRAPHQL_ACF_PLUGIN_DIR', plugin_dir_path( __FILE__ . '/..' ) );
+			define( 'WPGRAPHQL_ACF_PLUGIN_DIR', plugin_dir_path( $main_file_path ) );
 		}
 
 		// Plugin Folder URL.
 		if ( ! defined( 'WPGRAPHQL_ACF_PLUGIN_URL' ) ) {
-			define( 'WPGRAPHQL_ACF_PLUGIN_URL', plugin_dir_url( __FILE__ . '/..' ) );
+			define( 'WPGRAPHQL_ACF_PLUGIN_URL', plugin_dir_url( $main_file_path ) );
 		}
 
 		// Plugin Root File.
 		if ( ! defined( 'WPGRAPHQL_ACF_PLUGIN_FILE' ) ) {
-			define( 'WPGRAPHQL_ACF_PLUGIN_FILE', __FILE__ . '/..' );
+			define( 'WPGRAPHQL_ACF_PLUGIN_FILE', $main_file_path );
 		}
-
 	}
 
 	/**
@@ -121,7 +120,6 @@ final class ACF {
 	 * cycle
 	 */
 	private function actions() {
-
 	}
 
 	/**
@@ -133,28 +131,33 @@ final class ACF {
 		 * This filters any field that returns the `ContentTemplate` type
 		 * to pass the source node down to the template for added context
 		 */
-		add_filter( 'graphql_resolve_field', function( $result, $source, $args, $context, ResolveInfo $info, $type_name, $field_key, $field, $field_resolver ) {
-			if ( isset( $info->returnType ) && strtolower( 'ContentTemplate' ) === strtolower( $info->returnType ) ) {
-				if ( is_array( $result ) && ! isset( $result['node'] ) && ! empty( $source ) ) {
-					$result['node'] = $source;
+		add_filter(
+			'graphql_resolve_field',
+			static function ( $result, $source, $args, $context, ResolveInfo $info, $type_name, $field_key, $field, $field_resolver ) {
+				if ( isset( $info->returnType ) && strtolower( 'ContentTemplate' ) === strtolower( $info->returnType ) ) {
+					if ( is_array( $result ) && ! isset( $result['node'] ) && ! empty( $source ) ) {
+						$result['node'] = $source;
+					}
 				}
-			}
-			return $result;
-		}, 10, 9 );
-
+				return $result;
+			},
+			10,
+			9 
+		);
 	}
 
 	/**
 	 * Initialize
 	 */
 	private function init() {
-
 		$config = new Config();
 		add_action( 'graphql_register_types', [ $config, 'init' ], 10, 1 );
 
 		$acf_settings = new ACF_Settings();
 		$acf_settings->init();
 
+		$updater = new Updater();
+		$updater->init();
 	}
 
 }
